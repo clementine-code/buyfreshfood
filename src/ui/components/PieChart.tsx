@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Pie Chart — https://app.subframe.com/library?component=Pie+Chart_0654ccc7-054c-4f3a-8e9a-b7c81dd3963c
+ * Pie Chart — https://app.subframe.com/6b5c53cba769/library?component=Pie+Chart_0654ccc7-054c-4f3a-8e9a-b7c81dd3963c
  */
 
 import React from "react";
@@ -20,12 +20,12 @@ const PieChartRoot = React.forwardRef<HTMLElement, PieChartRootProps>(
         className={SubframeUtils.twClassNames("h-52 w-52", className)}
         ref={ref as any}
         colors={[
-          "#10b981",
-          "#a7f3d0",
-          "#059669",
-          "#6ee7b7",
-          "#047857",
-          "#34d399",
+          "#5fa269",
+          "#d9f2dc",
+          "#44874e",
+          "#b4e1b9",
+          "#346e3e",
+          "#8ec796",
         ]}
         {...otherProps}
       />

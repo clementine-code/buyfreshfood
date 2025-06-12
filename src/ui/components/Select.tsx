@@ -1,12 +1,14 @@
 "use client";
 /*
  * Documentation:
- * Select — https://app.subframe.com/library?component=Select_bb88f90b-8c43-4b73-9c2f-3558ce7838f3
+ * Select — https://app.subframe.com/6b5c53cba769/library?component=Select_bb88f90b-8c43-4b73-9c2f-3558ce7838f3
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
+import { FeatherCheck } from "@subframe/core";
+import { FeatherChevronDown } from "@subframe/core";
 
 interface ItemProps
   extends Omit<React.ComponentProps<typeof SubframeCore.Select.Item>, "value"> {
@@ -35,10 +37,7 @@ const Item = React.forwardRef<HTMLElement, ItemProps>(function Item(
         <Select.ItemText className="h-auto grow shrink-0 basis-0">
           {children || value}
         </Select.ItemText>
-        <SubframeCore.Icon
-          className="hidden text-body font-body text-default-font group-hover/969e345b:hidden group-data-[state=checked]/969e345b:inline-flex group-data-[state=checked]/969e345b:text-brand-600"
-          name="FeatherCheck"
-        />
+        <FeatherCheck className="hidden text-body font-body text-default-font group-hover/969e345b:hidden group-data-[state=checked]/969e345b:inline-flex group-data-[state=checked]/969e345b:text-brand-600" />
       </div>
     </SubframeCore.Select.Item>
   );
@@ -85,7 +84,7 @@ const Content = React.forwardRef<HTMLElement, ContentProps>(function Content(
     <SubframeCore.Select.Content asChild={true} {...otherProps}>
       <div
         className={SubframeUtils.twClassNames(
-          "flex w-full flex-col items-start overflow-hidden rounded-md border border-solid border-neutral-border bg-white px-1 py-1 shadow-lg",
+          "flex w-full flex-col items-start overflow-hidden rounded-md border border-solid border-[#f0efedff] bg-white px-1 py-1 shadow-lg",
           className
         )}
         ref={ref as any}
@@ -102,7 +101,7 @@ interface TriggerProps
     "placeholder"
   > {
   placeholder?: React.ReactNode;
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   className?: string;
 }
 
@@ -119,15 +118,13 @@ const Trigger = React.forwardRef<HTMLElement, TriggerProps>(function Trigger(
         )}
         ref={ref as any}
       >
-        <SubframeCore.Icon
-          className="text-body font-body text-neutral-400"
-          name={icon}
-        />
+        {icon ? (
+          <SubframeCore.IconWrapper className="text-body font-body text-neutral-400">
+            {icon}
+          </SubframeCore.IconWrapper>
+        ) : null}
         <Select.TriggerValue placeholder={placeholder as string} />
-        <SubframeCore.Icon
-          className="text-body font-body text-subtext-color"
-          name="FeatherChevronDown"
-        />
+        <FeatherChevronDown className="text-body font-body text-subtext-color" />
       </div>
     </SubframeCore.Select.Trigger>
   );
@@ -166,7 +163,7 @@ interface SelectRootProps
   label?: React.ReactNode;
   placeholder?: React.ReactNode;
   helpText?: React.ReactNode;
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   children?: React.ReactNode;
   value?: string;
   onValueChange?: (value: string) => void;
@@ -230,7 +227,7 @@ const SelectRoot = React.forwardRef<HTMLElement, SelectRootProps>(
           ) : null}
           <div
             className={SubframeUtils.twClassNames(
-              "flex h-8 w-full flex-none flex-col items-start rounded-md border border-solid border-neutral-border bg-default-background group-focus-within/bb88f90b:border group-focus-within/bb88f90b:border-solid group-focus-within/bb88f90b:border-brand-primary",
+              "flex h-8 w-full flex-none flex-col items-start rounded-md border border-solid border-[#f0efedff] bg-default-background group-focus-within/bb88f90b:border group-focus-within/bb88f90b:border-solid group-focus-within/bb88f90b:border-[#65d32aff]",
               {
                 "border border-solid border-neutral-100 bg-neutral-100 group-hover/bb88f90b:border group-hover/bb88f90b:border-solid group-hover/bb88f90b:border-neutral-border group-hover/bb88f90b:bg-neutral-100":
                   variant === "filled",

@@ -1,18 +1,19 @@
 "use client";
 /*
  * Documentation:
- * Toast — https://app.subframe.com/library?component=Toast_2c7966c2-a95d-468a-83fe-bf196b95be7a
- * Button — https://app.subframe.com/library?component=Button_3b777358-b86b-40af-9327-891efc6826fe
+ * Toast — https://app.subframe.com/6b5c53cba769/library?component=Toast_2c7966c2-a95d-468a-83fe-bf196b95be7a
+ * Button — https://app.subframe.com/6b5c53cba769/library?component=Button_3b777358-b86b-40af-9327-891efc6826fe
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
+import { FeatherInfo } from "@subframe/core";
 
 interface ToastRootProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   variant?: "brand" | "neutral" | "error" | "success";
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   title?: React.ReactNode;
   description?: React.ReactNode;
   actions?: React.ReactNode;
@@ -23,7 +24,7 @@ const ToastRoot = React.forwardRef<HTMLElement, ToastRootProps>(
   function ToastRoot(
     {
       variant = "neutral",
-      icon = "FeatherInfo",
+      icon = <FeatherInfo />,
       title,
       description,
       actions,
@@ -41,17 +42,20 @@ const ToastRoot = React.forwardRef<HTMLElement, ToastRootProps>(
         ref={ref as any}
         {...otherProps}
       >
-        <SubframeCore.Icon
-          className={SubframeUtils.twClassNames(
-            "text-heading-3 font-heading-3 text-neutral-700",
-            {
-              "text-success-700": variant === "success",
-              "text-error-700": variant === "error",
-              "text-brand-600": variant === "brand",
-            }
-          )}
-          name={icon}
-        />
+        {icon ? (
+          <SubframeCore.IconWrapper
+            className={SubframeUtils.twClassNames(
+              "text-heading-3 font-heading-3 text-neutral-700",
+              {
+                "text-success-700": variant === "success",
+                "text-error-700": variant === "error",
+                "text-brand-600": variant === "brand",
+              }
+            )}
+          >
+            {icon}
+          </SubframeCore.IconWrapper>
+        ) : null}
         <div className="flex grow shrink-0 basis-0 flex-col items-start">
           {title ? (
             <span

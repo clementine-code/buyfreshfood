@@ -1,18 +1,19 @@
 "use client";
 /*
  * Documentation:
- * Context Menu — https://app.subframe.com/library?component=Context+Menu_f8a49f07-fa5b-46c8-9399-cbbf0930cc62
- * Badge — https://app.subframe.com/library?component=Badge_97bdb082-1124-4dd7-a335-b14b822d0157
+ * Context Menu — https://app.subframe.com/6b5c53cba769/library?component=Context+Menu_f8a49f07-fa5b-46c8-9399-cbbf0930cc62
+ * Badge — https://app.subframe.com/6b5c53cba769/library?component=Badge_97bdb082-1124-4dd7-a335-b14b822d0157
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
+import { FeatherStar } from "@subframe/core";
 
 interface ContextItemProps
   extends React.ComponentProps<typeof SubframeCore.ContextMenu.Item> {
   children?: React.ReactNode;
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   rightSlot?: React.ReactNode;
   className?: string;
 }
@@ -21,7 +22,7 @@ const ContextItem = React.forwardRef<HTMLElement, ContextItemProps>(
   function ContextItem(
     {
       children,
-      icon = "FeatherStar",
+      icon = <FeatherStar />,
       rightSlot,
       className,
       ...otherProps
@@ -38,10 +39,11 @@ const ContextItem = React.forwardRef<HTMLElement, ContextItemProps>(
           ref={ref as any}
         >
           <div className="flex h-4 w-4 flex-none items-center justify-center gap-2">
-            <SubframeCore.Icon
-              className="text-body font-body text-default-font"
-              name={icon}
-            />
+            {icon ? (
+              <SubframeCore.IconWrapper className="text-body font-body text-default-font">
+                {icon}
+              </SubframeCore.IconWrapper>
+            ) : null}
           </div>
           {children ? (
             <span className="line-clamp-1 grow shrink-0 basis-0 text-body font-body text-default-font group-hover/9358ee78:text-default-font">
@@ -96,7 +98,7 @@ const ContextMenuRoot = React.forwardRef<HTMLElement, ContextMenuRootProps>(
     return children ? (
       <div
         className={SubframeUtils.twClassNames(
-          "flex min-w-[192px] flex-col items-start rounded-md border border-solid border-neutral-border bg-default-background px-1 py-1 shadow-lg",
+          "flex min-w-[192px] flex-col items-start rounded-md border border-solid border-[#f0efedff] bg-default-background px-1 py-1 shadow-lg",
           className
         )}
         ref={ref as any}

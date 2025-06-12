@@ -1,12 +1,12 @@
 "use client";
 /*
  * Documentation:
- * Vertical Stepper — https://app.subframe.com/library?component=Vertical+Stepper_bdc0291d-b5be-40c5-ae2f-527a868488b2
+ * Vertical Stepper — https://app.subframe.com/6b5c53cba769/library?component=Vertical+Stepper_bdc0291d-b5be-40c5-ae2f-527a868488b2
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
-import * as SubframeCore from "@subframe/core";
+import { FeatherCheck } from "@subframe/core";
 
 interface StepProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "completed" | "active";
@@ -54,7 +54,7 @@ const Step = React.forwardRef<HTMLElement, StepProps>(function Step(
         />
         <div
           className={SubframeUtils.twClassNames(
-            "flex h-7 w-7 flex-none items-center justify-center overflow-hidden rounded-full bg-neutral-100",
+            "flex h-7 w-7 flex-none items-center justify-center overflow-hidden rounded-rounded-extra-large bg-neutral-100",
             { "bg-brand-100": variant === "active" || variant === "completed" }
           )}
         >
@@ -72,12 +72,11 @@ const Step = React.forwardRef<HTMLElement, StepProps>(function Step(
               {stepNumber}
             </span>
           ) : null}
-          <SubframeCore.Icon
+          <FeatherCheck
             className={SubframeUtils.twClassNames(
               "hidden text-heading-3 font-heading-3 text-default-font",
               { "inline-flex text-brand-700": variant === "completed" }
             )}
-            name="FeatherCheck"
           />
         </div>
         <div

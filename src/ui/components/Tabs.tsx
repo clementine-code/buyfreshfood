@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Tabs — https://app.subframe.com/library?component=Tabs_e1ad5091-8ad8-4319-b1f7-3e47f0256c20
+ * Tabs — https://app.subframe.com/6b5c53cba769/library?component=Tabs_e1ad5091-8ad8-4319-b1f7-3e47f0256c20
  */
 
 import React from "react";
@@ -11,7 +11,7 @@ import * as SubframeCore from "@subframe/core";
 interface ItemProps extends React.HTMLAttributes<HTMLDivElement> {
   active?: boolean;
   disabled?: boolean;
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
 }
@@ -40,16 +40,20 @@ const Item = React.forwardRef<HTMLElement, ItemProps>(function Item(
       ref={ref as any}
       {...otherProps}
     >
-      <SubframeCore.Icon
-        className={SubframeUtils.twClassNames(
-          "text-body font-body text-subtext-color group-hover/d5612535:text-default-font",
-          {
-            "text-neutral-400 group-hover/d5612535:text-neutral-400": disabled,
-            "text-brand-700 group-hover/d5612535:text-brand-700": active,
-          }
-        )}
-        name={icon}
-      />
+      {icon ? (
+        <SubframeCore.IconWrapper
+          className={SubframeUtils.twClassNames(
+            "text-body font-body text-subtext-color group-hover/d5612535:text-default-font",
+            {
+              "text-neutral-400 group-hover/d5612535:text-neutral-400":
+                disabled,
+              "text-brand-700 group-hover/d5612535:text-brand-700": active,
+            }
+          )}
+        >
+          {icon}
+        </SubframeCore.IconWrapper>
+      ) : null}
       {children ? (
         <span
           className={SubframeUtils.twClassNames(

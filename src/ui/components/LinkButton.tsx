@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Link Button — https://app.subframe.com/library?component=Link+Button_a4ee726a-774c-4091-8c49-55b659356024
+ * Link Button — https://app.subframe.com/6b5c53cba769/library?component=Link+Button_a4ee726a-774c-4091-8c49-55b659356024
  */
 
 import React from "react";
@@ -12,9 +12,9 @@ interface LinkButtonRootProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "brand" | "neutral" | "inverse";
   size?: "large" | "medium" | "small";
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   children?: React.ReactNode;
-  iconRight?: SubframeCore.IconName;
+  iconRight?: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
 }
@@ -44,20 +44,23 @@ const LinkButtonRoot = React.forwardRef<HTMLElement, LinkButtonRootProps>(
         type={type}
         {...otherProps}
       >
-        <SubframeCore.Icon
-          className={SubframeUtils.twClassNames(
-            "text-body font-body text-neutral-700 group-hover/a4ee726a:text-brand-700 group-disabled/a4ee726a:text-neutral-400 group-hover/a4ee726a:group-disabled/a4ee726a:text-neutral-400",
-            {
-              "text-caption font-caption": size === "small",
-              "text-heading-3 font-heading-3": size === "large",
-              "text-white group-hover/a4ee726a:text-white":
-                variant === "inverse",
-              "text-brand-700 group-hover/a4ee726a:text-brand-700":
-                variant === "brand",
-            }
-          )}
-          name={icon}
-        />
+        {icon ? (
+          <SubframeCore.IconWrapper
+            className={SubframeUtils.twClassNames(
+              "text-body font-body text-neutral-700 group-hover/a4ee726a:text-brand-700 group-disabled/a4ee726a:text-neutral-400 group-hover/a4ee726a:group-disabled/a4ee726a:text-neutral-400",
+              {
+                "text-caption font-caption": size === "small",
+                "text-heading-3 font-heading-3": size === "large",
+                "text-white group-hover/a4ee726a:text-white":
+                  variant === "inverse",
+                "text-brand-700 group-hover/a4ee726a:text-brand-700":
+                  variant === "brand",
+              }
+            )}
+          >
+            {icon}
+          </SubframeCore.IconWrapper>
+        ) : null}
         {children ? (
           <span
             className={SubframeUtils.twClassNames(
@@ -75,20 +78,23 @@ const LinkButtonRoot = React.forwardRef<HTMLElement, LinkButtonRootProps>(
             {children}
           </span>
         ) : null}
-        <SubframeCore.Icon
-          className={SubframeUtils.twClassNames(
-            "text-body font-body text-neutral-700 group-hover/a4ee726a:text-brand-700 group-disabled/a4ee726a:text-neutral-400 group-hover/a4ee726a:group-disabled/a4ee726a:text-neutral-400",
-            {
-              "text-caption font-caption": size === "small",
-              "text-heading-3 font-heading-3": size === "large",
-              "text-white group-hover/a4ee726a:text-white":
-                variant === "inverse",
-              "text-brand-700 group-hover/a4ee726a:text-brand-700":
-                variant === "brand",
-            }
-          )}
-          name={iconRight}
-        />
+        {iconRight ? (
+          <SubframeCore.IconWrapper
+            className={SubframeUtils.twClassNames(
+              "text-body font-body text-neutral-700 group-hover/a4ee726a:text-brand-700 group-disabled/a4ee726a:text-neutral-400 group-hover/a4ee726a:group-disabled/a4ee726a:text-neutral-400",
+              {
+                "text-caption font-caption": size === "small",
+                "text-heading-3 font-heading-3": size === "large",
+                "text-white group-hover/a4ee726a:text-white":
+                  variant === "inverse",
+                "text-brand-700 group-hover/a4ee726a:text-brand-700":
+                  variant === "brand",
+              }
+            )}
+          >
+            {iconRight}
+          </SubframeCore.IconWrapper>
+        ) : null}
       </button>
     );
   }

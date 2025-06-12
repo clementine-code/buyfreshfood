@@ -1,13 +1,14 @@
 "use client";
 /*
  * Documentation:
- * Copy to clipboard button — https://app.subframe.com/library?component=Copy+to+clipboard+button_e8c76626-6462-4f2f-b595-38d530d427e8
- * Tooltip — https://app.subframe.com/library?component=Tooltip_ccebd1e9-f6ac-4737-8376-0dfacd90c9f3
+ * Copy to clipboard button — https://app.subframe.com/6b5c53cba769/library?component=Copy+to+clipboard+button_e8c76626-6462-4f2f-b595-38d530d427e8
+ * Tooltip — https://app.subframe.com/6b5c53cba769/library?component=Tooltip_ccebd1e9-f6ac-4737-8376-0dfacd90c9f3
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
+import { FeatherClipboard } from "@subframe/core";
 import { Tooltip } from "./Tooltip";
 
 interface CopyToClipboardButtonRootProps
@@ -17,7 +18,7 @@ interface CopyToClipboardButtonRootProps
   > {
   clipboardText?: React.ReactNode;
   tooltipText?: React.ReactNode;
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   onCopy?: () => void;
   className?: string;
 }
@@ -29,7 +30,7 @@ const CopyToClipboardButtonRoot = React.forwardRef<
   {
     clipboardText,
     tooltipText,
-    icon = "FeatherClipboard",
+    icon = <FeatherClipboard />,
     className,
     ...otherProps
   }: CopyToClipboardButtonRootProps,
@@ -50,10 +51,11 @@ const CopyToClipboardButtonRoot = React.forwardRef<
               )}
               ref={ref as any}
             >
-              <SubframeCore.Icon
-                className="text-body font-body text-subtext-color group-hover/e8c76626:text-default-font"
-                name={icon}
-              />
+              {icon ? (
+                <SubframeCore.IconWrapper className="text-body font-body text-subtext-color group-hover/e8c76626:text-default-font">
+                  {icon}
+                </SubframeCore.IconWrapper>
+              ) : null}
             </div>
           </SubframeCore.CopyToClipboard.Root>
         </SubframeCore.Tooltip.Trigger>

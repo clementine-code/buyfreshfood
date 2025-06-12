@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Badge — https://app.subframe.com/library?component=Badge_97bdb082-1124-4dd7-a335-b14b822d0157
+ * Badge — https://app.subframe.com/6b5c53cba769/library?component=Badge_97bdb082-1124-4dd7-a335-b14b822d0157
  */
 
 import React from "react";
@@ -10,9 +10,9 @@ import * as SubframeCore from "@subframe/core";
 
 interface BadgeRootProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "brand" | "neutral" | "error" | "warning" | "success";
-  icon?: SubframeCore.IconName;
+  icon?: React.ReactNode;
   children?: React.ReactNode;
-  iconRight?: SubframeCore.IconName;
+  iconRight?: React.ReactNode;
   className?: string;
 }
 
@@ -47,18 +47,21 @@ const BadgeRoot = React.forwardRef<HTMLElement, BadgeRootProps>(
         ref={ref as any}
         {...otherProps}
       >
-        <SubframeCore.Icon
-          className={SubframeUtils.twClassNames(
-            "text-caption font-caption text-brand-700",
-            {
-              "text-success-800": variant === "success",
-              "text-warning-800": variant === "warning",
-              "text-error-700": variant === "error",
-              "text-neutral-700": variant === "neutral",
-            }
-          )}
-          name={icon}
-        />
+        {icon ? (
+          <SubframeCore.IconWrapper
+            className={SubframeUtils.twClassNames(
+              "text-caption font-caption text-brand-700",
+              {
+                "text-success-800": variant === "success",
+                "text-warning-800": variant === "warning",
+                "text-error-700": variant === "error",
+                "text-neutral-700": variant === "neutral",
+              }
+            )}
+          >
+            {icon}
+          </SubframeCore.IconWrapper>
+        ) : null}
         {children ? (
           <span
             className={SubframeUtils.twClassNames(
@@ -74,18 +77,21 @@ const BadgeRoot = React.forwardRef<HTMLElement, BadgeRootProps>(
             {children}
           </span>
         ) : null}
-        <SubframeCore.Icon
-          className={SubframeUtils.twClassNames(
-            "text-caption font-caption text-brand-700",
-            {
-              "text-success-800": variant === "success",
-              "text-warning-800": variant === "warning",
-              "text-error-700": variant === "error",
-              "text-neutral-700": variant === "neutral",
-            }
-          )}
-          name={iconRight}
-        />
+        {iconRight ? (
+          <SubframeCore.IconWrapper
+            className={SubframeUtils.twClassNames(
+              "text-caption font-caption text-brand-700",
+              {
+                "text-success-800": variant === "success",
+                "text-warning-800": variant === "warning",
+                "text-error-700": variant === "error",
+                "text-neutral-700": variant === "neutral",
+              }
+            )}
+          >
+            {iconRight}
+          </SubframeCore.IconWrapper>
+        ) : null}
       </div>
     );
   }

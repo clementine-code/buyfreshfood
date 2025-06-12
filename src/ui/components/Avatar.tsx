@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Avatar — https://app.subframe.com/library?component=Avatar_bec25ae6-5010-4485-b46b-cf79e3943ab2
+ * Avatar — https://app.subframe.com/6b5c53cba769/library?component=Avatar_bec25ae6-5010-4485-b46b-cf79e3943ab2
  */
 
 import React from "react";
@@ -32,7 +32,7 @@ const AvatarRoot = React.forwardRef<HTMLElement, AvatarRootProps>(
     return (
       <div
         className={SubframeUtils.twClassNames(
-          "group/bec25ae6 flex h-8 w-8 flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-100 relative",
+          "group/bec25ae6 flex h-8 w-8 flex-col items-center justify-center gap-2 overflow-hidden rounded-rounded-extra-large bg-brand-100 relative",
           {
             "rounded-md": square,
             "h-5 w-5": size === "x-small",

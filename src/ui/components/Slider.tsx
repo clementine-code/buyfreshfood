@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Slider — https://app.subframe.com/library?component=Slider_f4092874-0320-449e-a0c5-b435987c4cfb
+ * Slider — https://app.subframe.com/6b5c53cba769/library?component=Slider_f4092874-0320-449e-a0c5-b435987c4cfb
  */
 
 import React from "react";
@@ -21,7 +21,7 @@ const Range = React.forwardRef<HTMLElement, RangeProps>(function Range(
     <SubframeCore.Slider.Range asChild={true} {...otherProps}>
       <div
         className={SubframeUtils.twClassNames(
-          "flex h-full flex-col items-start rounded-full bg-brand-600",
+          "flex h-full flex-col items-start rounded-rounded-extra-large bg-brand-600",
           className
         )}
         ref={ref as any}
@@ -43,7 +43,7 @@ const Thumb = React.forwardRef<HTMLElement, ThumbProps>(function Thumb(
     <SubframeCore.Slider.Thumb asChild={true} {...otherProps}>
       <div
         className={SubframeUtils.twClassNames(
-          "flex h-5 w-5 items-center gap-2 rounded-full bg-brand-600",
+          "flex h-5 w-5 items-center gap-2 rounded-rounded-extra-large bg-brand-600",
           className
         )}
         ref={ref as any}
@@ -65,7 +65,7 @@ const Track = React.forwardRef<HTMLElement, TrackProps>(function Track(
     <SubframeCore.Slider.Track asChild={true} {...otherProps}>
       <div
         className={SubframeUtils.twClassNames(
-          "flex h-1.5 w-full flex-col items-start gap-2 rounded-full bg-neutral-100",
+          "flex h-1.5 w-full flex-col items-start gap-2 rounded-rounded-extra-large bg-neutral-100",
           className
         )}
         ref={ref as any}

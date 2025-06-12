@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Switch — https://app.subframe.com/library?component=Switch_7a464794-9ea9-4040-b1de-5bfb2ce599d9
+ * Switch — https://app.subframe.com/6b5c53cba769/library?component=Switch_7a464794-9ea9-4040-b1de-5bfb2ce599d9
  */
 
 import React from "react";
@@ -21,7 +21,7 @@ const Thumb = React.forwardRef<HTMLElement, ThumbProps>(function Thumb(
     <SubframeCore.Switch.Thumb asChild={true} {...otherProps}>
       <div
         className={SubframeUtils.twClassNames(
-          "flex h-3.5 w-3.5 flex-col items-start gap-2 rounded-full bg-white shadow-sm",
+          "flex h-3.5 w-3.5 flex-col items-start gap-2 rounded-rounded-extra-large bg-white shadow-sm",
           className
         )}
         ref={ref as any}
@@ -43,7 +43,7 @@ const SwitchRoot = React.forwardRef<HTMLElement, SwitchRootProps>(
       <SubframeCore.Switch.Root asChild={true} {...otherProps}>
         <div
           className={SubframeUtils.twClassNames(
-            "group/7a464794 flex h-5 w-8 cursor-pointer flex-col items-start justify-center gap-2 rounded-full border border-solid border-neutral-200 bg-neutral-200 px-0.5 py-0.5 aria-[checked=true]:border aria-[checked=true]:border-solid aria-[checked=true]:border-brand-600 aria-[checked=true]:bg-brand-600",
+            "group/7a464794 flex h-5 w-8 cursor-pointer flex-col items-start justify-center gap-2 rounded-rounded-extra-large border border-solid border-neutral-200 bg-neutral-200 px-0.5 py-0.5 aria-[checked=true]:border aria-[checked=true]:border-solid aria-[checked=true]:border-brand-600 aria-[checked=true]:bg-brand-600",
             className
           )}
           ref={ref as any}

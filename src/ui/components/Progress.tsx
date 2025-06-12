@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Progress — https://app.subframe.com/library?component=Progress_60964db0-a1bf-428b-b9d5-f34cdf58ea77
+ * Progress — https://app.subframe.com/6b5c53cba769/library?component=Progress_60964db0-a1bf-428b-b9d5-f34cdf58ea77
  */
 
 import React from "react";
@@ -19,7 +19,7 @@ const Indicator = React.forwardRef<HTMLElement, IndicatorProps>(
       <SubframeCore.Progress.Indicator asChild={true} {...otherProps}>
         <div
           className={SubframeUtils.twClassNames(
-            "flex h-2 w-full flex-col items-start gap-2 rounded-full bg-brand-600",
+            "flex h-2 w-full flex-col items-start gap-2 rounded-rounded-extra-large bg-brand-600",
             className
           )}
           ref={ref as any}
@@ -44,7 +44,7 @@ const ProgressRoot = React.forwardRef<HTMLElement, ProgressRootProps>(
       <SubframeCore.Progress.Root asChild={true} value={value} {...otherProps}>
         <div
           className={SubframeUtils.twClassNames(
-            "flex w-full flex-col items-start gap-2 overflow-hidden rounded-full bg-neutral-100",
+            "flex w-full flex-col items-start gap-2 overflow-hidden rounded-rounded-extra-large bg-neutral-100",
             className
           )}
           ref={ref as any}

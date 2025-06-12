@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Text Area — https://app.subframe.com/library?component=Text+Area_4ec05ee8-8f1c-46b2-b863-5419aa7f5cce
+ * Text Area — https://app.subframe.com/6b5c53cba769/library?component=Text+Area_4ec05ee8-8f1c-46b2-b863-5419aa7f5cce
  */
 
 import React from "react";
@@ -76,7 +76,7 @@ const TextAreaRoot = React.forwardRef<HTMLElement, TextAreaRootProps>(
         {children ? (
           <div
             className={SubframeUtils.twClassNames(
-              "flex w-full grow shrink-0 basis-0 flex-col items-start rounded-md border border-solid border-neutral-border bg-default-background pl-1 group-focus-within/4ec05ee8:border group-focus-within/4ec05ee8:border-solid group-focus-within/4ec05ee8:border-brand-primary",
+              "flex w-full grow shrink-0 basis-0 flex-col items-start rounded-md border border-solid border-[#f0efedff] bg-default-background pl-1 group-focus-within/4ec05ee8:border group-focus-within/4ec05ee8:border-solid group-focus-within/4ec05ee8:border-[#65d32aff]",
               {
                 "border border-solid border-neutral-100 bg-neutral-100 group-hover/4ec05ee8:border group-hover/4ec05ee8:border-solid group-hover/4ec05ee8:border-neutral-border group-focus-within/4ec05ee8:bg-default-background":
                   variant === "filled",

@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Radio Card Group — https://app.subframe.com/library?component=Radio+Card+Group_6d5193b8-6043-4dc1-aad5-7f902ef872df
+ * Radio Card Group — https://app.subframe.com/6b5c53cba769/library?component=Radio+Card+Group_6d5193b8-6043-4dc1-aad5-7f902ef872df
  */
 
 import React from "react";
@@ -31,12 +31,12 @@ const RadioCard = React.forwardRef<HTMLElement, RadioCardProps>(
         >
           <div
             className={SubframeUtils.twClassNames(
-              "flex items-start gap-2 rounded-full pt-0.5",
+              "flex items-start gap-2 rounded-rounded-extra-large pt-0.5",
               { hidden: hideRadio }
             )}
           >
-            <div className="flex h-4 w-4 flex-none flex-col items-center justify-center gap-2 rounded-full border-2 border-solid border-neutral-300 group-aria-[checked=true]/502d4919:border-2 group-aria-[checked=true]/502d4919:border-solid group-aria-[checked=true]/502d4919:border-brand-600 group-disabled/502d4919:border-2 group-disabled/502d4919:border-solid group-disabled/502d4919:border-neutral-300 group-disabled/502d4919:bg-neutral-100">
-              <div className="hidden h-2 w-2 flex-none flex-col items-start gap-2 rounded-full bg-white group-aria-[checked=true]/502d4919:flex group-aria-[checked=true]/502d4919:bg-brand-600 group-disabled/502d4919:bg-neutral-300" />
+            <div className="flex h-4 w-4 flex-none flex-col items-center justify-center gap-2 rounded-rounded-extra-large border-2 border-solid border-neutral-300 group-aria-[checked=true]/502d4919:border-2 group-aria-[checked=true]/502d4919:border-solid group-aria-[checked=true]/502d4919:border-brand-600 group-disabled/502d4919:border-2 group-disabled/502d4919:border-solid group-disabled/502d4919:border-neutral-300 group-disabled/502d4919:bg-neutral-100">
+              <div className="hidden h-2 w-2 flex-none flex-col items-start gap-2 rounded-rounded-extra-large bg-white group-aria-[checked=true]/502d4919:flex group-aria-[checked=true]/502d4919:bg-brand-600 group-disabled/502d4919:bg-neutral-300" />
             </div>
           </div>
           {children ? (

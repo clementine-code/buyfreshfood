@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Stepper — https://app.subframe.com/library?component=Stepper_3c5d47dc-1b1a-45d9-b244-18422d7bfb56
+ * Stepper — https://app.subframe.com/6b5c53cba769/library?component=Stepper_3c5d47dc-1b1a-45d9-b244-18422d7bfb56
  */
 
 import React from "react";
@@ -51,7 +51,7 @@ const Step = React.forwardRef<HTMLElement, StepProps>(function Step(
         />
         <div
           className={SubframeUtils.twClassNames(
-            "flex h-7 w-7 flex-none flex-col items-center justify-center gap-2 rounded-full bg-neutral-100",
+            "flex h-7 w-7 flex-none flex-col items-center justify-center gap-2 rounded-rounded-extra-large bg-neutral-100",
             { "bg-brand-100": variant === "active" || variant === "completed" }
           )}
         >

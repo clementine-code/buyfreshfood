@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Bar Chart — https://app.subframe.com/library?component=Bar+Chart_4d4f30e7-1869-4980-8b96-617df3b37912
+ * Bar Chart — https://app.subframe.com/6b5c53cba769/library?component=Bar+Chart_4d4f30e7-1869-4980-8b96-617df3b37912
  */
 
 import React from "react";
@@ -25,12 +25,12 @@ const BarChartRoot = React.forwardRef<HTMLElement, BarChartRootProps>(
         ref={ref as any}
         stacked={stacked}
         colors={[
-          "#10b981",
-          "#a7f3d0",
-          "#059669",
-          "#6ee7b7",
-          "#047857",
-          "#34d399",
+          "#5fa269",
+          "#d9f2dc",
+          "#44874e",
+          "#b4e1b9",
+          "#346e3e",
+          "#8ec796",
         ]}
         {...otherProps}
       />
