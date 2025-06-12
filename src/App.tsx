@@ -3,20 +3,22 @@
 import React from "react";
 import { ResponsivePageLayout } from "./layouts/ResponsivePageLayout";
 import { TextField } from "@/ui/components/TextField";
-import { FeatherMapPin } from "@subframe/core";
-import { FeatherLocate } from "@subframe/core";
-import { FeatherShoppingBag } from "@subframe/core";
 import { Button } from "@/ui/components/Button";
-import { FeatherArrowRight } from "@subframe/core";
-import { FeatherHome } from "@subframe/core";
-import { FeatherClock } from "@subframe/core";
-import { FeatherHeart } from "@subframe/core";
-import { FeatherLeaf } from "@subframe/core";
 import { IconButton } from "@/ui/components/IconButton";
-import { FeatherTwitter } from "@subframe/core";
-import { FeatherGithub } from "@subframe/core";
-import { FeatherSlack } from "@subframe/core";
-import { FeatherYoutube } from "@subframe/core";
+import { 
+  FeatherMapPin, 
+  FeatherLocate, 
+  FeatherShoppingBag, 
+  FeatherArrowRight, 
+  FeatherHome, 
+  FeatherClock, 
+  FeatherHeart, 
+  FeatherLeaf,
+  FeatherTwitter,
+  FeatherGithub,
+  FeatherSlack,
+  FeatherYoutube
+} from "@subframe/core";
 
 function HomePage() {
   return (
@@ -74,7 +76,7 @@ function HomePage() {
               </div>
               <Button
                 className="h-10 md:h-12 w-full flex-none mt-auto"
-                icon={<FeatherArrowRight />}
+                icon="FeatherArrowRight"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               >
                 Start Shopping
@@ -93,7 +95,7 @@ function HomePage() {
               <Button
                 className="h-10 md:h-12 w-full flex-none mt-auto"
                 variant="destructive-primary"
-                icon={<FeatherArrowRight />}
+                icon="FeatherArrowRight"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               >
                 Become a Seller
@@ -157,24 +159,24 @@ function HomePage() {
                     alt="Logo"
                   />
                   <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Subframe
+                    Fresh Local Food
                   </span>
                 </div>
                 <div className="flex w-full items-center gap-2 justify-center md:justify-start">
                   <IconButton
-                    icon={<FeatherTwitter />}
+                    icon="FeatherTwitter"
                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                   />
                   <IconButton
-                    icon={<FeatherGithub />}
+                    icon="FeatherGithub"
                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                   />
                   <IconButton
-                    icon={<FeatherSlack />}
+                    icon="FeatherSlack"
                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                   />
                   <IconButton
-                    icon={<FeatherYoutube />}
+                    icon="FeatherYoutube"
                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                   />
                 </div>

@@ -2,12 +2,9 @@
 
 import React from "react";
 import { TextField } from "@/ui/components/TextField";
-import { FeatherSearch } from "@subframe/core";
-import { FeatherUser } from "@subframe/core";
-import { FeatherShoppingCart } from "@subframe/core";
-import { FeatherMenu } from "@subframe/core";
 import { Button } from "@/ui/components/Button";
 import { IconButton } from "@/ui/components/IconButton";
+import { FeatherSearch, FeatherUser, FeatherShoppingCart, FeatherMenu } from "@subframe/core";
 
 interface ResponsiveTopbarProps {
   className?: string;
@@ -52,7 +49,7 @@ export function ResponsiveTopbar({ className }: ResponsiveTopbarProps) {
           />
           <IconButton
             variant="neutral-tertiary"
-            icon={<FeatherMenu />}
+            icon="FeatherMenu"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
           />
         </div>
@@ -96,13 +93,13 @@ export function ResponsiveTopbar({ className }: ResponsiveTopbarProps) {
         <div className="hidden lg:flex items-center gap-2">
           <Button 
             variant="brand-secondary" 
-            icon={<FeatherUser />}
+            icon="FeatherUser"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
           >
             Sign In
           </Button>
           <Button 
-            icon={<FeatherShoppingCart />}
+            icon="FeatherShoppingCart"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
           >
             Cart
@@ -112,12 +109,12 @@ export function ResponsiveTopbar({ className }: ResponsiveTopbarProps) {
         <div className="flex lg:hidden items-center gap-1">
           <IconButton
             variant="brand-secondary"
-            icon={<FeatherUser />}
+            icon="FeatherUser"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
           />
           <IconButton
             variant="brand-primary"
-            icon={<FeatherShoppingCart />}
+            icon="FeatherShoppingCart"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
           />
         </div>
