@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { TopbarWithCenterSearch } from "@/ui/components/TopbarWithCenterSearch";
+import { TopbarWithCenterNav } from "@/ui/components/TopbarWithCenterNav";
 import { TextField } from "@/ui/components/TextField";
 import { FeatherSearch } from "@subframe/core";
 import { FeatherUser } from "@subframe/core";
@@ -25,15 +25,15 @@ export function ResponsiveTopbar({ className }: ResponsiveTopbarProps) {
             alt="Logo"
           />
           <div className="flex items-center justify-center gap-2">
-            <TopbarWithCenterSearch.NavItem selected={true}>
+            <TopbarWithCenterNav.NavItem selected={true}>
               Home
-            </TopbarWithCenterSearch.NavItem>
-            <TopbarWithCenterSearch.NavItem>
+            </TopbarWithCenterNav.NavItem>
+            <TopbarWithCenterNav.NavItem>
               Shop
-            </TopbarWithCenterSearch.NavItem>
-            <TopbarWithCenterSearch.NavItem>
+            </TopbarWithCenterNav.NavItem>
+            <TopbarWithCenterNav.NavItem>
               Sell
-            </TopbarWithCenterSearch.NavItem>
+            </TopbarWithCenterNav.NavItem>
           </div>
         </div>
         {/* Mobile/Tablet: Logo + Hamburger Menu - Hidden on desktop */}
