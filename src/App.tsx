@@ -44,7 +44,7 @@ function HomePage() {
               iconRight={<FeatherLocate />}
             >
               <TextField.Input
-                placeholder="Enter your address to find fresh local food..."
+                placeholder="Enter your location to find fresh local food..."
                 value=""
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
