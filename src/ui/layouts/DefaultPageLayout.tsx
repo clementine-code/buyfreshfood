@@ -12,9 +12,13 @@ import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
 import { TopbarWithCenterSearch2 } from "../components/TopbarWithCenterSearch2";
 import { TextField } from "../components/TextField";
 import { Button } from "../components/Button";
-import { IconButton } from "../components/IconButton";
+import { DropdownMenu } from "../components/DropdownMenu";
+import * as SubframeCore from "@subframe/core";
+import { FeatherSearch } from "@subframe/core";
 import { FeatherMapPin } from "@subframe/core";
+import { FeatherUser } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
+import { FeatherLocateFixed } from "@subframe/core";
 
 interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -43,27 +47,31 @@ const DefaultPageLayoutRoot = React.forwardRef<
         <TopbarWithCenterSearch3
           className="py-3"
           leftSlot={
-            <div className="flex items-center gap-6">
+            <>
+              <img
+                className="h-6 flex-none object-cover"
+                src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
+              />
               <div className="flex items-center gap-2">
-                <img
-                  className="h-5 w-5 flex-none object-cover"
-                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
-                />
+                <TopbarWithCenterSearch3.NavItem selected={true}>
+                  Home
+                </TopbarWithCenterSearch3.NavItem>
+                <TopbarWithCenterSearch3.NavItem>
+                  Shop
+                </TopbarWithCenterSearch3.NavItem>
+                <TopbarWithCenterSearch3.NavItem>
+                  Sell
+                </TopbarWithCenterSearch3.NavItem>
               </div>
-              <div className="flex items-center gap-4">
-                <TopbarWithCenterSearch3.NavItem>Home</TopbarWithCenterSearch3.NavItem>
-                <TopbarWithCenterSearch3.NavItem>Shop</TopbarWithCenterSearch3.NavItem>
-                <TopbarWithCenterSearch3.NavItem>Sell</TopbarWithCenterSearch3.NavItem>
-              </div>
-            </div>
+            </>
           }
           centerSlot={
             <TextField
-              className="h-auto w-full max-w-[384px] flex-none"
+              className="h-auto grow shrink-0 basis-0"
               variant="filled"
               label=""
               helpText=""
-              icon={<FeatherMapPin />}
+              icon={<FeatherSearch />}
             >
               <TextField.Input
                 placeholder="Search for fresh local food..."
@@ -73,21 +81,56 @@ const DefaultPageLayoutRoot = React.forwardRef<
             </TextField>
           }
           rightSlot={
-            <div className="flex items-center gap-2">
-              <IconButton
-                variant="neutral-tertiary"
-                icon={<FeatherMapPin />}
+            <>
+              <SubframeCore.DropdownMenu.Root>
+                <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                  <Button
+                    variant="destructive-secondary"
+                    icon={<FeatherMapPin />}
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  />
+                </SubframeCore.DropdownMenu.Trigger>
+                <SubframeCore.DropdownMenu.Portal>
+                  <SubframeCore.DropdownMenu.Content
+                    side="bottom"
+                    align="end"
+                    sideOffset={4}
+                    asChild={true}
+                  >
+                    <DropdownMenu>
+                      <TextField
+                        className="h-auto w-44 flex-none"
+                        variant="filled"
+                        label=""
+                        helpText=""
+                        icon={<FeatherLocateFixed />}
+                      >
+                        <TextField.Input
+                          placeholder="Enter location"
+                          value=""
+                          onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>
+                          ) => {}}
+                        />
+                      </TextField>
+                    </DropdownMenu>
+                  </SubframeCore.DropdownMenu.Content>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
+              <Button
+                variant="brand-secondary"
+                icon={<FeatherUser />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <Button variant="neutral-secondary" size="medium">
+              >
                 Sign In
               </Button>
-              <IconButton
-                variant="brand-primary"
+              <Button
                 icon={<FeatherShoppingCart />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-            </div>
+              >
+                Cart
+              </Button>
+            </>
           }
         />
       </div>
@@ -103,7 +146,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
               variant="filled"
               label=""
               helpText=""
-              icon={<FeatherMapPin />}
+              icon={<FeatherSearch />}
             >
               <TextField.Input
                 placeholder="Search for fresh local food..."
@@ -113,21 +156,59 @@ const DefaultPageLayoutRoot = React.forwardRef<
             </TextField>
           }
           rightSlot={
-            <div className="flex items-center gap-2">
-              <IconButton
-                variant="neutral-tertiary"
-                icon={<FeatherMapPin />}
+            <>
+              <SubframeCore.DropdownMenu.Root>
+                <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                  <Button
+                    variant="destructive-secondary"
+                    icon={<FeatherMapPin />}
+                    size="small"
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  />
+                </SubframeCore.DropdownMenu.Trigger>
+                <SubframeCore.DropdownMenu.Portal>
+                  <SubframeCore.DropdownMenu.Content
+                    side="bottom"
+                    align="end"
+                    sideOffset={4}
+                    asChild={true}
+                  >
+                    <DropdownMenu>
+                      <TextField
+                        className="h-auto w-44 flex-none"
+                        variant="filled"
+                        label=""
+                        helpText=""
+                        icon={<FeatherLocateFixed />}
+                      >
+                        <TextField.Input
+                          placeholder="Enter location"
+                          value=""
+                          onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>
+                          ) => {}}
+                        />
+                      </TextField>
+                    </DropdownMenu>
+                  </SubframeCore.DropdownMenu.Content>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
+              <Button
+                variant="brand-secondary"
+                icon={<FeatherUser />}
+                size="small"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <Button variant="neutral-secondary" size="small">
+              >
                 Sign In
               </Button>
-              <IconButton
-                variant="brand-primary"
+              <Button
                 icon={<FeatherShoppingCart />}
+                size="small"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-            </div>
+              >
+                Cart
+              </Button>
+            </>
           }
         />
       </div>
@@ -143,31 +224,69 @@ const DefaultPageLayoutRoot = React.forwardRef<
               variant="filled"
               label=""
               helpText=""
-              icon={<FeatherMapPin />}
+              icon={<FeatherSearch />}
             >
               <TextField.Input
-                placeholder="Search for fresh local food..."
+                placeholder="Search..."
                 value=""
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
             </TextField>
           }
           rightSlot={
-            <div className="flex items-center gap-2">
-              <IconButton
-                variant="neutral-tertiary"
-                icon={<FeatherMapPin />}
+            <>
+              <SubframeCore.DropdownMenu.Root>
+                <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                  <Button
+                    variant="destructive-secondary"
+                    icon={<FeatherMapPin />}
+                    size="small"
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  />
+                </SubframeCore.DropdownMenu.Trigger>
+                <SubframeCore.DropdownMenu.Portal>
+                  <SubframeCore.DropdownMenu.Content
+                    side="bottom"
+                    align="end"
+                    sideOffset={4}
+                    asChild={true}
+                  >
+                    <DropdownMenu>
+                      <TextField
+                        className="h-auto w-44 flex-none"
+                        variant="filled"
+                        label=""
+                        helpText=""
+                        icon={<FeatherLocateFixed />}
+                      >
+                        <TextField.Input
+                          placeholder="Enter location"
+                          value=""
+                          onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>
+                          ) => {}}
+                        />
+                      </TextField>
+                    </DropdownMenu>
+                  </SubframeCore.DropdownMenu.Content>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
+              <Button
+                variant="brand-secondary"
+                icon={<FeatherUser />}
+                size="small"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <Button variant="neutral-secondary" size="small">
+              >
                 Sign In
               </Button>
-              <IconButton
-                variant="brand-primary"
+              <Button
                 icon={<FeatherShoppingCart />}
+                size="small"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-            </div>
+              >
+                Cart
+              </Button>
+            </>
           }
         />
       </div>
