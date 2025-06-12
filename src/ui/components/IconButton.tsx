@@ -58,7 +58,7 @@ const IconButtonRoot = React.forwardRef<HTMLElement, IconButtonRootProps>(
               variant === "destructive-primary",
             "border border-solid border-[#f0efedff] bg-white hover:bg-neutral-100 active:bg-white":
               variant === "neutral-secondary",
-            "bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-100":
+            "bg-peach-200 hover:bg-peach-300 active:bg-peach-100":
               variant === "neutral-primary",
             "hover:bg-brand-50 active:bg-brand-100":
               variant === "brand-tertiary",
