@@ -27,6 +27,7 @@ function ResponsiveTopbar() {
       {/* Desktop Topbar */}
       <div className="hidden md:block w-full">
         <TopbarWithCenterSearch3
+          className="py-3"
           leftSlot={
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
@@ -49,7 +50,6 @@ function ResponsiveTopbar() {
               label=""
               helpText=""
               icon={<FeatherMapPin />}
-              iconRight={<FeatherLocate />}
             >
               <TextField.Input
                 placeholder="Search for fresh local food..."
@@ -61,6 +61,7 @@ function ResponsiveTopbar() {
           rightSlot={
             <div className="flex items-center gap-2">
               <IconButton
+                variant="neutral-tertiary"
                 icon={<FeatherMapPin />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
@@ -68,6 +69,7 @@ function ResponsiveTopbar() {
                 Sign In
               </Button>
               <IconButton
+                variant="brand-primary"
                 icon={<FeatherShoppingCart />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
@@ -79,6 +81,7 @@ function ResponsiveTopbar() {
       {/* Tablet Topbar */}
       <div className="hidden sm:block md:hidden w-full">
         <TopbarWithCenterSearch2
+          className="py-3"
           mobile="tablet"
           centerSlot={
             <TextField
@@ -87,7 +90,6 @@ function ResponsiveTopbar() {
               label=""
               helpText=""
               icon={<FeatherMapPin />}
-              iconRight={<FeatherLocate />}
             >
               <TextField.Input
                 placeholder="Search for fresh local food..."
@@ -99,6 +101,7 @@ function ResponsiveTopbar() {
           rightSlot={
             <div className="flex items-center gap-2">
               <IconButton
+                variant="neutral-tertiary"
                 icon={<FeatherMapPin />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
@@ -106,6 +109,7 @@ function ResponsiveTopbar() {
                 Sign In
               </Button>
               <IconButton
+                variant="brand-primary"
                 icon={<FeatherShoppingCart />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
@@ -117,6 +121,7 @@ function ResponsiveTopbar() {
       {/* Mobile Topbar */}
       <div className="block sm:hidden w-full">
         <TopbarWithCenterSearch2
+          className="py-3"
           mobile="phone"
           centerSlot={
             <TextField
@@ -136,6 +141,7 @@ function ResponsiveTopbar() {
           rightSlot={
             <div className="flex items-center gap-2">
               <IconButton
+                variant="neutral-tertiary"
                 icon={<FeatherMapPin />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
@@ -143,8 +149,9 @@ function ResponsiveTopbar() {
                 Sign In
               </Button>
               <IconButton
+                variant="brand-primary"
                 icon={<FeatherShoppingCart />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                onClick={(event: React.MouseEvent<HTMLButtonButton>) => {}}
               />
             </div>
           }
@@ -182,7 +189,7 @@ function HomePage() {
             iconRight={<FeatherLocate />}
           >
             <TextField.Input
-              placeholder="Search for fresh local food..."
+              placeholder="Enter your address to find fresh local food..."
               value=""
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
             />
@@ -319,7 +326,7 @@ function HomePage() {
                 />
                 <IconButton
                   icon={<FeatherYoutube />}
-                  onClick={(event: React.MouseEvent<HTMLButtonButton>) => {}}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
               </div>
             </div>
