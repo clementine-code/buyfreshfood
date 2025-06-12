@@ -23,7 +23,7 @@ function HomePage() {
     <DefaultPageLayout>
       <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden">
         {/* Hero Section */}
-        <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 py-24 max-w-full relative mobile:px-4 mobile:py-16">
+        <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 py-24 max-w-full relative mobile:px-4 mobile:py-16 mobile:min-h-[500px]">
           <div className="flex flex-col items-center justify-center gap-8 z-10">
             <div className="flex w-full max-w-[768px] flex-col items-start gap-4">
               <span className="w-full font-['Inter'] text-[48px] font-[700] leading-[48px] text-white text-center -tracking-[0.035em] mobile:font-['Inter'] mobile:text-[32px] mobile:font-[400] mobile:leading-[36px] mobile:tracking-normal">
@@ -50,11 +50,13 @@ function HomePage() {
               />
             </TextField>
           </div>
+          {/* Background Image - Full Coverage */}
           <img
-            className="w-full grow shrink-0 basis-0 object-cover absolute inset-0"
+            className="w-full h-full object-cover absolute inset-0"
             src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3"
           />
-          <div className="flex w-full grow shrink-0 basis-0 flex-col items-start bg-[#00000066] absolute inset-0" />
+          {/* Dark Overlay - Full Coverage */}
+          <div className="w-full h-full bg-[#00000066] absolute inset-0" />
         </div>
 
         {/* Main Content */}
