@@ -1,19 +1,18 @@
 "use client";
 /*
  * Documentation:
- * Toggle Group — https://app.subframe.com/6b5c53cba769/library?component=Toggle+Group_2026f10a-e3cc-4c89-80da-a7259acae3b7
+ * Toggle Group — https://app.subframe.com/library?component=Toggle+Group_2026f10a-e3cc-4c89-80da-a7259acae3b7
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
-import { FeatherStar } from "@subframe/core";
 
 interface ItemProps
   extends React.ComponentProps<typeof SubframeCore.ToggleGroup.Item> {
   disabled?: boolean;
   children?: React.ReactNode;
-  icon?: React.ReactNode;
+  icon?: SubframeCore.IconName;
   className?: string;
 }
 
@@ -21,7 +20,7 @@ const Item = React.forwardRef<HTMLElement, ItemProps>(function Item(
   {
     disabled = false,
     children,
-    icon = <FeatherStar />,
+    icon = "FeatherStar",
     className,
     ...otherProps
   }: ItemProps,
@@ -37,19 +36,16 @@ const Item = React.forwardRef<HTMLElement, ItemProps>(function Item(
         )}
         ref={ref as any}
       >
-        {icon ? (
-          <SubframeCore.IconWrapper
-            className={SubframeUtils.twClassNames(
-              "text-body font-body text-subtext-color group-hover/56dea6ed:text-default-font group-active/56dea6ed:text-default-font group-aria-[checked=true]/56dea6ed:text-default-font",
-              {
-                "text-neutral-400 group-hover/56dea6ed:text-neutral-400 group-active/56dea6ed:text-neutral-400":
-                  disabled,
-              }
-            )}
-          >
-            {icon}
-          </SubframeCore.IconWrapper>
-        ) : null}
+        <SubframeCore.Icon
+          className={SubframeUtils.twClassNames(
+            "text-body font-body text-subtext-color group-hover/56dea6ed:text-default-font group-active/56dea6ed:text-default-font group-aria-[checked=true]/56dea6ed:text-default-font",
+            {
+              "text-neutral-400 group-hover/56dea6ed:text-neutral-400 group-active/56dea6ed:text-neutral-400":
+                disabled,
+            }
+          )}
+          name={icon}
+        />
         {children ? (
           <span
             className={SubframeUtils.twClassNames(

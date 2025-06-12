@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Line Chart — https://app.subframe.com/6b5c53cba769/library?component=Line+Chart_22944dd2-3cdd-42fd-913a-1b11a3c1d16d
+ * Line Chart — https://app.subframe.com/library?component=Line+Chart_22944dd2-3cdd-42fd-913a-1b11a3c1d16d
  */
 
 import React from "react";
@@ -23,12 +23,12 @@ const LineChartRoot = React.forwardRef<HTMLElement, LineChartRootProps>(
         className={SubframeUtils.twClassNames("h-80 w-full", className)}
         ref={ref as any}
         colors={[
-          "#5fa269",
-          "#d9f2dc",
-          "#44874e",
-          "#b4e1b9",
-          "#346e3e",
-          "#8ec796",
+          "#10b981",
+          "#a7f3d0",
+          "#059669",
+          "#6ee7b7",
+          "#047857",
+          "#34d399",
         ]}
         {...otherProps}
       />

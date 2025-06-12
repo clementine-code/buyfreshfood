@@ -1,8 +1,8 @@
 "use client";
 /*
  * Documentation:
- * Dialog Layout — https://app.subframe.com/6b5c53cba769/library?component=Dialog+Layout_ff4920a8-df26-4012-934d-0a9edbf5e373
- * Dialog — https://app.subframe.com/6b5c53cba769/library?component=Dialog_ca59db17-43fb-4247-8094-3c55162e902d
+ * Dialog Layout — https://app.subframe.com/library?component=Dialog+Layout_ff4920a8-df26-4012-934d-0a9edbf5e373
+ * Dialog — https://app.subframe.com/library?component=Dialog_ca59db17-43fb-4247-8094-3c55162e902d
  */
 
 import React from "react";

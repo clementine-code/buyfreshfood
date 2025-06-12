@@ -1,12 +1,12 @@
 "use client";
 /*
  * Documentation:
- * Breadcrumbs — https://app.subframe.com/6b5c53cba769/library?component=Breadcrumbs_8898334b-a66f-4ee8-8bd1-afcfa8e37cc0
+ * Breadcrumbs — https://app.subframe.com/library?component=Breadcrumbs_8898334b-a66f-4ee8-8bd1-afcfa8e37cc0
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
-import { FeatherChevronRight } from "@subframe/core";
+import * as SubframeCore from "@subframe/core";
 
 interface ItemProps extends React.HTMLAttributes<HTMLSpanElement> {
   children?: React.ReactNode;
@@ -34,7 +34,10 @@ const Item = React.forwardRef<HTMLElement, ItemProps>(function Item(
 });
 
 interface DividerProps
-  extends React.ComponentProps<typeof FeatherChevronRight> {
+  extends SubframeCore.TypescriptHelpers.Optional<
+    React.ComponentProps<typeof SubframeCore.Icon>,
+    "name"
+  > {
   className?: string;
 }
 
@@ -43,11 +46,12 @@ const Divider = React.forwardRef<HTMLElement, DividerProps>(function Divider(
   ref
 ) {
   return (
-    <FeatherChevronRight
+    <SubframeCore.Icon
       className={SubframeUtils.twClassNames(
         "text-body font-body text-subtext-color",
         className
       )}
+      name="FeatherChevronRight"
       ref={ref as any}
       {...otherProps}
     />

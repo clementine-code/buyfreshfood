@@ -1,20 +1,18 @@
 "use client";
 /*
  * Documentation:
- * Tree View — https://app.subframe.com/6b5c53cba769/library?component=Tree+View_4ed46422-ecc3-41e8-8787-e55ee10cdc75
+ * Tree View — https://app.subframe.com/library?component=Tree+View_4ed46422-ecc3-41e8-8787-e55ee10cdc75
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
-import { FeatherFolder } from "@subframe/core";
 import { Accordion } from "./Accordion";
-import { FeatherFile } from "@subframe/core";
 
 interface FolderProps extends React.ComponentProps<typeof Accordion> {
   children?: React.ReactNode;
   label?: React.ReactNode;
-  icon?: React.ReactNode;
+  icon?: SubframeCore.IconName;
   className?: string;
 }
 
@@ -22,7 +20,7 @@ const Folder = React.forwardRef<HTMLElement, FolderProps>(function Folder(
   {
     children,
     label,
-    icon = <FeatherFolder />,
+    icon = "FeatherFolder",
     className,
     ...otherProps
   }: FolderProps,
@@ -36,11 +34,10 @@ const Folder = React.forwardRef<HTMLElement, FolderProps>(function Folder(
       )}
       trigger={
         <div className="flex w-full items-center gap-2 rounded-md px-3 py-2 group-hover/c841484c:bg-neutral-50">
-          {icon ? (
-            <SubframeCore.IconWrapper className="text-body font-body text-default-font">
-              {icon}
-            </SubframeCore.IconWrapper>
-          ) : null}
+          <SubframeCore.Icon
+            className="text-body font-body text-default-font"
+            name={icon}
+          />
           {label ? (
             <span className="line-clamp-1 grow shrink-0 basis-0 text-body font-body text-default-font">
               {label}
@@ -65,7 +62,7 @@ const Folder = React.forwardRef<HTMLElement, FolderProps>(function Folder(
 interface ItemProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
   label?: React.ReactNode;
-  icon?: React.ReactNode;
+  icon?: SubframeCore.IconName;
   className?: string;
 }
 
@@ -73,7 +70,7 @@ const Item = React.forwardRef<HTMLElement, ItemProps>(function Item(
   {
     selected = false,
     label,
-    icon = <FeatherFile />,
+    icon = "FeatherFile",
     className,
     ...otherProps
   }: ItemProps,
@@ -89,16 +86,13 @@ const Item = React.forwardRef<HTMLElement, ItemProps>(function Item(
       ref={ref as any}
       {...otherProps}
     >
-      {icon ? (
-        <SubframeCore.IconWrapper
-          className={SubframeUtils.twClassNames(
-            "text-body font-body text-default-font",
-            { "text-brand-700": selected }
-          )}
-        >
-          {icon}
-        </SubframeCore.IconWrapper>
-      ) : null}
+      <SubframeCore.Icon
+        className={SubframeUtils.twClassNames(
+          "text-body font-body text-default-font",
+          { "text-brand-700": selected }
+        )}
+        name={icon}
+      />
       {label ? (
         <span
           className={SubframeUtils.twClassNames(

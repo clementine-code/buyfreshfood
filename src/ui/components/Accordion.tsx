@@ -1,13 +1,12 @@
 "use client";
 /*
  * Documentation:
- * Accordion — https://app.subframe.com/6b5c53cba769/library?component=Accordion_d2e81e20-863a-4027-826a-991d8910efd9
+ * Accordion — https://app.subframe.com/library?component=Accordion_d2e81e20-863a-4027-826a-991d8910efd9
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
-import { FeatherChevronDown } from "@subframe/core";
 
 interface ChevronProps
   extends React.ComponentProps<typeof SubframeCore.Collapsible.Chevron> {
@@ -20,11 +19,12 @@ const Chevron = React.forwardRef<HTMLElement, ChevronProps>(function Chevron(
 ) {
   return (
     <SubframeCore.Collapsible.Chevron {...otherProps}>
-      <FeatherChevronDown
+      <SubframeCore.Icon
         className={SubframeUtils.twClassNames(
           "text-body font-body text-default-font",
           className
         )}
+        name="FeatherChevronDown"
         ref={ref as any}
       />
     </SubframeCore.Collapsible.Chevron>

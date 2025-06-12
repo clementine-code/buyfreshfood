@@ -1,13 +1,12 @@
 "use client";
 /*
  * Documentation:
- * Icon Button — https://app.subframe.com/6b5c53cba769/library?component=Icon+Button_af9405b1-8c54-4e01-9786-5aad308224f6
+ * Icon Button — https://app.subframe.com/library?component=Icon+Button_af9405b1-8c54-4e01-9786-5aad308224f6
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
-import { FeatherPlus } from "@subframe/core";
 
 interface IconButtonRootProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -23,7 +22,7 @@ interface IconButtonRootProps
     | "destructive-tertiary"
     | "inverse";
   size?: "large" | "medium" | "small";
-  icon?: React.ReactNode;
+  icon?: SubframeCore.IconName;
   loading?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
@@ -34,7 +33,7 @@ const IconButtonRoot = React.forwardRef<HTMLElement, IconButtonRootProps>(
     {
       variant = "neutral-tertiary",
       size = "medium",
-      icon = <FeatherPlus />,
+      icon = "FeatherPlus",
       loading = false,
       className,
       type = "button",
@@ -56,7 +55,7 @@ const IconButtonRoot = React.forwardRef<HTMLElement, IconButtonRootProps>(
               variant === "destructive-secondary",
             "bg-error-600 hover:bg-error-500 active:bg-error-600":
               variant === "destructive-primary",
-            "border border-solid border-[#f0efedff] bg-white hover:bg-neutral-100 active:bg-white":
+            "border border-solid border-neutral-border bg-white hover:bg-neutral-100 active:bg-white":
               variant === "neutral-secondary",
             "bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-100":
               variant === "neutral-primary",
@@ -64,7 +63,7 @@ const IconButtonRoot = React.forwardRef<HTMLElement, IconButtonRootProps>(
               variant === "brand-tertiary",
             "bg-brand-50 hover:bg-brand-100 active:bg-brand-50":
               variant === "brand-secondary",
-            "bg-brand-600 hover:bg-brand-500 active:bg-brand-600":
+            "bg-brand-400 hover:bg-brand-500 active:bg-brand-600":
               variant === "brand-primary",
           },
           className
@@ -73,33 +72,31 @@ const IconButtonRoot = React.forwardRef<HTMLElement, IconButtonRootProps>(
         type={type}
         {...otherProps}
       >
-        {icon ? (
-          <SubframeCore.IconWrapper
-            className={SubframeUtils.twClassNames(
-              "text-heading-3 font-heading-3 text-neutral-700 group-disabled/af9405b1:text-neutral-400",
-              {
-                hidden: loading,
-                "text-body font-body": size === "small",
-                "text-heading-3 font-heading-3": size === "large",
-                "text-white group-hover/af9405b1:text-white":
-                  variant === "inverse",
-                "text-error-700 group-hover/af9405b1:text-error-700 group-active/af9405b1:text-error-700":
-                  variant === "destructive-tertiary" ||
-                  variant === "destructive-secondary",
-                "text-white group-hover/af9405b1:text-white group-active/af9405b1:text-white":
-                  variant === "destructive-primary" ||
-                  variant === "brand-primary",
-                "text-neutral-700": variant === "neutral-secondary",
-                "text-neutral-700 group-hover/af9405b1:text-neutral-700 group-active/af9405b1:text-neutral-700":
-                  variant === "neutral-primary",
-                "text-brand-700 group-hover/af9405b1:text-brand-700 group-active/af9405b1:text-brand-700":
-                  variant === "brand-tertiary" || variant === "brand-secondary",
-              }
-            )}
-          >
-            {icon}
-          </SubframeCore.IconWrapper>
-        ) : null}
+        <SubframeCore.Icon
+          className={SubframeUtils.twClassNames(
+            "text-heading-3 font-heading-3 text-neutral-700 group-disabled/af9405b1:text-neutral-400",
+            {
+              hidden: loading,
+              "text-body font-body": size === "small",
+              "text-heading-3 font-heading-3": size === "large",
+              "text-white group-hover/af9405b1:text-white":
+                variant === "inverse",
+              "text-error-700 group-hover/af9405b1:text-error-700 group-active/af9405b1:text-error-700":
+                variant === "destructive-tertiary" ||
+                variant === "destructive-secondary",
+              "text-white group-hover/af9405b1:text-white group-active/af9405b1:text-white":
+                variant === "destructive-primary",
+              "text-neutral-700": variant === "neutral-secondary",
+              "text-neutral-700 group-hover/af9405b1:text-neutral-700 group-active/af9405b1:text-neutral-700":
+                variant === "neutral-primary",
+              "text-brand-700 group-hover/af9405b1:text-brand-700 group-active/af9405b1:text-brand-700":
+                variant === "brand-tertiary" || variant === "brand-secondary",
+              "text-neutral-0 group-hover/af9405b1:text-white group-active/af9405b1:text-white":
+                variant === "brand-primary",
+            }
+          )}
+          name={icon}
+        />
         <SubframeCore.Loader
           className={SubframeUtils.twClassNames(
             "hidden text-caption font-caption text-neutral-700 group-disabled/af9405b1:text-neutral-400",

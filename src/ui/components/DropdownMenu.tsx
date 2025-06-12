@@ -1,18 +1,17 @@
 "use client";
 /*
  * Documentation:
- * Dropdown Menu — https://app.subframe.com/6b5c53cba769/library?component=Dropdown+Menu_99951515-459b-4286-919e-a89e7549b43b
+ * Dropdown Menu — https://app.subframe.com/library?component=Dropdown+Menu_99951515-459b-4286-919e-a89e7549b43b
  */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import * as SubframeCore from "@subframe/core";
-import { FeatherStar } from "@subframe/core";
 
 interface DropdownItemProps
   extends React.ComponentProps<typeof SubframeCore.DropdownMenu.Item> {
   children?: React.ReactNode;
-  icon?: React.ReactNode;
+  icon?: SubframeCore.IconName;
   className?: string;
 }
 
@@ -20,7 +19,7 @@ const DropdownItem = React.forwardRef<HTMLElement, DropdownItemProps>(
   function DropdownItem(
     {
       children,
-      icon = <FeatherStar />,
+      icon = "FeatherStar",
       className,
       ...otherProps
     }: DropdownItemProps,
@@ -35,11 +34,10 @@ const DropdownItem = React.forwardRef<HTMLElement, DropdownItemProps>(
           )}
           ref={ref as any}
         >
-          {icon ? (
-            <SubframeCore.IconWrapper className="text-body font-body text-default-font">
-              {icon}
-            </SubframeCore.IconWrapper>
-          ) : null}
+          <SubframeCore.Icon
+            className="text-body font-body text-default-font"
+            name={icon}
+          />
           {children ? (
             <span className="line-clamp-1 grow shrink-0 basis-0 text-body font-body text-default-font group-hover/adcae8d6:text-default-font">
               {children}
@@ -88,7 +86,7 @@ const DropdownMenuRoot = React.forwardRef<HTMLElement, DropdownMenuRootProps>(
     return children ? (
       <div
         className={SubframeUtils.twClassNames(
-          "flex min-w-[192px] flex-col items-start rounded-md border border-solid border-[#f0efedff] bg-default-background px-1 py-1 shadow-lg",
+          "flex min-w-[192px] flex-col items-start rounded-md border border-solid border-neutral-border bg-default-background px-1 py-1 shadow-lg",
           className
         )}
         ref={ref as any}

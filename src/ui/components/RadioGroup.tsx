@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Radio Group — https://app.subframe.com/6b5c53cba769/library?component=Radio+Group_c4b6300e-20b4-4f3e-8b9f-379a046674ca
+ * Radio Group — https://app.subframe.com/library?component=Radio+Group_c4b6300e-20b4-4f3e-8b9f-379a046674ca
  */
 
 import React from "react";
@@ -28,8 +28,8 @@ const Option = React.forwardRef<HTMLElement, OptionProps>(function Option(
         ref={ref as any}
       >
         <div className="flex h-4 items-center gap-2">
-          <div className="flex h-4 w-4 flex-none flex-col items-center justify-center gap-2 rounded-rounded-extra-large border-2 border-solid border-neutral-300 bg-default-background group-active/0f804ad9:border-2 group-active/0f804ad9:border-solid group-active/0f804ad9:border-brand-700 group-aria-[checked=true]/0f804ad9:border-2 group-aria-[checked=true]/0f804ad9:border-solid group-aria-[checked=true]/0f804ad9:border-brand-600 group-disabled/0f804ad9:border-2 group-disabled/0f804ad9:border-solid group-disabled/0f804ad9:border-neutral-200 group-disabled/0f804ad9:bg-neutral-100 group-active/0f804ad9:group-disabled/0f804ad9:border-2 group-active/0f804ad9:group-disabled/0f804ad9:border-solid group-active/0f804ad9:group-disabled/0f804ad9:border-neutral-200">
-            <div className="hidden h-2 w-2 flex-none flex-col items-start gap-2 rounded-rounded-extra-large bg-default-background group-aria-[checked=true]/0f804ad9:flex group-aria-[checked=true]/0f804ad9:bg-brand-600 group-disabled/0f804ad9:bg-neutral-200" />
+          <div className="flex h-4 w-4 flex-none flex-col items-center justify-center gap-2 rounded-full border-2 border-solid border-neutral-300 bg-default-background group-active/0f804ad9:border-2 group-active/0f804ad9:border-solid group-active/0f804ad9:border-brand-700 group-aria-[checked=true]/0f804ad9:border-2 group-aria-[checked=true]/0f804ad9:border-solid group-aria-[checked=true]/0f804ad9:border-brand-600 group-disabled/0f804ad9:border-2 group-disabled/0f804ad9:border-solid group-disabled/0f804ad9:border-neutral-200 group-disabled/0f804ad9:bg-neutral-100 group-active/0f804ad9:group-disabled/0f804ad9:border-2 group-active/0f804ad9:group-disabled/0f804ad9:border-solid group-active/0f804ad9:group-disabled/0f804ad9:border-neutral-200">
+            <div className="hidden h-2 w-2 flex-none flex-col items-start gap-2 rounded-full bg-default-background group-aria-[checked=true]/0f804ad9:flex group-aria-[checked=true]/0f804ad9:bg-brand-600 group-disabled/0f804ad9:bg-neutral-200" />
           </div>
         </div>
         {label ? (
