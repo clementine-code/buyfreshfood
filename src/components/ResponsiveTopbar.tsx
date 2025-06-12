@@ -4,8 +4,6 @@ import React from "react";
 import { TopbarWithCenterSearch } from "@/ui/components/TopbarWithCenterSearch";
 import { TextField } from "@/ui/components/TextField";
 import { FeatherSearch } from "@subframe/core";
-import { Button } from "@/ui/components/Button";
-import { IconButton } from "@/ui/components/IconButton";
 import { FeatherUser } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherMenu } from "@subframe/core";
@@ -45,11 +43,12 @@ export function ResponsiveTopbar({ className }: ResponsiveTopbarProps) {
             src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
             alt="Logo"
           />
-          <IconButton
-            variant="neutral-tertiary"
-            icon={<FeatherMenu />}
+          <button
+            className="flex h-8 w-8 cursor-pointer items-center justify-center gap-2 rounded-md border-none bg-transparent hover:bg-neutral-100 active:bg-neutral-50"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-          />
+          >
+            <FeatherMenu className="text-heading-3 font-heading-3 text-neutral-700" />
+          </button>
         </div>
       </div>
 
@@ -71,7 +70,7 @@ export function ResponsiveTopbar({ className }: ResponsiveTopbarProps) {
         </TextField>
         {/* Mobile/Tablet: Full width search */}
         <TextField
-          className="h-auto w-full max-w-none flex lg:hidden"
+          className="h-auto w-full flex lg:hidden"
           variant="filled"
           label=""
           helpText=""
@@ -89,32 +88,39 @@ export function ResponsiveTopbar({ className }: ResponsiveTopbarProps) {
       <div className="flex items-center gap-2">
         {/* Desktop: Full Buttons - Hidden on mobile/tablet */}
         <div className="hidden lg:flex items-center gap-2">
-          <Button 
-            variant="brand-secondary" 
-            icon={<FeatherUser />}
+          <button 
+            className="flex h-8 cursor-pointer items-center justify-center gap-2 rounded-md border-none bg-brand-50 hover:bg-brand-100 active:bg-brand-50 px-3"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
           >
-            Sign In
-          </Button>
-          <Button 
-            icon={<FeatherShoppingCart />}
+            <FeatherUser className="text-body font-body text-brand-700" />
+            <span className="whitespace-nowrap text-body-bold font-body-bold text-brand-700">
+              Sign In
+            </span>
+          </button>
+          <button 
+            className="flex h-8 cursor-pointer items-center justify-center gap-2 rounded-md border-none bg-brand-600 hover:bg-brand-500 active:bg-brand-600 px-3"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
           >
-            Cart
-          </Button>
+            <FeatherShoppingCart className="text-body font-body text-white" />
+            <span className="whitespace-nowrap text-body-bold font-body-bold text-white">
+              Cart
+            </span>
+          </button>
         </div>
         {/* Mobile/Tablet: Icon Buttons Only - Hidden on desktop */}
         <div className="flex lg:hidden items-center gap-1">
-          <IconButton
-            variant="brand-secondary"
-            icon={<FeatherUser />}
+          <button
+            className="flex h-8 w-8 cursor-pointer items-center justify-center gap-2 rounded-md border-none bg-brand-50 hover:bg-brand-100 active:bg-brand-50"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-          />
-          <IconButton
-            variant="brand-primary"
-            icon={<FeatherShoppingCart />}
+          >
+            <FeatherUser className="text-heading-3 font-heading-3 text-brand-700" />
+          </button>
+          <button
+            className="flex h-8 w-8 cursor-pointer items-center justify-center gap-2 rounded-md border-none bg-brand-600 hover:bg-brand-500 active:bg-brand-600"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-          />
+          >
+            <FeatherShoppingCart className="text-heading-3 font-heading-3 text-white" />
+          </button>
         </div>
       </div>
     </div>
