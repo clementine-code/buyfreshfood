@@ -12,6 +12,7 @@ import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
 import { TopbarWithCenterSearch2 } from "../components/TopbarWithCenterSearch2";
 import { TextField } from "../components/TextField";
 import { Button } from "../components/Button";
+import { IconButton } from "../components/IconButton";
 import { DropdownMenu } from "../components/DropdownMenu";
 import * as SubframeCore from "@subframe/core";
 import { FeatherSearch } from "@subframe/core";
@@ -135,21 +136,21 @@ const DefaultPageLayoutRoot = React.forwardRef<
         />
       </div>
 
-      {/* Tablet Topbar */}
-      <div className="hidden sm:block md:hidden w-full">
+      {/* Mobile Topbar - Icons Only */}
+      <div className="block md:hidden w-full">
         <TopbarWithCenterSearch2
           className="py-3"
-          mobile="tablet"
+          mobile="default"
           centerSlot={
             <TextField
-              className="h-auto w-full max-w-[320px] flex-none"
+              className="h-auto grow shrink-0 basis-0"
               variant="filled"
               label=""
               helpText=""
               icon={<FeatherSearch />}
             >
               <TextField.Input
-                placeholder="Search for fresh local food..."
+                placeholder="Search"
                 value=""
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
@@ -162,7 +163,6 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   <Button
                     variant="destructive-secondary"
                     icon={<FeatherMapPin />}
-                    size="small"
                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                   />
                 </SubframeCore.DropdownMenu.Trigger>
@@ -193,99 +193,16 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   </SubframeCore.DropdownMenu.Content>
                 </SubframeCore.DropdownMenu.Portal>
               </SubframeCore.DropdownMenu.Root>
-              <Button
+              <IconButton
                 variant="brand-secondary"
                 icon={<FeatherUser />}
-                size="small"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Sign In
-              </Button>
-              <Button
-                icon={<FeatherShoppingCart />}
-                size="small"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Cart
-              </Button>
-            </>
-          }
-        />
-      </div>
-
-      {/* Mobile Topbar */}
-      <div className="block sm:hidden w-full">
-        <TopbarWithCenterSearch2
-          className="py-3"
-          mobile="phone"
-          centerSlot={
-            <TextField
-              className="h-auto w-full max-w-[240px] flex-none"
-              variant="filled"
-              label=""
-              helpText=""
-              icon={<FeatherSearch />}
-            >
-              <TextField.Input
-                placeholder="Search..."
-                value=""
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
-            </TextField>
-          }
-          rightSlot={
-            <>
-              <SubframeCore.DropdownMenu.Root>
-                <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                  <Button
-                    variant="destructive-secondary"
-                    icon={<FeatherMapPin />}
-                    size="small"
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
-                </SubframeCore.DropdownMenu.Trigger>
-                <SubframeCore.DropdownMenu.Portal>
-                  <SubframeCore.DropdownMenu.Content
-                    side="bottom"
-                    align="end"
-                    sideOffset={4}
-                    asChild={true}
-                  >
-                    <DropdownMenu>
-                      <TextField
-                        className="h-auto w-44 flex-none"
-                        variant="filled"
-                        label=""
-                        helpText=""
-                        icon={<FeatherLocateFixed />}
-                      >
-                        <TextField.Input
-                          placeholder="Enter location"
-                          value=""
-                          onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>
-                          ) => {}}
-                        />
-                      </TextField>
-                    </DropdownMenu>
-                  </SubframeCore.DropdownMenu.Content>
-                </SubframeCore.DropdownMenu.Portal>
-              </SubframeCore.DropdownMenu.Root>
-              <Button
-                variant="brand-secondary"
-                icon={<FeatherUser />}
-                size="small"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Sign In
-              </Button>
-              <Button
+              <IconButton
+                variant="brand-primary"
                 icon={<FeatherShoppingCart />}
-                size="small"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Cart
-              </Button>
+              />
             </>
           }
         />
