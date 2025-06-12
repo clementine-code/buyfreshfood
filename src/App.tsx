@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ResponsivePageLayout } from "./layouts/ResponsivePageLayout";
+import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { TextField } from "@/ui/components/TextField";
 import { Button } from "@/ui/components/Button";
 import { IconButton } from "@/ui/components/IconButton";
@@ -22,7 +22,7 @@ import {
 
 function HomePage() {
   return (
-    <ResponsivePageLayout>
+    <DefaultPageLayout>
       <div className="flex w-full flex-col items-center justify-center bg-default-background">
         {/* Hero Section - Full viewport height minus topbar */}
         <div className="flex min-h-[calc(100vh-80px)] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 py-12 relative md:px-6 lg:px-8">
@@ -215,7 +215,7 @@ function HomePage() {
           </div>
         </div>
       </div>
-    </ResponsivePageLayout>
+    </DefaultPageLayout>
   );
 }
 
