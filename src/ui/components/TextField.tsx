@@ -1,7 +1,7 @@
 "use client";
 /*
  * Documentation:
- * Text Field — https://app.subframe.com/library?component=Text+Field_be48ca43-f8e7-4c0e-8870-d219ea11abfe
+ * Text Field — https://app.subframe.com/6b5c53cba769/library?component=Text+Field_be48ca43-f8e7-4c0e-8870-d219ea11abfe
  */
 
 import React from "react";
@@ -40,8 +40,8 @@ interface TextFieldRootProps
   variant?: "outline" | "filled";
   label?: React.ReactNode;
   helpText?: React.ReactNode;
-  icon?: SubframeCore.IconName;
-  iconRight?: SubframeCore.IconName;
+  icon?: React.ReactNode;
+  iconRight?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
 }
@@ -78,7 +78,7 @@ const TextFieldRoot = React.forwardRef<HTMLElement, TextFieldRootProps>(
         ) : null}
         <div
           className={SubframeUtils.twClassNames(
-            "flex h-8 w-full flex-none items-center gap-1 rounded-md border border-solid border-neutral-border bg-default-background px-2 group-focus-within/be48ca43:border group-focus-within/be48ca43:border-solid group-focus-within/be48ca43:border-brand-primary",
+            "flex h-8 w-full flex-none items-center gap-1 rounded-md border border-solid border-[#f0efedff] bg-default-background px-2 group-focus-within/be48ca43:border group-focus-within/be48ca43:border-solid group-focus-within/be48ca43:border-[#65d32aff]",
             {
               "border border-solid border-neutral-100 bg-neutral-100 group-hover/be48ca43:border group-hover/be48ca43:border-solid group-hover/be48ca43:border-neutral-border group-focus-within/be48ca43:bg-default-background":
                 variant === "filled",
@@ -87,22 +87,26 @@ const TextFieldRoot = React.forwardRef<HTMLElement, TextFieldRootProps>(
             }
           )}
         >
-          <SubframeCore.Icon
-            className="text-body font-body text-subtext-color"
-            name={icon}
-          />
+          {icon ? (
+            <SubframeCore.IconWrapper className="text-body font-body text-subtext-color">
+              {icon}
+            </SubframeCore.IconWrapper>
+          ) : null}
           {children ? (
             <div className="flex grow shrink-0 basis-0 flex-col items-start self-stretch px-1">
               {children}
             </div>
           ) : null}
-          <SubframeCore.Icon
-            className={SubframeUtils.twClassNames(
-              "text-body font-body text-subtext-color",
-              { "text-error-500": error }
-            )}
-            name={iconRight}
-          />
+          {iconRight ? (
+            <SubframeCore.IconWrapper
+              className={SubframeUtils.twClassNames(
+                "text-body font-body text-subtext-color",
+                { "text-error-500": error }
+              )}
+            >
+              {iconRight}
+            </SubframeCore.IconWrapper>
+          ) : null}
         </div>
         {helpText ? (
           <span
