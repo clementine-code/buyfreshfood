@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { TextField } from "@/ui/components/TextField";
 import { FeatherMapPin } from "@subframe/core";
 import { FeatherLocate } from "@subframe/core";
@@ -17,201 +16,211 @@ import { FeatherTwitter } from "@subframe/core";
 import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
+import { FeatherShoppingCart } from "@subframe/core";
+import { FeatherUser } from "@subframe/core";
+import { FeatherSearch } from "@subframe/core";
 
 function HomePage() {
   return (
-    <DefaultPageLayout>
-      <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden">
-        <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 py-24 max-w-full relative mobile:px-4 mobile:py-16">
-          <div className="flex flex-col items-center justify-center gap-8 z-10">
-            <div className="flex w-full max-w-[768px] flex-col items-start gap-4">
-              <span className="w-full font-['Inter'] text-[48px] font-[700] leading-[48px] text-white text-center -tracking-[0.035em] mobile:font-['Inter'] mobile:text-[32px] mobile:font-[400] mobile:leading-[36px] mobile:tracking-normal">
-                Fresh Local Food From Your Neighbors
-              </span>
-              <span className="w-full whitespace-pre-wrap font-['Inter'] text-[24px] font-[500] leading-[32px] text-white text-center -tracking-[0.025em] mobile:font-['Inter'] mobile:text-[18px] mobile:font-[400] mobile:leading-[24px] mobile:tracking-normal">
-                {
-                  "Connect with local farmers and gardeners for the freshest produce, eggs, and more - right in your neighborhood."
-                }
-              </span>
-            </div>
-            <TextField
-              className="h-auto w-full max-w-[384px] flex-none"
-              variant="filled"
-              label=""
-              helpText=""
-              icon={<FeatherMapPin />}
-              iconRight={<FeatherLocate />}
-            >
-              <TextField.Input
-                placeholder="Enter your address to find fresh local food..."
-                value=""
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
-              />
-            </TextField>
+    <div className="flex min-h-screen w-full flex-col bg-default-background">
+      {/* Navigation Header */}
+      <nav className="flex w-full items-center justify-between bg-white px-6 py-4 shadow-sm">
+        <div className="flex items-center gap-8">
+          <div className="flex items-center gap-2">
+            <FeatherLeaf className="h-6 w-6 text-brand-600" />
+            <span className="text-xl font-bold text-default-font">FreshLocal</span>
           </div>
-          <img
-            className="w-full grow shrink-0 basis-0 object-cover absolute inset-0"
-            src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3"
-          />
-          <div className="flex w-full grow shrink-0 basis-0 flex-col items-start bg-[#00000066] absolute inset-0" />
+          <div className="hidden md:flex items-center gap-6">
+            <span className="text-body font-body text-default-font cursor-pointer hover:text-brand-600">Home</span>
+            <span className="text-body font-body text-default-font cursor-pointer hover:text-brand-600">Shop</span>
+            <span className="text-body font-body text-default-font cursor-pointer hover:text-brand-600">Sell</span>
+          </div>
         </div>
-        <div className="flex w-full flex-col items-center gap-8 px-6 pt-6 pb-24 max-w-full mobile:px-4 mobile:pt-6 mobile:pb-24">
-          <div className="w-full max-w-[1280px] flex-wrap items-start justify-center gap-8 grid grid-cols-2 mobile:grid mobile:grid-cols-1">
-            <div className="flex min-w-[288px] grow shrink-0 basis-0 flex-col items-start gap-6 rounded-xl bg-neutral-200 px-8 py-8 mobile:px-6 mobile:py-8">
-              <FeatherShoppingBag className="text-body font-body text-sunny-600" />
-              <div className="flex w-full flex-col items-start gap-4">
-                <span className="w-full font-['Inter'] text-[28px] font-[700] leading-[32px] text-default-font -tracking-[0.035em]">
-                  Shop Local
-                </span>
-                <span className="w-full whitespace-pre-wrap font-['Inter'] text-[18px] font-[500] leading-[24px] text-subtext-color">
-                  {
-                    "Discover fresh produce, eggs, and more from your neighbors and local farmers."
-                  }
-                </span>
-              </div>
-              <Button
-                className="h-8 w-full flex-none mobile:h-12 mobile:w-full mobile:flex-none"
-                icon={<FeatherArrowRight />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Start Shopping
-              </Button>
-            </div>
-            <div className="flex min-w-[288px] grow shrink-0 basis-0 flex-col items-start gap-6 rounded-xl bg-neutral-800 px-8 py-8 mobile:px-6 mobile:py-8">
-              <FeatherHome className="text-body font-body text-white" />
-              <div className="flex w-full flex-col items-start gap-4">
-                <span className="w-full font-['Inter'] text-[28px] font-[700] leading-[32px] text-white -tracking-[0.035em]">
-                  Sell Your Harvest
-                </span>
-                <span className="w-full whitespace-pre-wrap font-['Inter'] text-[18px] font-[500] leading-[24px] text-neutral-400">
-                  {
-                    "Turn your garden or farm into a thriving local business. Join our community of producers."
-                  }
-                </span>
-              </div>
-              <Button
-                className="h-8 w-full flex-none mobile:h-12 mobile:w-full mobile:flex-none"
-                variant="destructive-primary"
-                icon={<FeatherArrowRight />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Become a Seller
-              </Button>
-            </div>
+        
+        <div className="flex-1 max-w-md mx-8">
+          <TextField
+            className="w-full"
+            variant="outline"
+            icon={<FeatherSearch />}
+          >
+            <TextField.Input
+              placeholder="Search for fresh local food..."
+              value=""
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
+            />
+          </TextField>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <IconButton
+            icon={<FeatherUser />}
+            variant="neutral-tertiary"
+          />
+          <Button
+            variant="brand-primary"
+            icon={<FeatherShoppingCart />}
+          >
+            Cart
+          </Button>
+          <Button variant="brand-secondary">
+            Sign In
+          </Button>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <div className="relative flex min-h-[600px] w-full flex-col items-center justify-center overflow-hidden">
+        <img
+          className="absolute inset-0 h-full w-full object-cover"
+          src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
+          alt="Fresh vegetables"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-40" />
+        
+        <div className="relative z-10 flex flex-col items-center gap-8 px-4 text-center">
+          <div className="max-w-4xl">
+            <h1 className="mb-6 text-5xl font-bold text-white md:text-6xl">
+              Fresh Local Food From Your Neighbors
+            </h1>
+            <p className="mb-8 text-xl text-white md:text-2xl">
+              Connect with local farmers and gardeners for the freshest produce, eggs, and more - right in your neighborhood.
+            </p>
           </div>
-          <div className="flex w-full flex-col items-center gap-6 rounded-xl bg-brand-100 px-6 py-6 max-w-full">
-            <span className="text-heading-1 font-heading-1 text-default-font text-center mobile:font-['Inter'] mobile:text-[24px] mobile:font-[400] mobile:leading-[28px] mobile:tracking-normal">
+          
+          <TextField
+            className="w-full max-w-md"
+            variant="filled"
+            icon={<FeatherMapPin />}
+            iconRight={<FeatherLocate />}
+          >
+            <TextField.Input
+              placeholder="Enter your address to find fresh local food..."
+              value=""
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
+            />
+          </TextField>
+        </div>
+      </div>
+
+      {/* Action Cards */}
+      <div className="flex w-full justify-center px-6 py-16">
+        <div className="grid w-full max-w-6xl grid-cols-1 gap-8 md:grid-cols-2">
+          <div className="flex flex-col gap-6 rounded-xl bg-neutral-100 p-8">
+            <FeatherShoppingBag className="h-8 w-8 text-brand-600" />
+            <div className="flex flex-col gap-4">
+              <h3 className="text-2xl font-bold text-default-font">Shop Local</h3>
+              <p className="text-body text-subtext-color">
+                Discover fresh produce, eggs, and more from your neighbors and local farmers.
+              </p>
+            </div>
+            <Button
+              className="w-full"
+              variant="brand-primary"
+              icon={<FeatherArrowRight />}
+            >
+              Start Shopping
+            </Button>
+          </div>
+          
+          <div className="flex flex-col gap-6 rounded-xl bg-neutral-800 p-8">
+            <FeatherHome className="h-8 w-8 text-white" />
+            <div className="flex flex-col gap-4">
+              <h3 className="text-2xl font-bold text-white">Sell Your Harvest</h3>
+              <p className="text-body text-neutral-300">
+                Turn your garden or farm into a thriving local business. Join our community of producers.
+              </p>
+            </div>
+            <Button
+              className="w-full"
+              variant="destructive-primary"
+              icon={<FeatherArrowRight />}
+            >
+              Become a Seller
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Community Section */}
+      <div className="flex w-full justify-center bg-brand-50 px-6 py-16">
+        <div className="w-full max-w-6xl">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-4xl font-bold text-default-font">
               Built on Community, Not Supply Chains
-            </span>
-            <span className="max-w-[576px] text-body font-body text-subtext-color text-center">
-              When you buy from local producers, you&#39;re supporting
-              sustainable farming practices and getting superior quality food.
-            </span>
-            <div className="flex w-full items-start gap-8 px-12 mobile:flex-col mobile:flex-nowrap mobile:gap-8 mobile:px-4 mobile:py-0">
-              <div className="flex grow shrink-0 basis-0 flex-col items-center gap-4">
-                <div className="flex h-16 w-16 flex-none items-center justify-center gap-2 rounded-rounded-extra-large bg-sunny-400">
-                  <FeatherClock className="text-heading-1 font-heading-1 text-white" />
-                </div>
-                <span className="text-heading-2 font-heading-2 text-default-font text-center">
-                  Maximum Freshness
-                </span>
-                <span className="text-body font-body text-subtext-color text-center">
-                  Food is often harvested the same day you receive it, unlike
-                  store produce that can be weeks old.
-                </span>
-              </div>
-              <div className="flex grow shrink-0 basis-0 flex-col items-center gap-4">
-                <div className="flex h-16 w-16 flex-none items-center justify-center gap-2 rounded-rounded-extra-large bg-peach-600">
-                  <FeatherHeart className="text-heading-1 font-heading-1 text-white" />
-                </div>
-                <span className="text-heading-2 font-heading-2 text-default-font text-center">
-                  Support Local
-                </span>
-                <span className="text-body font-body text-subtext-color text-center">
-                  Every purchase directly supports your neighbors and
-                  strengthens your local community.
-                </span>
-              </div>
-              <div className="flex grow shrink-0 basis-0 flex-col items-center gap-4">
-                <div className="flex h-16 w-16 flex-none items-center justify-center gap-2 rounded-rounded-extra-large bg-brand-600">
-                  <FeatherLeaf className="text-heading-1 font-heading-1 text-white" />
-                </div>
-                <span className="text-heading-2 font-heading-2 text-default-font text-center">
-                  Eco-Friendly
-                </span>
-                <span className="text-body font-body text-subtext-color text-center">
-                  Reduce transportation emissions and packaging waste by buying
-                  directly from local sources.
-                </span>
-              </div>
-            </div>
+            </h2>
+            <p className="text-lg text-subtext-color">
+              When you buy from local producers, you're supporting sustainable farming practices and getting superior quality food.
+            </p>
           </div>
-          <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-6 py-12 max-w-full mobile:px-4 mobile:py-12">
-            <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
-              <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
-                <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">
-                  <img
-                    className="h-5 w-5 flex-none object-cover"
-                    src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
-                  />
-                  <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Subframe
-                  </span>
-                </div>
-                <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
-                  <IconButton
-                    icon={<FeatherTwitter />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
-                  <IconButton
-                    icon={<FeatherGithub />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
-                  <IconButton
-                    icon={<FeatherSlack />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
-                  <IconButton
-                    icon={<FeatherYoutube />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
-                </div>
+          
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sunny-400">
+                <FeatherClock className="h-8 w-8 text-white" />
               </div>
-              <div className="flex grow shrink-0 basis-0 flex-wrap items-start gap-4 self-stretch mobile:grid mobile:grid-cols-2">
-                <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                  <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Product
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Features
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Integrations
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Pricing
-                  </span>
-                </div>
-                <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                  <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Company
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    About us
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Blog
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Careers
-                  </span>
-                </div>
+              <h3 className="text-xl font-bold text-default-font">Maximum Freshness</h3>
+              <p className="text-body text-subtext-color">
+                Food is often harvested the same day you receive it, unlike store produce that can be weeks old.
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-peach-600">
+                <FeatherHeart className="h-8 w-8 text-white" />
               </div>
+              <h3 className="text-xl font-bold text-default-font">Support Local</h3>
+              <p className="text-body text-subtext-color">
+                Every purchase directly supports your neighbors and strengthens your local community.
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-600">
+                <FeatherLeaf className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-default-font">Eco-Friendly</h3>
+              <p className="text-body text-subtext-color">
+                Reduce transportation emissions and packaging waste by buying directly from local sources.
+              </p>
             </div>
           </div>
         </div>
       </div>
-    </DefaultPageLayout>
+
+      {/* Footer */}
+      <footer className="border-t border-neutral-200 bg-white px-6 py-12">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 md:flex-row">
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-2">
+              <FeatherLeaf className="h-5 w-5 text-brand-600" />
+              <span className="text-lg font-bold text-default-font">FreshLocal</span>
+            </div>
+            <div className="flex gap-2">
+              <IconButton icon={<FeatherTwitter />} variant="neutral-tertiary" />
+              <IconButton icon={<FeatherGithub />} variant="neutral-tertiary" />
+              <IconButton icon={<FeatherSlack />} variant="neutral-tertiary" />
+              <IconButton icon={<FeatherYoutube />} variant="neutral-tertiary" />
+            </div>
+          </div>
+          
+          <div className="flex flex-1 gap-8">
+            <div className="flex flex-col gap-4">
+              <h4 className="font-bold text-default-font">Product</h4>
+              <span className="text-subtext-color cursor-pointer hover:text-default-font">Features</span>
+              <span className="text-subtext-color cursor-pointer hover:text-default-font">Integrations</span>
+              <span className="text-subtext-color cursor-pointer hover:text-default-font">Pricing</span>
+            </div>
+            
+            <div className="flex flex-col gap-4">
+              <h4 className="font-bold text-default-font">Company</h4>
+              <span className="text-subtext-color cursor-pointer hover:text-default-font">About us</span>
+              <span className="text-subtext-color cursor-pointer hover:text-default-font">Blog</span>
+              <span className="text-subtext-color cursor-pointer hover:text-default-font">Careers</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
 
