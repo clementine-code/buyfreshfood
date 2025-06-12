@@ -8,6 +8,7 @@ import { TextField } from "@/ui/components/TextField";
 import { FeatherMapPin } from "@subframe/core";
 import { FeatherLocate } from "@subframe/core";
 import { FeatherShoppingBag } from "@subframe/core";
+import { FeatherShoppingCart } from "@subframe/core";
 import { Button } from "@/ui/components/Button";
 import { FeatherArrowRight } from "@subframe/core";
 import { FeatherHome } from "@subframe/core";
@@ -33,14 +34,11 @@ function ResponsiveTopbar() {
                   className="h-5 w-5 flex-none object-cover"
                   src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
                 />
-                <span className="font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                  Fresh Local Food
-                </span>
               </div>
               <div className="flex items-center gap-4">
-                <TopbarWithCenterSearch3.NavItem>Browse</TopbarWithCenterSearch3.NavItem>
+                <TopbarWithCenterSearch3.NavItem>Home</TopbarWithCenterSearch3.NavItem>
+                <TopbarWithCenterSearch3.NavItem>Shop</TopbarWithCenterSearch3.NavItem>
                 <TopbarWithCenterSearch3.NavItem>Sell</TopbarWithCenterSearch3.NavItem>
-                <TopbarWithCenterSearch3.NavItem>About</TopbarWithCenterSearch3.NavItem>
               </div>
             </div>
           }
@@ -54,7 +52,7 @@ function ResponsiveTopbar() {
               iconRight={<FeatherLocate />}
             >
               <TextField.Input
-                placeholder="Enter your address to find fresh local food..."
+                placeholder="Search for fresh local food..."
                 value=""
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
@@ -62,12 +60,17 @@ function ResponsiveTopbar() {
           }
           rightSlot={
             <div className="flex items-center gap-2">
+              <IconButton
+                icon={<FeatherMapPin />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
               <Button variant="neutral-secondary" size="medium">
                 Sign In
               </Button>
-              <Button variant="brand-primary" size="medium">
-                Get Started
-              </Button>
+              <IconButton
+                icon={<FeatherShoppingCart />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
             </div>
           }
         />
@@ -87,7 +90,7 @@ function ResponsiveTopbar() {
               iconRight={<FeatherLocate />}
             >
               <TextField.Input
-                placeholder="Find fresh local food..."
+                placeholder="Search for fresh local food..."
                 value=""
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
@@ -95,12 +98,17 @@ function ResponsiveTopbar() {
           }
           rightSlot={
             <div className="flex items-center gap-2">
+              <IconButton
+                icon={<FeatherMapPin />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
               <Button variant="neutral-secondary" size="small">
                 Sign In
               </Button>
-              <Button variant="brand-primary" size="small">
-                Start
-              </Button>
+              <IconButton
+                icon={<FeatherShoppingCart />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
             </div>
           }
         />
@@ -119,16 +127,26 @@ function ResponsiveTopbar() {
               icon={<FeatherMapPin />}
             >
               <TextField.Input
-                placeholder="Search..."
+                placeholder="Search for fresh local food..."
                 value=""
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
             </TextField>
           }
           rightSlot={
-            <Button variant="brand-primary" size="small">
-              Start
-            </Button>
+            <div className="flex items-center gap-2">
+              <IconButton
+                icon={<FeatherMapPin />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+              <Button variant="neutral-secondary" size="small">
+                Sign In
+              </Button>
+              <IconButton
+                icon={<FeatherShoppingCart />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+            </div>
           }
         />
       </div>
@@ -164,7 +182,7 @@ function HomePage() {
             iconRight={<FeatherLocate />}
           >
             <TextField.Input
-              placeholder="Enter your address to find fresh local food..."
+              placeholder="Search for fresh local food..."
               value=""
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
             />
@@ -301,7 +319,7 @@ function HomePage() {
                 />
                 <IconButton
                   icon={<FeatherYoutube />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  onClick={(event: React.MouseEvent<HTMLButtonButton>) => {}}
                 />
               </div>
             </div>
