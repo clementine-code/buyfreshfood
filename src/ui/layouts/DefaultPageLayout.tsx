@@ -37,14 +37,14 @@ const DefaultPageLayoutRoot = React.forwardRef<
   return (
     <div
       className={SubframeUtils.twClassNames(
-        "flex h-screen w-full flex-col items-center",
+        "flex min-h-screen w-full flex-col items-center",
         className
       )}
       ref={ref as any}
       {...otherProps}
     >
       {/* Desktop Topbar */}
-      <div className="hidden md:block w-full">
+      <div className="hidden md:block w-full sticky top-0 z-50 bg-default-background border-b border-neutral-border">
         <TopbarWithCenterSearch3
           className="py-3"
           leftSlot={
@@ -137,7 +137,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
       </div>
 
       {/* Mobile Topbar - Icons Only */}
-      <div className="block md:hidden w-full">
+      <div className="block md:hidden w-full sticky top-0 z-50 bg-default-background border-b border-neutral-border">
         <TopbarWithCenterSearch2
           className="py-3"
           mobile="default"
@@ -209,7 +209,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
       </div>
 
       {children ? (
-        <div className="flex w-full grow shrink-0 basis-0 flex-col items-start gap-4 overflow-y-auto bg-default-background">
+        <div className="flex w-full flex-col items-start bg-default-background">
           {children}
         </div>
       ) : null}
