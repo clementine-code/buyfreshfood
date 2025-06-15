@@ -261,8 +261,8 @@ function Shop() {
       <div className="hidden lg:flex w-full h-full relative">
         {/* Left Side - Products */}
         <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
-          {/* Sticky Controls Bar - Fixed positioning for desktop, no gap */}
-          <div className="fixed top-[72px] left-0 right-1/2 z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+          {/* Sticky Controls Bar - Perfectly aligned with navbar */}
+          <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -324,8 +324,8 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Grid/List - Add top margin to account for fixed controls */}
-          <div className="flex-1 overflow-y-auto p-6 bg-default-background mt-[72px]">
+          {/* Products Grid/List - Scrollable content */}
+          <div className="flex-1 overflow-y-auto p-6 bg-default-background">
             <div className={`w-full ${
               viewMode === "grid" 
                 ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
@@ -348,10 +348,10 @@ function Shop() {
         </div>
       </div>
 
-      {/* Mobile & Tablet Layout (combined for consistency) */}
-      <div className="lg:hidden flex w-full flex-col items-start flex-1 bg-default-background">
-        {/* Mobile/Tablet Page Controls - Sticky, positioned right below main navbar */}
-        <div className="sticky top-[72px] z-20 w-full bg-white border-b border-neutral-200 shadow-sm">
+      {/* Mobile & Tablet Layout */}
+      <div className="lg:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
+        {/* Mobile/Tablet Page Controls - Fixed positioning to prevent gaps */}
+        <div className="fixed top-[73px] left-0 right-0 z-30 bg-white border-b border-neutral-200 shadow-sm">
           <div className="flex w-full items-center justify-between px-4 py-3">
             <div className="flex flex-col gap-1">
               <span className="text-body-bold font-body-bold text-default-font">
@@ -402,8 +402,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Products Grid/List - Scrollable content */}
-        <div className="flex-1 w-full px-4 pt-4 pb-24 overflow-y-auto">
+        {/* Products Grid/List - Add proper top margin to account for both fixed bars */}
+        <div className="w-full pt-[130px] px-4 pb-24 overflow-y-auto">
           <div className={`w-full ${
             viewMode === "grid" 
               ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 

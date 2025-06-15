@@ -46,10 +46,10 @@ const DefaultPageLayoutRoot = React.forwardRef<
       ref={ref as any}
       {...otherProps}
     >
-      {/* Desktop Topbar */}
-      <div className="hidden md:block w-full sticky top-0 z-50 bg-default-background border-b border-neutral-border">
+      {/* Desktop Topbar - Fixed positioning with exact height */}
+      <div className="hidden md:block w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
         <TopbarWithCenterSearch3
-          className="py-3"
+          className="py-3 h-full"
           leftSlot={
             <>
               <Link to="/">
@@ -145,10 +145,10 @@ const DefaultPageLayoutRoot = React.forwardRef<
         />
       </div>
 
-      {/* Mobile Topbar - Icons Only */}
-      <div className="block md:hidden w-full sticky top-0 z-50 bg-default-background border-b border-neutral-border">
+      {/* Mobile Topbar - Fixed positioning with exact height */}
+      <div className="block md:hidden w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
         <TopbarWithCenterSearch2
-          className="py-3"
+          className="py-3 h-full"
           mobile="default"
           centerSlot={
             <TextField
@@ -217,8 +217,9 @@ const DefaultPageLayoutRoot = React.forwardRef<
         />
       </div>
 
+      {/* Main Content - Add top padding to account for fixed navbar */}
       {children ? (
-        <div className="flex w-full flex-col items-start bg-default-background">
+        <div className="flex w-full flex-col items-start bg-default-background pt-[73px]">
           {children}
         </div>
       ) : null}
