@@ -252,11 +252,11 @@ function Shop() {
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
       {/* Desktop Layout - Only show on extra large screens (1280px+) */}
-      <div className="hidden xl:flex w-full h-full relative">
+      <div className="hidden xl:flex w-full h-full">
         {/* Left Side - Products */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
-          {/* Sticky Controls Bar - Positioned directly below navbar */}
-          <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+        <div className="flex-1 flex flex-col h-full bg-default-background">
+          {/* Controls Bar - Fixed height, no scroll */}
+          <div className="flex-none flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -318,7 +318,7 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Grid/List - Scrollable content */}
+          {/* Products Grid/List - Scrollable content area */}
           <div className="flex-1 overflow-y-auto p-6 bg-default-background">
             <div className={`w-full ${
               viewMode === "grid" 
@@ -337,7 +337,7 @@ function Shop() {
         </div>
 
         {/* Right Side - Static Map */}
-        <div className="w-1/2 h-full border-l border-neutral-200 relative z-0">
+        <div className="w-1/2 h-full border-l border-neutral-200">
           <Map className="h-full w-full" />
         </div>
       </div>
