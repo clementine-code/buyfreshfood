@@ -26,6 +26,8 @@ import { FeatherTwitter } from "@subframe/core";
 import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
+import { FeatherChevronLeft } from "@subframe/core";
+import { FeatherChevronRight } from "@subframe/core";
 
 const products = [
   {
@@ -113,6 +115,7 @@ const products = [
 
 function Shop() {
   const [viewMode, setViewMode] = useState("grid");
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
 
   const ProductCard = ({ product, isListView = false }) => {
     if (isListView) {
@@ -246,163 +249,180 @@ function Shop() {
 
         {/* Main Content */}
         <div className="flex w-full items-start gap-6 px-6 flex-1">
-          {/* Filters Sidebar */}
-          <div className="w-72 flex-none">
-            <Accordion
-              trigger={
-                <div className="flex w-full items-center justify-between rounded-md border border-solid border-neutral-border bg-white px-4 py-4">
+          {/* Filters Sidebar - Collapsible */}
+          <div className={`transition-all duration-300 ease-in-out ${
+            filtersExpanded ? 'w-72 opacity-100' : 'w-12 opacity-100'
+          } flex-none`}>
+            {filtersExpanded ? (
+              <div className="w-full">
+                <div className="flex w-full items-center justify-between rounded-md border border-solid border-neutral-border bg-white px-4 py-4 mb-2">
                   <span className="text-heading-3 font-heading-3 text-default-font">
                     Filters
                   </span>
                   <IconButton
                     variant="brand-primary"
-                    icon={<FeatherFilter />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                    icon={<FeatherChevronLeft />}
+                    onClick={() => setFiltersExpanded(false)}
                   />
                 </div>
-              }
-              defaultOpen={true}
-            >
-              <div className="flex w-full flex-col items-start gap-6 rounded-md border border-solid border-neutral-border bg-white px-6 py-6 mt-2">
-                <div className="flex w-full flex-col items-start gap-4">
-                  <span className="text-heading-3 font-heading-3 text-default-font">
-                    Categories
-                  </span>
-                  <div className="flex w-full flex-col items-start gap-2">
-                    <Button
-                      className="h-auto w-full justify-start"
-                      variant="neutral-tertiary"
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    >
-                      Vegetables
-                    </Button>
-                    <Button
-                      className="h-auto w-full justify-start"
-                      variant="neutral-tertiary"
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    >
-                      Fruits
-                    </Button>
-                    <Button
-                      className="h-auto w-full justify-start"
-                      variant="neutral-tertiary"
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    >
-                      Eggs & Dairy
-                    </Button>
-                    <Button
-                      className="h-auto w-full justify-start"
-                      variant="neutral-tertiary"
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    >
-                      Meat & Poultry
-                    </Button>
-                    <Button
-                      className="h-auto w-full justify-start"
-                      variant="neutral-tertiary"
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    >
-                      Baked Goods
-                    </Button>
-                    <Button
-                      className="h-auto w-full justify-start"
-                      variant="neutral-tertiary"
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    >
-                      Artisan Crafts
-                    </Button>
+                <div className="flex w-full flex-col items-start gap-6 rounded-md border border-solid border-neutral-border bg-white px-6 py-6">
+                  <div className="flex w-full flex-col items-start gap-4">
+                    <span className="text-heading-3 font-heading-3 text-default-font">
+                      Categories
+                    </span>
+                    <div className="flex w-full flex-col items-start gap-2">
+                      <Button
+                        className="h-auto w-full justify-start"
+                        variant="neutral-tertiary"
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                      >
+                        Vegetables
+                      </Button>
+                      <Button
+                        className="h-auto w-full justify-start"
+                        variant="neutral-tertiary"
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                      >
+                        Fruits
+                      </Button>
+                      <Button
+                        className="h-auto w-full justify-start"
+                        variant="neutral-tertiary"
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                      >
+                        Eggs & Dairy
+                      </Button>
+                      <Button
+                        className="h-auto w-full justify-start"
+                        variant="neutral-tertiary"
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                      >
+                        Meat & Poultry
+                      </Button>
+                      <Button
+                        className="h-auto w-full justify-start"
+                        variant="neutral-tertiary"
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                      >
+                        Baked Goods
+                      </Button>
+                      <Button
+                        className="h-auto w-full justify-start"
+                        variant="neutral-tertiary"
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                      >
+                        Artisan Crafts
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex w-full flex-col items-start gap-4">
-                  <span className="text-heading-3 font-heading-3 text-default-font">
-                    Quality
-                  </span>
-                  <div className="flex w-full flex-col items-start gap-2">
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Certified Organic
-                      </span>
-                    </CheckboxCard>
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Pesticide Free
-                      </span>
-                    </CheckboxCard>
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Free Range
-                      </span>
-                    </CheckboxCard>
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Grass Fed
-                      </span>
-                    </CheckboxCard>
+                  
+                  <div className="flex w-full flex-col items-start gap-4">
+                    <span className="text-heading-3 font-heading-3 text-default-font">
+                      Quality
+                    </span>
+                    <div className="flex w-full flex-col items-start gap-2">
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Certified Organic
+                        </span>
+                      </CheckboxCard>
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Pesticide Free
+                        </span>
+                      </CheckboxCard>
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Free Range
+                        </span>
+                      </CheckboxCard>
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Grass Fed
+                        </span>
+                      </CheckboxCard>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex w-full flex-col items-start gap-4">
-                  <span className="text-heading-3 font-heading-3 text-default-font">
-                    Sellers
-                  </span>
-                  <div className="flex w-full flex-col items-start gap-2">
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Green Acres Farm
-                      </span>
-                    </CheckboxCard>
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Sweet Life Bakery
-                      </span>
-                    </CheckboxCard>
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Hillside Dairy
-                      </span>
-                    </CheckboxCard>
-                    <CheckboxCard
-                      className="h-auto w-full"
-                      checked={false}
-                      onCheckedChange={(checked: boolean) => {}}
-                    >
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Heritage Meats
-                      </span>
-                    </CheckboxCard>
+                  
+                  <div className="flex w-full flex-col items-start gap-4">
+                    <span className="text-heading-3 font-heading-3 text-default-font">
+                      Sellers
+                    </span>
+                    <div className="flex w-full flex-col items-start gap-2">
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Green Acres Farm
+                        </span>
+                      </CheckboxCard>
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Sweet Life Bakery
+                        </span>
+                      </CheckboxCard>
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Hillside Dairy
+                        </span>
+                      </CheckboxCard>
+                      <CheckboxCard
+                        className="h-auto w-full"
+                        checked={false}
+                        onCheckedChange={(checked: boolean) => {}}
+                      >
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Heritage Meats
+                        </span>
+                      </CheckboxCard>
+                    </div>
                   </div>
                 </div>
               </div>
-            </Accordion>
+            ) : (
+              <div className="flex flex-col items-center">
+                <div className="flex items-center justify-center rounded-md border border-solid border-neutral-border bg-white p-3 mb-2">
+                  <IconButton
+                    variant="brand-primary"
+                    icon={<FeatherChevronRight />}
+                    onClick={() => setFiltersExpanded(true)}
+                  />
+                </div>
+                <div className="flex flex-col items-center gap-2 rounded-md border border-solid border-neutral-border bg-white p-3">
+                  <IconButton
+                    variant="neutral-tertiary"
+                    icon={<FeatherFilter />}
+                    onClick={() => setFiltersExpanded(true)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Products Section */}
@@ -476,7 +496,7 @@ function Shop() {
             {/* Products Grid/List */}
             <div className={`w-full ${
               viewMode === "grid" 
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" 
+                ? `grid gap-4 ${filtersExpanded ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'}` 
                 : "flex flex-col gap-4"
             }`}>
               {products.map((product) => (
