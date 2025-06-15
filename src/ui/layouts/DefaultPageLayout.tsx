@@ -7,6 +7,7 @@
  */
 
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
 import { TopbarWithCenterSearch2 } from "../components/TopbarWithCenterSearch2";
@@ -34,6 +35,8 @@ const DefaultPageLayoutRoot = React.forwardRef<
   { children, className, ...otherProps }: DefaultPageLayoutRootProps,
   ref
 ) {
+  const location = useLocation();
+
   return (
     <div
       className={SubframeUtils.twClassNames(
@@ -49,17 +52,23 @@ const DefaultPageLayoutRoot = React.forwardRef<
           className="py-3"
           leftSlot={
             <>
-              <img
-                className="h-6 flex-none object-cover"
-                src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
-              />
+              <Link to="/">
+                <img
+                  className="h-6 flex-none object-cover cursor-pointer"
+                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
+                />
+              </Link>
               <div className="flex items-center gap-2">
-                <TopbarWithCenterSearch3.NavItem selected={true}>
-                  Home
-                </TopbarWithCenterSearch3.NavItem>
-                <TopbarWithCenterSearch3.NavItem>
-                  Shop
-                </TopbarWithCenterSearch3.NavItem>
+                <Link to="/">
+                  <TopbarWithCenterSearch3.NavItem selected={location.pathname === "/"}>
+                    Home
+                  </TopbarWithCenterSearch3.NavItem>
+                </Link>
+                <Link to="/shop">
+                  <TopbarWithCenterSearch3.NavItem selected={location.pathname === "/shop"}>
+                    Shop
+                  </TopbarWithCenterSearch3.NavItem>
+                </Link>
                 <TopbarWithCenterSearch3.NavItem>
                   Sell
                 </TopbarWithCenterSearch3.NavItem>
