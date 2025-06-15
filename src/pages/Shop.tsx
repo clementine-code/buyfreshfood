@@ -257,8 +257,8 @@ function Shop() {
 
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
-      {/* Desktop Layout */}
-      <div className="hidden lg:flex w-full h-full relative">
+      {/* Desktop Layout - Only show on extra large screens (1280px+) */}
+      <div className="hidden xl:flex w-full h-full relative">
         {/* Left Side - Products */}
         <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
           {/* Sticky Controls Bar - Perfectly aligned with navbar */}
@@ -348,8 +348,8 @@ function Shop() {
         </div>
       </div>
 
-      {/* Mobile & Tablet Layout */}
-      <div className="lg:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
+      {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
+      <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
         {/* Mobile/Tablet Page Controls - Fixed positioning to prevent gaps */}
         <div className="fixed top-[73px] left-0 right-0 z-30 bg-white border-b border-neutral-200 shadow-sm">
           <div className="flex w-full items-center justify-between px-4 py-3">
@@ -420,8 +420,8 @@ function Shop() {
         </div>
       </div>
 
-      {/* Floating Action Buttons - Mobile & Tablet Only */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
+      {/* Floating Action Buttons - Mobile & Tablet Only (below 1280px) */}
+      <div className="xl:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
         <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
           <Button
             variant="neutral-secondary"
@@ -463,8 +463,8 @@ function Shop() {
         onFiltersChange={setAppliedFilters}
       />
 
-      {/* Footer - Mobile & Tablet Only */}
-      <div className="lg:hidden flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 py-12 max-w-full mt-8">
+      {/* Footer - Mobile & Tablet Only (below 1280px) */}
+      <div className="xl:hidden flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 py-12 max-w-full mt-8">
         <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
           <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
             <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">

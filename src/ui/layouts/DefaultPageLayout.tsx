@@ -46,8 +46,8 @@ const DefaultPageLayoutRoot = React.forwardRef<
       ref={ref as any}
       {...otherProps}
     >
-      {/* Desktop Topbar - Fixed positioning with exact height */}
-      <div className="hidden md:block w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
+      {/* Desktop Topbar - Only show on large screens (1280px+) */}
+      <div className="hidden xl:block w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
         <TopbarWithCenterSearch3
           className="py-3 h-full"
           leftSlot={
@@ -145,8 +145,8 @@ const DefaultPageLayoutRoot = React.forwardRef<
         />
       </div>
 
-      {/* Mobile Topbar - Fixed positioning with exact height */}
-      <div className="block md:hidden w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
+      {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
+      <div className="xl:hidden w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
         <TopbarWithCenterSearch2
           className="py-3 h-full"
           mobile="default"
