@@ -21,7 +21,7 @@ import { FeatherYoutube } from "@subframe/core";
 function HomePage() {
   return (
     <DefaultPageLayout>
-      <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden">
+      <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden min-h-screen">
         {/* Hero Section */}
         <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 py-24 max-w-full relative mobile:px-4 mobile:py-16 mobile:min-h-[500px]">
           <div className="flex flex-col items-center justify-center gap-8 z-10">
@@ -60,7 +60,7 @@ function HomePage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex w-full flex-col items-center gap-8 px-6 pt-6 pb-24 max-w-full mobile:px-4 mobile:pt-6 mobile:pb-24">
+        <div className="flex w-full flex-col items-center gap-8 px-6 pt-6 pb-24 max-w-full mobile:px-4 mobile:pt-6 mobile:pb-24 bg-default-background">
           {/* Action Cards - Fixed to be same size */}
           <div className="w-full max-w-[1280px] flex-wrap items-stretch justify-center gap-8 grid grid-cols-1 md:grid-cols-2">
             <div className="flex min-w-[288px] flex-col items-start gap-6 rounded-xl bg-neutral-200 px-8 py-8 mobile:px-6 mobile:py-8 h-full">

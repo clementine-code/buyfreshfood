@@ -37,7 +37,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
   return (
     <div
       className={SubframeUtils.twClassNames(
-        "flex min-h-screen w-full flex-col items-center",
+        "flex min-h-screen w-full flex-col items-center bg-default-background",
         className
       )}
       ref={ref as any}
