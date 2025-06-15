@@ -257,14 +257,22 @@ function Shop() {
   };
 
   return (
-    <DefaultPageLayout>
-      <div className="flex h-full w-full flex-col items-start bg-default-background">
+    <div className="flex h-screen w-full flex-col bg-default-background">
+      {/* Navbar - Fixed at top with proper z-index */}
+      <div className="relative z-50">
+        <DefaultPageLayout>
+          <div></div>
+        </DefaultPageLayout>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
         {/* Desktop Layout */}
-        <div className="hidden md:flex w-full h-screen">
+        <div className="hidden md:flex w-full h-full">
           {/* Left Side - Products */}
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
             {/* Controls Bar */}
-            <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200">
+            <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 relative z-10">
               <div className="flex items-center gap-4">
                 <Button
                   variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -327,7 +335,7 @@ function Shop() {
             </div>
 
             {/* Products Grid/List */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 bg-default-background">
               <div className={`w-full ${
                 viewMode === "grid" 
                   ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
@@ -345,13 +353,13 @@ function Shop() {
           </div>
 
           {/* Right Side - Static Map */}
-          <div className="w-1/2 h-full border-l border-neutral-200">
+          <div className="w-1/2 h-full border-l border-neutral-200 relative z-0">
             <Map className="h-full w-full" />
           </div>
         </div>
 
         {/* Mobile Layout */}
-        <div className="md:hidden flex w-full flex-col items-start flex-1 pb-6">
+        <div className="md:hidden flex w-full flex-col items-start flex-1 pb-6 bg-default-background">
           {/* Controls */}
           <div className="flex w-full items-center justify-between px-4 py-4">
             <div className="flex flex-col gap-1">
@@ -439,116 +447,116 @@ function Shop() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Floating Action Buttons - Mobile Only */}
-        <div className="md:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-          <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
-            <Button
-              variant="neutral-secondary"
-              icon={<FeatherMap />}
-              onClick={() => setShowMobileMap(true)}
-              className="rounded-full px-6"
-            >
-              Map
-            </Button>
-            <div className="w-px h-6 bg-neutral-200"></div>
-            <Button
-              variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
-              icon={<FeatherFilter />}
-              onClick={() => setShowMobileFilters(true)}
-              className="rounded-full px-6"
-            >
-              Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
-            </Button>
-          </div>
+      {/* Floating Action Buttons - Mobile Only */}
+      <div className="md:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
+        <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
+          <Button
+            variant="neutral-secondary"
+            icon={<FeatherMap />}
+            onClick={() => setShowMobileMap(true)}
+            className="rounded-full px-6"
+          >
+            Map
+          </Button>
+          <div className="w-px h-6 bg-neutral-200"></div>
+          <Button
+            variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+            icon={<FeatherFilter />}
+            onClick={() => setShowMobileFilters(true)}
+            className="rounded-full px-6"
+          >
+            Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+          </Button>
         </div>
+      </div>
 
-        {/* Modals */}
-        <MobileFilterModal
-          isOpen={showMobileFilters}
-          onClose={() => setShowMobileFilters(false)}
-          appliedFilters={appliedFilters}
-          onFiltersChange={setAppliedFilters}
-        />
+      {/* Modals */}
+      <MobileFilterModal
+        isOpen={showMobileFilters}
+        onClose={() => setShowMobileFilters(false)}
+        appliedFilters={appliedFilters}
+        onFiltersChange={setAppliedFilters}
+      />
 
-        <MobileMapModal
-          isOpen={showMobileMap}
-          onClose={() => setShowMobileMap(false)}
-        />
+      <MobileMapModal
+        isOpen={showMobileMap}
+        onClose={() => setShowMobileMap(false)}
+      />
 
-        <DesktopFilterModal
-          isOpen={showDesktopFilters}
-          onClose={() => setShowDesktopFilters(false)}
-          appliedFilters={appliedFilters}
-          onFiltersChange={setAppliedFilters}
-        />
+      <DesktopFilterModal
+        isOpen={showDesktopFilters}
+        onClose={() => setShowDesktopFilters(false)}
+        appliedFilters={appliedFilters}
+        onFiltersChange={setAppliedFilters}
+      />
 
-        {/* Footer - Mobile Only */}
-        <div className="md:hidden flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 py-12 max-w-full mt-8">
-          <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
-            <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
-              <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">
-                <img
-                  className="h-5 w-5 flex-none object-cover"
-                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
-                />
-                <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                  Fresh Local Food
-                </span>
-              </div>
-              <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
-                <IconButton
-                  icon={<FeatherTwitter />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-                <IconButton
-                  icon={<FeatherGithub />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-                <IconButton
-                  icon={<FeatherSlack />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-                <IconButton
-                  icon={<FeatherYoutube />}
-                  onClick={(event: React.MouseEvent<HTMLButtonButton>) => {}}
-                />
-              </div>
+      {/* Footer - Mobile Only */}
+      <div className="md:hidden flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 py-12 max-w-full mt-8">
+        <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
+          <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
+            <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">
+              <img
+                className="h-5 w-5 flex-none object-cover"
+                src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
+              />
+              <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
+                Fresh Local Food
+              </span>
             </div>
-            <div className="flex grow shrink-0 basis-0 flex-wrap items-start gap-4 self-stretch mobile:grid mobile:grid-cols-2">
-              <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                  Product
-                </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                  Features
-                </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                  Integrations
-                </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                  Pricing
-                </span>
-              </div>
-              <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                  Company
-                </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                  About us
-                </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                  Blog
-                </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                  Careers
-                </span>
-              </div>
+            <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
+              <IconButton
+                icon={<FeatherTwitter />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+              <IconButton
+                icon={<FeatherGithub />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+              <IconButton
+                icon={<FeatherSlack />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+              <IconButton
+                icon={<FeatherYoutube />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+            </div>
+          </div>
+          <div className="flex grow shrink-0 basis-0 flex-wrap items-start gap-4 self-stretch mobile:grid mobile:grid-cols-2">
+            <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
+              <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
+                Product
+              </span>
+              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                Features
+              </span>
+              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                Integrations
+              </span>
+              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                Pricing
+              </span>
+            </div>
+            <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
+              <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
+                Company
+              </span>
+              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                About us
+              </span>
+              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                Blog
+              </span>
+              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                Careers
+              </span>
             </div>
           </div>
         </div>
       </div>
-    </DefaultPageLayout>
+    </div>
   );
 }
 

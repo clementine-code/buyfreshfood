@@ -83,7 +83,7 @@ const MobileFilterModal: React.FC<MobileFilterModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-end md:items-center md:justify-center">
+    <div className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex items-end md:items-center md:justify-center">
       <div className="bg-white w-full h-[90vh] md:w-[500px] md:h-auto md:max-h-[80vh] md:rounded-lg overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-200">

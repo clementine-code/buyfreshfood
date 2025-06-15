@@ -18,7 +18,7 @@ const MobileMapModal: React.FC<MobileMapModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col">
+    <div className="fixed inset-0 z-[60] bg-white flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-white">
         <h2 className="text-heading-2 font-heading-2 text-default-font">Local Food Map</h2>
