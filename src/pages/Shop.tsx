@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMap } from "@subframe/core";
 import { FeatherFilter } from "@subframe/core";
@@ -24,121 +24,12 @@ import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
 import { FeatherX } from "@subframe/core";
+import { Loader } from "@/ui/components/Loader";
 import Map from "../components/Map";
 import MobileFilterModal from "../components/MobileFilterModal";
 import MobileMapModal from "../components/MobileMapModal";
 import DesktopFilterModal from "../components/DesktopFilterModal";
-
-const products = [
-  {
-    id: 1,
-    name: "Heirloom Tomatoes",
-    price: "$4.99/lb",
-    image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800",
-    badges: ["Organic", "Limited Stock"],
-    seller: "Green Acres Farm",
-    description: "Juicy, flavorful heirloom tomatoes grown without pesticides. Perfect for salads and cooking."
-  },
-  {
-    id: 2,
-    name: "Rainbow Swiss Chard",
-    price: "$3.99/bunch",
-    image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800",
-    badges: ["Organic"],
-    seller: "Hillside Gardens",
-    description: "Colorful and nutritious leafy greens, perfect for sautéing or adding to smoothies."
-  },
-  {
-    id: 3,
-    name: "Fresh Herbs Bundle",
-    price: "$5.99/bundle",
-    image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800",
-    badges: ["Organic"],
-    seller: "Herb Haven",
-    description: "A mix of fresh basil, rosemary, thyme, and oregano. Grown in our greenhouse year-round."
-  },
-  {
-    id: 4,
-    name: "Farm Fresh Eggs",
-    price: "$6.99/dozen",
-    image: "https://images.unsplash.com/photo-1590005354167-6da97870c757?w=800",
-    badges: ["Free Range"],
-    seller: "Happy Hen Farm",
-    description: "Free-range eggs from pasture-raised hens. Rich, golden yolks and superior taste."
-  },
-  {
-    id: 5,
-    name: "Artisan Sourdough Bread",
-    price: "$8.99/loaf",
-    image: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=800",
-    badges: ["Artisan"],
-    seller: "Sweet Life Bakery",
-    description: "Traditional sourdough bread made with wild yeast starter. Crispy crust, soft interior."
-  },
-  {
-    id: 6,
-    name: "Seasonal Fruit Mix",
-    price: "$12.99/basket",
-    image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=800",
-    badges: ["Organic"],
-    seller: "Orchard Valley",
-    description: "A beautiful selection of seasonal fruits including apples, pears, and stone fruits."
-  },
-  {
-    id: 7,
-    name: "Grass-Fed Ground Beef",
-    price: "$9.99/lb",
-    image: "https://images.unsplash.com/photo-1588347818481-c7c1b6b3b5b3?w=800",
-    badges: ["Grass Fed", "Local"],
-    seller: "Heritage Meats",
-    description: "Premium grass-fed ground beef from cattle raised on local pastures."
-  },
-  {
-    id: 8,
-    name: "Organic Honey",
-    price: "$15.99/jar",
-    image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800",
-    badges: ["Organic", "Raw"],
-    seller: "Busy Bee Apiary",
-    description: "Pure, raw honey harvested from our local beehives. Unfiltered and unpasteurized."
-  },
-  {
-    id: 9,
-    name: "Baby Spinach",
-    price: "$4.49/bag",
-    image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=800",
-    badges: ["Organic"],
-    seller: "Green Acres Farm",
-    description: "Tender baby spinach leaves, perfect for salads or cooking. Harvested fresh daily."
-  },
-  {
-    id: 10,
-    name: "Artisan Cheese Selection",
-    price: "$18.99/pack",
-    image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800",
-    badges: ["Local", "Artisan"],
-    seller: "Hillside Dairy",
-    description: "A curated selection of locally made artisan cheeses from grass-fed cows."
-  },
-  {
-    id: 11,
-    name: "Microgreens Mix",
-    price: "$7.99/container",
-    image: "https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=800",
-    badges: ["Organic", "Fresh"],
-    seller: "Urban Greens",
-    description: "Nutrient-dense microgreens including pea shoots, radish, and sunflower greens."
-  },
-  {
-    id: 12,
-    name: "Heritage Apples",
-    price: "$5.99/bag",
-    image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
-    badges: ["Organic", "Heritage"],
-    seller: "Orchard Valley",
-    description: "Rare heritage apple varieties with unique flavors and textures."
-  }
-];
+import { getProducts, getCategories, getSellers, type Product } from "../lib/supabase";
 
 function Shop() {
   const [viewMode, setViewMode] = useState("grid");
@@ -150,30 +41,89 @@ function Shop() {
     quality: [],
     sellers: []
   });
+  
+  // Database state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [sellers, setSellers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load data from Supabase
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Load all data in parallel
+        const [productsResult, categoriesResult, sellersResult] = await Promise.all([
+          getProducts(),
+          getCategories(),
+          getSellers()
+        ]);
+
+        if (productsResult.error) {
+          throw new Error(productsResult.error.message);
+        }
+        if (categoriesResult.error) {
+          throw new Error(categoriesResult.error.message);
+        }
+        if (sellersResult.error) {
+          throw new Error(sellersResult.error.message);
+        }
+
+        setProducts(productsResult.data);
+        setCategories(categoriesResult.data);
+        setSellers(sellersResult.data);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
-  const ProductCard = ({ product, isListView = false }) => {
+  const getBadgeVariant = (tag: string) => {
+    if (tag.includes('organic') || tag.includes('pesticide-free')) return 'success';
+    if (tag.includes('limited') || tag.includes('seasonal')) return 'warning';
+    if (tag.includes('artisan') || tag.includes('heritage')) return 'brand';
+    return 'neutral';
+  };
+
+  const formatPrice = (price: number, unit: string) => {
+    return `$${price.toFixed(2)}/${unit}`;
+  };
+
+  const ProductCard = ({ product, isListView = false }: { product: Product; isListView?: boolean }) => {
     if (isListView) {
       return (
         <div className="flex items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
           <img
             className="h-20 w-20 md:h-24 md:w-24 flex-none rounded-md object-cover"
-            src={product.image}
+            src={product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
           />
           <div className="flex flex-1 flex-col gap-2 min-w-0">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
               <div className="flex flex-col gap-2 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  {product.badges.map((badge, index) => (
-                    <Badge 
-                      key={index} 
-                      variant={badge === "Limited Stock" ? "warning" : badge === "Free Range" || badge === "Grass Fed" ? "success" : "brand"}
-                    >
-                      {badge}
+                  {product.is_organic && (
+                    <Badge variant="success">Organic</Badge>
+                  )}
+                  {product.tags?.slice(0, 2).map((tag, index) => (
+                    <Badge key={index} variant={getBadgeVariant(tag)}>
+                      {tag.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                     </Badge>
                   ))}
+                  {product.stock_quantity < 10 && (
+                    <Badge variant="warning">Limited Stock</Badge>
+                  )}
                 </div>
                 <span className="text-heading-3 font-heading-3 text-default-font truncate">
                   {product.name}
@@ -182,12 +132,20 @@ function Shop() {
                   {product.description}
                 </span>
                 <span className="text-caption font-caption text-subtext-color">
-                  by {product.seller}
+                  by {product.seller?.name}
                 </span>
+                {product.average_rating && (
+                  <div className="flex items-center gap-1">
+                    <FeatherStar className="w-4 h-4 text-yellow-500 fill-current" />
+                    <span className="text-caption font-caption text-subtext-color">
+                      {product.average_rating.toFixed(1)} ({product.reviews?.length || 0} reviews)
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex flex-row md:flex-col items-center md:items-end gap-2 justify-between md:justify-start">
                 <span className="text-heading-3 font-heading-3 text-default-font whitespace-nowrap">
-                  {product.price}
+                  {formatPrice(product.price, product.unit)}
                 </span>
                 <div className="flex items-center gap-2">
                   <Button
@@ -215,27 +173,38 @@ function Shop() {
       <div className="flex flex-col items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
         <img
           className="h-48 w-full flex-none rounded-md object-cover"
-          src={product.image}
+          src={product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
         />
         <div className="flex w-full flex-col items-start gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            {product.badges.map((badge, index) => (
-              <Badge 
-                key={index} 
-                variant={badge === "Limited Stock" ? "warning" : badge === "Free Range" || badge === "Grass Fed" ? "success" : "brand"}
-              >
-                {badge}
+            {product.is_organic && (
+              <Badge variant="success">Organic</Badge>
+            )}
+            {product.tags?.slice(0, 2).map((tag, index) => (
+              <Badge key={index} variant={getBadgeVariant(tag)}>
+                {tag.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Badge>
             ))}
+            {product.stock_quantity < 10 && (
+              <Badge variant="warning">Limited Stock</Badge>
+            )}
           </div>
           <span className="text-heading-3 font-heading-3 text-default-font">
             {product.name}
           </span>
           <span className="text-caption font-caption text-subtext-color">
-            by {product.seller}
+            by {product.seller?.name}
           </span>
+          {product.average_rating && (
+            <div className="flex items-center gap-1">
+              <FeatherStar className="w-4 h-4 text-yellow-500 fill-current" />
+              <span className="text-caption font-caption text-subtext-color">
+                {product.average_rating.toFixed(1)} ({product.reviews?.length || 0} reviews)
+              </span>
+            </div>
+          )}
           <span className="text-body-bold font-body-bold text-default-font">
-            {product.price}
+            {formatPrice(product.price, product.unit)}
           </span>
         </div>
         <div className="flex w-full items-center gap-2">
@@ -254,6 +223,31 @@ function Shop() {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-default-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader size="large" />
+          <span className="text-body font-body text-subtext-color">Loading fresh local products...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-default-background">
+        <div className="flex flex-col items-center gap-4 text-center max-w-md">
+          <span className="text-heading-2 font-heading-2 text-error-700">Unable to load products</span>
+          <span className="text-body font-body text-subtext-color">{error}</span>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
@@ -449,6 +443,8 @@ function Shop() {
         onClose={() => setShowMobileFilters(false)}
         appliedFilters={appliedFilters}
         onFiltersChange={setAppliedFilters}
+        categories={categories}
+        sellers={sellers}
       />
 
       <MobileMapModal
@@ -461,6 +457,8 @@ function Shop() {
         onClose={() => setShowDesktopFilters(false)}
         appliedFilters={appliedFilters}
         onFiltersChange={setAppliedFilters}
+        categories={categories}
+        sellers={sellers}
       />
 
       {/* Footer - Mobile & Tablet Only (below 1280px) */}

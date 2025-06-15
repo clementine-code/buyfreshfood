@@ -25,63 +25,88 @@ const farmIcon = createCustomIcon('#70af7d'); // Green for farms
 const bakeryIcon = createCustomIcon('#f59e0b'); // Orange for bakeries
 const dairyIcon = createCustomIcon('#3b82f6'); // Blue for dairy
 const meatIcon = createCustomIcon('#ef4444'); // Red for meat
+const apiaryIcon = createCustomIcon('#fbbf24'); // Yellow for apiaries
 
-// Sample local producers in Northwest Arkansas
+// Sample local producers in Northwest Arkansas (matching database data)
 const producers = [
   {
     id: 1,
     name: "Green Acres Farm",
-    type: "Organic Vegetables",
+    type: "Organic Vegetables & Herbs",
     position: [36.1627, -94.1574] as [number, number], // Fayetteville area
-    description: "Certified organic vegetables, herbs, and seasonal produce",
+    description: "Certified organic farm specializing in seasonal vegetables and herbs",
     icon: farmIcon
   },
   {
     id: 2,
     name: "Sweet Life Bakery",
     type: "Artisan Baked Goods",
-    position: [36.0822, -94.1719] as [number, number], // Springdale area
-    description: "Fresh bread, pastries, and artisan baked goods",
+    position: [36.1867, -94.1288] as [number, number], // Springdale area
+    description: "Artisan bakery creating fresh bread, pastries, and custom cakes",
     icon: bakeryIcon
   },
   {
     id: 3,
     name: "Hillside Dairy",
     type: "Fresh Dairy Products",
-    position: [36.3729, -94.2088] as [number, number], // Rogers area
-    description: "Farm-fresh milk, cheese, and dairy products",
+    position: [36.3321, -94.1185] as [number, number], // Rogers area
+    description: "Small family dairy producing fresh milk, cheese, and yogurt",
     icon: dairyIcon
   },
   {
     id: 4,
     name: "Heritage Meats",
-    type: "Grass-Fed Meat",
-    position: [36.1881, -94.1308] as [number, number], // Fayetteville
-    description: "Grass-fed beef, free-range chicken, and heritage pork",
+    type: "Grass-Fed Meat & Poultry",
+    position: [36.3729, -94.2088] as [number, number], // Bentonville
+    description: "Pasture-raised livestock providing grass-fed beef and free-range chicken",
     icon: meatIcon
   },
   {
     id: 5,
-    name: "Ozark Orchard",
+    name: "Orchard Valley",
     type: "Seasonal Fruits",
     position: [36.2298, -94.1178] as [number, number], // Elkins area
-    description: "Apples, peaches, berries, and seasonal fruit varieties",
+    description: "Family orchard growing heirloom apples, peaches, and seasonal stone fruits",
     icon: farmIcon
   },
   {
     id: 6,
-    name: "Prairie Grove Farm",
-    type: "Mixed Produce",
-    position: [35.9645, -94.3171] as [number, number], // Prairie Grove
-    description: "Seasonal vegetables, herbs, and farm-fresh eggs",
+    name: "Happy Hen Farm",
+    type: "Free-Range Eggs",
+    position: [36.0420, -94.2474] as [number, number], // Farmington
+    description: "Free-range chicken farm producing fresh eggs and seasonal poultry",
     icon: farmIcon
   },
   {
     id: 7,
-    name: "Bentonville Bees",
-    type: "Raw Honey",
-    position: [36.3729, -94.2088] as [number, number], // Bentonville area
-    description: "Raw honey, beeswax products, and seasonal honey varieties",
+    name: "Busy Bee Apiary",
+    type: "Raw Honey & Bee Products",
+    position: [35.9645, -94.3171] as [number, number], // Prairie Grove
+    description: "Local beekeepers producing raw honey, beeswax products, and seasonal honey varieties",
+    icon: apiaryIcon
+  },
+  {
+    id: 8,
+    name: "Urban Greens",
+    type: "Microgreens & Herbs",
+    position: [36.0822, -94.1719] as [number, number], // Fayetteville
+    description: "Indoor vertical farm specializing in microgreens, herbs, and leafy greens",
+    icon: farmIcon
+  },
+  {
+    id: 9,
+    name: "Ozark Mushrooms",
+    type: "Specialty Mushrooms",
+    position: [35.8012, -94.1341] as [number, number], // Winslow
+    description: "Specialty mushroom farm growing shiitake, oyster, and seasonal wild mushrooms",
+    icon: farmIcon
+  },
+  {
+    id: 10,
+    name: "Sunset Gardens",
+    type: "Flowers & Herbs",
+    position: [36.1573, -94.2341] as [number, number], // Tontitown
+    description: "Flower and herb farm offering fresh cut flowers, culinary herbs, and medicinal plants",
     icon: farmIcon
   }
 ];
@@ -134,7 +159,7 @@ const Map: React.FC<MapProps> = ({ className }) => {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <span className="text-xs text-subtext-color">Bakeries</span>
+            <span className="text-xs text-subtext-color">Bakeries & Apiaries</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500"></div>

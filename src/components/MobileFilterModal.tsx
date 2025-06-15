@@ -16,25 +16,20 @@ interface MobileFilterModalProps {
     sellers: string[];
   };
   onFiltersChange: (filters: any) => void;
+  categories: any[];
+  sellers: any[];
 }
 
 const MobileFilterModal: React.FC<MobileFilterModalProps> = ({
   isOpen,
   onClose,
   appliedFilters,
-  onFiltersChange
+  onFiltersChange,
+  categories,
+  sellers
 }) => {
-  const categories = [
-    "Vegetables", "Fruits", "Eggs & Dairy", 
-    "Meat & Poultry", "Baked Goods", "Artisan Crafts"
-  ];
-  
   const qualityOptions = [
-    "Certified Organic", "Pesticide Free", "Free Range", "Grass Fed"
-  ];
-  
-  const sellers = [
-    "Green Acres Farm", "Sweet Life Bakery", "Hillside Dairy", "Heritage Meats"
+    "Certified Organic", "Pesticide Free", "Free Range", "Grass Fed", "Raw", "Artisan"
   ];
 
   const handleCategoryToggle = (category: string) => {
@@ -103,13 +98,13 @@ const MobileFilterModal: React.FC<MobileFilterModalProps> = ({
             <div className="grid grid-cols-2 gap-2">
               {categories.map((category) => (
                 <CheckboxCard
-                  key={category}
-                  checked={appliedFilters.categories.includes(category)}
-                  onCheckedChange={() => handleCategoryToggle(category)}
+                  key={category.id}
+                  checked={appliedFilters.categories.includes(category.name)}
+                  onCheckedChange={() => handleCategoryToggle(category.name)}
                   className="h-auto"
                 >
                   <span className="text-body font-body text-default-font text-sm">
-                    {category}
+                    {category.name}
                   </span>
                 </CheckboxCard>
               ))}
@@ -141,13 +136,13 @@ const MobileFilterModal: React.FC<MobileFilterModalProps> = ({
             <div className="space-y-2">
               {sellers.map((seller) => (
                 <CheckboxCard
-                  key={seller}
-                  checked={appliedFilters.sellers.includes(seller)}
-                  onCheckedChange={() => handleSellerToggle(seller)}
+                  key={seller.id}
+                  checked={appliedFilters.sellers.includes(seller.name)}
+                  onCheckedChange={() => handleSellerToggle(seller.name)}
                   className="h-auto"
                 >
                   <span className="text-body font-body text-default-font">
-                    {seller}
+                    {seller.name}
                   </span>
                 </CheckboxCard>
               ))}
