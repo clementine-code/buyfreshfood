@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMap } from "@subframe/core";
-import { Accordion } from "@/ui/components/Accordion";
 import { FeatherFilter } from "@subframe/core";
 import { Button } from "@/ui/components/Button";
 import { CheckboxCard } from "@/ui/components/CheckboxCard";
@@ -25,9 +24,11 @@ import { FeatherTwitter } from "@subframe/core";
 import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
+import { FeatherX } from "@subframe/core";
 import Map from "../components/Map";
 import MobileFilterModal from "../components/MobileFilterModal";
 import MobileMapModal from "../components/MobileMapModal";
+import DesktopFilterModal from "../components/DesktopFilterModal";
 
 const products = [
   {
@@ -142,9 +143,9 @@ const products = [
 
 function Shop() {
   const [viewMode, setViewMode] = useState("grid");
-  const [filtersExpanded, setFiltersExpanded] = useState(false); // Start collapsed on mobile
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
+  const [showDesktopFilters, setShowDesktopFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({
     categories: [],
     quality: [],
@@ -258,226 +259,42 @@ function Shop() {
   return (
     <DefaultPageLayout>
       <div className="flex h-full w-full flex-col items-start bg-default-background">
-        {/* Desktop Map Section */}
-        <div className="hidden md:block w-full px-6 py-6">
-          <Accordion
-            trigger={
-              <div className="flex w-full items-center justify-between px-6 py-4 bg-white rounded-lg border border-neutral-border">
-                <span className="text-heading-3 font-heading-3 text-default-font">
-                  Northwest Arkansas Local Food Map
-                </span>
-                <IconButton
-                  variant="brand-primary"
-                  icon={<FeatherMap />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-              </div>
-            }
-            defaultOpen={true}
-          >
-            <div className="flex w-full items-start gap-2 px-6 py-4">
-              <Map className="h-80 w-full" />
-            </div>
-          </Accordion>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex w-full items-start gap-6 px-4 md:px-6 flex-1 pb-6">
-          {/* Desktop Filters Sidebar */}
-          <div className={`hidden md:block transition-all duration-300 ease-in-out ${
-            filtersExpanded ? 'w-72 opacity-100' : 'w-12 opacity-100'
-          } flex-none`}>
-            {filtersExpanded ? (
-              <div className="w-full">
-                <div className="flex w-full items-center justify-between rounded-md border border-solid border-neutral-border bg-white px-4 py-4 mb-2">
+        {/* Desktop Layout */}
+        <div className="hidden md:flex w-full h-screen">
+          {/* Left Side - Products */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Controls Bar */}
+            <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+                  icon={<FeatherFilter />}
+                  onClick={() => setShowDesktopFilters(true)}
+                  className="rounded-full"
+                >
+                  Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+                </Button>
+                
+                <div className="flex flex-col gap-1">
                   <span className="text-heading-3 font-heading-3 text-default-font">
-                    Filters
+                    {products.length} local products
                   </span>
-                  <IconButton
-                    variant={hasFiltersApplied ? "brand-primary" : "neutral-tertiary"}
-                    icon={<FeatherFilter />}
-                    onClick={() => setFiltersExpanded(false)}
-                  />
-                </div>
-                <div className="flex w-full flex-col items-start gap-6 rounded-md border border-solid border-neutral-border bg-white px-6 py-6">
-                  <div className="flex w-full flex-col items-start gap-4">
-                    <span className="text-heading-3 font-heading-3 text-default-font">
-                      Categories
-                    </span>
-                    <div className="flex w-full flex-col items-start gap-2">
-                      <Button
-                        className="h-auto w-full justify-start"
-                        variant="neutral-tertiary"
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                      >
-                        Vegetables
-                      </Button>
-                      <Button
-                        className="h-auto w-full justify-start"
-                        variant="neutral-tertiary"
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                      >
-                        Fruits
-                      </Button>
-                      <Button
-                        className="h-auto w-full justify-start"
-                        variant="neutral-tertiary"
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                      >
-                        Eggs & Dairy
-                      </Button>
-                      <Button
-                        className="h-auto w-full justify-start"
-                        variant="neutral-tertiary"
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                      >
-                        Meat & Poultry
-                      </Button>
-                      <Button
-                        className="h-auto w-full justify-start"
-                        variant="neutral-tertiary"
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                      >
-                        Baked Goods
-                      </Button>
-                      <Button
-                        className="h-auto w-full justify-start"
-                        variant="neutral-tertiary"
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                      >
-                        Artisan Crafts
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex w-full flex-col items-start gap-4">
-                    <span className="text-heading-3 font-heading-3 text-default-font">
-                      Quality
-                    </span>
-                    <div className="flex w-full flex-col items-start gap-2">
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Certified Organic
-                        </span>
-                      </CheckboxCard>
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Pesticide Free
-                        </span>
-                      </CheckboxCard>
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Free Range
-                        </span>
-                      </CheckboxCard>
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Grass Fed
-                        </span>
-                      </CheckboxCard>
-                    </div>
-                  </div>
-                  
-                  <div className="flex w-full flex-col items-start gap-4">
-                    <span className="text-heading-3 font-heading-3 text-default-font">
-                      Sellers
-                    </span>
-                    <div className="flex w-full flex-col items-start gap-2">
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Green Acres Farm
-                        </span>
-                      </CheckboxCard>
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Sweet Life Bakery
-                        </span>
-                      </CheckboxCard>
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Hillside Dairy
-                        </span>
-                      </CheckboxCard>
-                      <CheckboxCard
-                        className="h-auto w-full"
-                        checked={false}
-                        onCheckedChange={(checked: boolean) => {}}
-                      >
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          Heritage Meats
-                        </span>
-                      </CheckboxCard>
-                    </div>
-                  </div>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <div className="flex items-center justify-center rounded-md border border-solid border-neutral-border bg-white p-3">
-                  <IconButton
-                    variant={hasFiltersApplied ? "brand-primary" : "neutral-tertiary"}
-                    icon={<FeatherFilter />}
-                    onClick={() => setFiltersExpanded(true)}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Products Section */}
-          <div className="flex flex-col items-start gap-4 flex-1 min-w-0">
-            {/* Controls */}
-            <div className="flex w-full items-center justify-between">
-              <div className="flex flex-col gap-1">
-                <span className="text-heading-2 font-heading-2 text-default-font">
-                  Fresh Local Products
-                </span>
-                <span className="text-body font-body text-subtext-color">
-                  {products.length} items available
-                </span>
-              </div>
+              
               <div className="flex items-center gap-2">
                 <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
                   <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
                   <ToggleGroup.Item icon={<FeatherList />} value="list" />
                 </ToggleGroup>
+                
                 <SubframeCore.DropdownMenu.Root>
                   <SubframeCore.DropdownMenu.Trigger asChild={true}>
                     <Button
                       variant="neutral-tertiary"
                       iconRight={<FeatherChevronDown />}
                       size="small"
-                      onClick={(
-                        event: React.MouseEvent<HTMLButtonElement>
-                      ) => {}}
+                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                     >
                       Sort
                     </Button>
@@ -493,9 +310,7 @@ function Shop() {
                         <DropdownMenu.DropdownItem icon={<FeatherStar />}>
                           Top Rated
                         </DropdownMenu.DropdownItem>
-                        <DropdownMenu.DropdownItem
-                          icon={<FeatherShoppingCart />}
-                        >
+                        <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
                           Most Purchased
                         </DropdownMenu.DropdownItem>
                         <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
@@ -511,31 +326,107 @@ function Shop() {
               </div>
             </div>
 
-            {/* Search Bar - Mobile */}
-            <div className="md:hidden w-full">
-              <TextField
-                className="h-auto w-full"
-                variant="filled"
-                label=""
-                helpText=""
-                icon={<FeatherSearch />}
-              >
-                <TextField.Input
-                  placeholder="Search products..."
-                  value=""
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
-                />
-              </TextField>
-            </div>
-
             {/* Products Grid/List */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className={`w-full ${
+                viewMode === "grid" 
+                  ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
+                  : "flex flex-col gap-4"
+              }`}>
+                {products.map((product) => (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    isListView={viewMode === "list"} 
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Static Map */}
+          <div className="w-1/2 h-full border-l border-neutral-200">
+            <Map className="h-full w-full" />
+          </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="md:hidden flex w-full flex-col items-start flex-1 pb-6">
+          {/* Controls */}
+          <div className="flex w-full items-center justify-between px-4 py-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-heading-2 font-heading-2 text-default-font">
+                Fresh Local Products
+              </span>
+              <span className="text-body font-body text-subtext-color">
+                {products.length} items available
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
+                <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
+                <ToggleGroup.Item icon={<FeatherList />} value="list" />
+              </ToggleGroup>
+              <SubframeCore.DropdownMenu.Root>
+                <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                  <Button
+                    variant="neutral-tertiary"
+                    iconRight={<FeatherChevronDown />}
+                    size="small"
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  >
+                    Sort
+                  </Button>
+                </SubframeCore.DropdownMenu.Trigger>
+                <SubframeCore.DropdownMenu.Portal>
+                  <SubframeCore.DropdownMenu.Content
+                    side="bottom"
+                    align="end"
+                    sideOffset={4}
+                    asChild={true}
+                  >
+                    <DropdownMenu>
+                      <DropdownMenu.DropdownItem icon={<FeatherStar />}>
+                        Top Rated
+                      </DropdownMenu.DropdownItem>
+                      <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
+                        Most Purchased
+                      </DropdownMenu.DropdownItem>
+                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                        Price - Low to High
+                      </DropdownMenu.DropdownItem>
+                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                        Price - High to Low
+                      </DropdownMenu.DropdownItem>
+                    </DropdownMenu>
+                  </SubframeCore.DropdownMenu.Content>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
+            </div>
+          </div>
+
+          {/* Search Bar - Mobile */}
+          <div className="w-full px-4 mb-4">
+            <TextField
+              className="h-auto w-full"
+              variant="filled"
+              label=""
+              helpText=""
+              icon={<FeatherSearch />}
+            >
+              <TextField.Input
+                placeholder="Search products..."
+                value=""
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
+              />
+            </TextField>
+          </div>
+
+          {/* Products Grid/List */}
+          <div className="flex-1 w-full px-4">
             <div className={`w-full ${
               viewMode === "grid" 
-                ? `grid gap-4 ${
-                    filtersExpanded 
-                      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-                      : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                  }` 
+                ? "grid gap-4 grid-cols-1 sm:grid-cols-2" 
                 : "flex flex-col gap-4"
             }`}>
               {products.map((product) => (
@@ -572,7 +463,7 @@ function Shop() {
           </div>
         </div>
 
-        {/* Mobile Modals */}
+        {/* Modals */}
         <MobileFilterModal
           isOpen={showMobileFilters}
           onClose={() => setShowMobileFilters(false)}
@@ -585,8 +476,15 @@ function Shop() {
           onClose={() => setShowMobileMap(false)}
         />
 
-        {/* Footer */}
-        <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 md:px-6 py-12 max-w-full mobile:px-4 mobile:py-12 mt-8">
+        <DesktopFilterModal
+          isOpen={showDesktopFilters}
+          onClose={() => setShowDesktopFilters(false)}
+          appliedFilters={appliedFilters}
+          onFiltersChange={setAppliedFilters}
+        />
+
+        {/* Footer - Mobile Only */}
+        <div className="md:hidden flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 py-12 max-w-full mt-8">
           <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
             <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
               <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">
@@ -613,7 +511,7 @@ function Shop() {
                 />
                 <IconButton
                   icon={<FeatherYoutube />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  onClick={(event: React.MouseEvent<HTMLButtonButton>) => {}}
                 />
               </div>
             </div>
