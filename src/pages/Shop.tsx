@@ -26,8 +26,6 @@ import { FeatherTwitter } from "@subframe/core";
 import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
-import { FeatherChevronLeft } from "@subframe/core";
-import { FeatherChevronRight } from "@subframe/core";
 
 const products = [
   {
@@ -116,6 +114,14 @@ const products = [
 function Shop() {
   const [viewMode, setViewMode] = useState("grid");
   const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const [appliedFilters, setAppliedFilters] = useState({
+    categories: [],
+    quality: [],
+    sellers: []
+  });
+
+  // Check if any filters are applied
+  const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
   const ProductCard = ({ product, isListView = false }) => {
     if (isListView) {
@@ -260,8 +266,8 @@ function Shop() {
                     Filters
                   </span>
                   <IconButton
-                    variant="brand-primary"
-                    icon={<FeatherChevronLeft />}
+                    variant={hasFiltersApplied ? "brand-primary" : "neutral-tertiary"}
+                    icon={<FeatherFilter />}
                     onClick={() => setFiltersExpanded(false)}
                   />
                 </div>
@@ -407,16 +413,9 @@ function Shop() {
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <div className="flex items-center justify-center rounded-md border border-solid border-neutral-border bg-white p-3 mb-2">
+                <div className="flex items-center justify-center rounded-md border border-solid border-neutral-border bg-white p-3">
                   <IconButton
-                    variant="brand-primary"
-                    icon={<FeatherChevronRight />}
-                    onClick={() => setFiltersExpanded(true)}
-                  />
-                </div>
-                <div className="flex flex-col items-center gap-2 rounded-md border border-solid border-neutral-border bg-white p-3">
-                  <IconButton
-                    variant="neutral-tertiary"
+                    variant={hasFiltersApplied ? "brand-primary" : "neutral-tertiary"}
                     icon={<FeatherFilter />}
                     onClick={() => setFiltersExpanded(true)}
                   />
