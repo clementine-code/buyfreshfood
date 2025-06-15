@@ -55,7 +55,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
               <Link to="/">
                 <img
                   className="h-6 flex-none object-cover cursor-pointer"
-                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
+                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye.png"
                 />
               </Link>
               <div className="flex items-center gap-2">
@@ -146,7 +146,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
       </div>
 
       {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-      <div className="xl:hidden w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
+      <div className="xl:hidden w-full fixed top-0 z-[100] bg-default-background border-b border-neutral-border h-[73px]">
         <TopbarWithCenterSearch2
           className="py-3 h-full"
           mobile="default"

@@ -344,8 +344,8 @@ function Shop() {
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
       <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
-        {/* Mobile/Tablet Page Controls - Fixed positioning */}
-        <div className="fixed top-[73px] left-0 right-0 z-30 bg-white border-b border-neutral-200 shadow-sm">
+        {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
+        <div className="fixed top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm">
           <div className="flex w-full items-center justify-between px-4 py-3">
             <div className="flex flex-col gap-1">
               <span className="text-body-bold font-body-bold text-default-font">
@@ -415,7 +415,7 @@ function Shop() {
       </div>
 
       {/* Floating Action Buttons - Mobile & Tablet Only (below 1280px) */}
-      <div className="xl:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
+      <div className="xl:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[80]">
         <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
           <Button
             variant="neutral-secondary"
