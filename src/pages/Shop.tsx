@@ -7,7 +7,6 @@ import { FeatherMap } from "@subframe/core";
 import { Accordion } from "@/ui/components/Accordion";
 import { FeatherFilter } from "@subframe/core";
 import { Button } from "@/ui/components/Button";
-import { Checkbox } from "@/ui/components/Checkbox";
 import { CheckboxCard } from "@/ui/components/CheckboxCard";
 import { TextField } from "@/ui/components/TextField";
 import { FeatherSearch } from "@subframe/core";
@@ -27,6 +26,8 @@ import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
 import Map from "../components/Map";
+import MobileFilterModal from "../components/MobileFilterModal";
+import MobileMapModal from "../components/MobileMapModal";
 
 const products = [
   {
@@ -109,12 +110,41 @@ const products = [
     badges: ["Organic"],
     seller: "Green Acres Farm",
     description: "Tender baby spinach leaves, perfect for salads or cooking. Harvested fresh daily."
+  },
+  {
+    id: 10,
+    name: "Artisan Cheese Selection",
+    price: "$18.99/pack",
+    image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800",
+    badges: ["Local", "Artisan"],
+    seller: "Hillside Dairy",
+    description: "A curated selection of locally made artisan cheeses from grass-fed cows."
+  },
+  {
+    id: 11,
+    name: "Microgreens Mix",
+    price: "$7.99/container",
+    image: "https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=800",
+    badges: ["Organic", "Fresh"],
+    seller: "Urban Greens",
+    description: "Nutrient-dense microgreens including pea shoots, radish, and sunflower greens."
+  },
+  {
+    id: 12,
+    name: "Heritage Apples",
+    price: "$5.99/bag",
+    image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800",
+    badges: ["Organic", "Heritage"],
+    seller: "Orchard Valley",
+    description: "Rare heritage apple varieties with unique flavors and textures."
   }
 ];
 
 function Shop() {
   const [viewMode, setViewMode] = useState("grid");
-  const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const [filtersExpanded, setFiltersExpanded] = useState(false); // Start collapsed on mobile
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showMobileMap, setShowMobileMap] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState({
     categories: [],
     quality: [],
@@ -127,15 +157,15 @@ function Shop() {
   const ProductCard = ({ product, isListView = false }) => {
     if (isListView) {
       return (
-        <div className="flex items-start gap-4 rounded-md bg-white px-4 py-4 shadow-sm border border-neutral-100">
+        <div className="flex items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
           <img
-            className="h-24 w-24 flex-none rounded-md object-cover"
+            className="h-20 w-20 md:h-24 md:w-24 flex-none rounded-md object-cover"
             src={product.image}
           />
-          <div className="flex flex-1 flex-col gap-2">
-            <div className="flex items-start justify-between">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
+          <div className="flex flex-1 flex-col gap-2 min-w-0">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+              <div className="flex flex-col gap-2 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
                   {product.badges.map((badge, index) => (
                     <Badge 
                       key={index} 
@@ -145,18 +175,18 @@ function Shop() {
                     </Badge>
                   ))}
                 </div>
-                <span className="text-heading-3 font-heading-3 text-default-font">
+                <span className="text-heading-3 font-heading-3 text-default-font truncate">
                   {product.name}
                 </span>
-                <span className="text-body font-body text-subtext-color">
+                <span className="text-body font-body text-subtext-color line-clamp-2 hidden md:block">
                   {product.description}
                 </span>
                 <span className="text-caption font-caption text-subtext-color">
-                  Sold by {product.seller}
+                  by {product.seller}
                 </span>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <span className="text-heading-3 font-heading-3 text-default-font">
+              <div className="flex flex-row md:flex-col items-center md:items-end gap-2 justify-between md:justify-start">
+                <span className="text-heading-3 font-heading-3 text-default-font whitespace-nowrap">
                   {product.price}
                 </span>
                 <div className="flex items-center gap-2">
@@ -182,7 +212,7 @@ function Shop() {
     }
 
     return (
-      <div className="flex flex-col items-start gap-4 rounded-md bg-white px-4 py-4 shadow-sm border border-neutral-100">
+      <div className="flex flex-col items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
         <img
           className="h-48 w-full flex-none rounded-md object-cover"
           src={product.image}
@@ -227,9 +257,31 @@ function Shop() {
 
   return (
     <DefaultPageLayout>
-      <div className="flex h-full w-full flex-col items-start gap-6 bg-default-background py-6">
-        {/* Map Section */}
-        <div className="w-full px-6">
+      <div className="flex h-full w-full flex-col items-start bg-default-background">
+        {/* Mobile Action Bar */}
+        <div className="md:hidden w-full px-4 py-3 bg-white border-b border-neutral-200 sticky top-[73px] z-40">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="neutral-secondary"
+              icon={<FeatherMap />}
+              onClick={() => setShowMobileMap(true)}
+              className="flex-1"
+            >
+              Map
+            </Button>
+            <Button
+              variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+              icon={<FeatherFilter />}
+              onClick={() => setShowMobileFilters(true)}
+              className="flex-1"
+            >
+              Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+            </Button>
+          </div>
+        </div>
+
+        {/* Desktop Map Section */}
+        <div className="hidden md:block w-full px-6 py-6">
           <Accordion
             trigger={
               <div className="flex w-full items-center justify-between px-6 py-4 bg-white rounded-lg border border-neutral-border">
@@ -252,9 +304,9 @@ function Shop() {
         </div>
 
         {/* Main Content */}
-        <div className="flex w-full items-start gap-6 px-6 flex-1">
-          {/* Filters Sidebar - Collapsible */}
-          <div className={`transition-all duration-300 ease-in-out ${
+        <div className="flex w-full items-start gap-6 px-4 md:px-6 flex-1 pb-6">
+          {/* Desktop Filters Sidebar */}
+          <div className={`hidden md:block transition-all duration-300 ease-in-out ${
             filtersExpanded ? 'w-72 opacity-100' : 'w-12 opacity-100'
           } flex-none`}>
             {filtersExpanded ? (
@@ -426,74 +478,86 @@ function Shop() {
           <div className="flex flex-col items-start gap-4 flex-1 min-w-0">
             {/* Controls */}
             <div className="flex w-full items-center justify-between">
-              <span className="text-heading-2 font-heading-2 text-default-font">
-                Fresh Local Products ({products.length})
-              </span>
-              <div className="flex items-center gap-4">
-                <TextField
-                  className="h-auto w-80 flex-none hidden md:flex"
-                  variant="filled"
-                  label=""
-                  helpText=""
-                  icon={<FeatherSearch />}
-                >
-                  <TextField.Input
-                    placeholder="Search products..."
-                    value=""
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
-                  />
-                </TextField>
-                <div className="flex items-center gap-2">
-                  <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
-                    <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
-                    <ToggleGroup.Item icon={<FeatherList />} value="list" />
-                  </ToggleGroup>
-                  <SubframeCore.DropdownMenu.Root>
-                    <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                      <Button
-                        variant="neutral-tertiary"
-                        iconRight={<FeatherChevronDown />}
-                        onClick={(
-                          event: React.MouseEvent<HTMLButtonElement>
-                        ) => {}}
-                      >
-                        Sort
-                      </Button>
-                    </SubframeCore.DropdownMenu.Trigger>
-                    <SubframeCore.DropdownMenu.Portal>
-                      <SubframeCore.DropdownMenu.Content
-                        side="bottom"
-                        align="end"
-                        sideOffset={4}
-                        asChild={true}
-                      >
-                        <DropdownMenu>
-                          <DropdownMenu.DropdownItem icon={<FeatherStar />}>
-                            Top Rated
-                          </DropdownMenu.DropdownItem>
-                          <DropdownMenu.DropdownItem
-                            icon={<FeatherShoppingCart />}
-                          >
-                            Most Purchased
-                          </DropdownMenu.DropdownItem>
-                          <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                            Price - Lowest to Highest
-                          </DropdownMenu.DropdownItem>
-                          <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                            Price - Highest to Lowest
-                          </DropdownMenu.DropdownItem>
-                        </DropdownMenu>
-                      </SubframeCore.DropdownMenu.Content>
-                    </SubframeCore.DropdownMenu.Portal>
-                  </SubframeCore.DropdownMenu.Root>
-                </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-heading-2 font-heading-2 text-default-font">
+                  Fresh Local Products
+                </span>
+                <span className="text-body font-body text-subtext-color">
+                  {products.length} items available
+                </span>
               </div>
+              <div className="flex items-center gap-2">
+                <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
+                  <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
+                  <ToggleGroup.Item icon={<FeatherList />} value="list" />
+                </ToggleGroup>
+                <SubframeCore.DropdownMenu.Root>
+                  <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                    <Button
+                      variant="neutral-tertiary"
+                      iconRight={<FeatherChevronDown />}
+                      size="small"
+                      onClick={(
+                        event: React.MouseEvent<HTMLButtonElement>
+                      ) => {}}
+                    >
+                      Sort
+                    </Button>
+                  </SubframeCore.DropdownMenu.Trigger>
+                  <SubframeCore.DropdownMenu.Portal>
+                    <SubframeCore.DropdownMenu.Content
+                      side="bottom"
+                      align="end"
+                      sideOffset={4}
+                      asChild={true}
+                    >
+                      <DropdownMenu>
+                        <DropdownMenu.DropdownItem icon={<FeatherStar />}>
+                          Top Rated
+                        </DropdownMenu.DropdownItem>
+                        <DropdownMenu.DropdownItem
+                          icon={<FeatherShoppingCart />}
+                        >
+                          Most Purchased
+                        </DropdownMenu.DropdownItem>
+                        <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                          Price - Low to High
+                        </DropdownMenu.DropdownItem>
+                        <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                          Price - High to Low
+                        </DropdownMenu.DropdownItem>
+                      </DropdownMenu>
+                    </SubframeCore.DropdownMenu.Content>
+                  </SubframeCore.DropdownMenu.Portal>
+                </SubframeCore.DropdownMenu.Root>
+              </div>
+            </div>
+
+            {/* Search Bar - Mobile */}
+            <div className="md:hidden w-full">
+              <TextField
+                className="h-auto w-full"
+                variant="filled"
+                label=""
+                helpText=""
+                icon={<FeatherSearch />}
+              >
+                <TextField.Input
+                  placeholder="Search products..."
+                  value=""
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
+                />
+              </TextField>
             </div>
 
             {/* Products Grid/List */}
             <div className={`w-full ${
               viewMode === "grid" 
-                ? `grid gap-4 ${filtersExpanded ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'}` 
+                ? `grid gap-4 ${
+                    filtersExpanded 
+                      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+                      : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                  }` 
                 : "flex flex-col gap-4"
             }`}>
               {products.map((product) => (
@@ -507,8 +571,21 @@ function Shop() {
           </div>
         </div>
 
+        {/* Mobile Modals */}
+        <MobileFilterModal
+          isOpen={showMobileFilters}
+          onClose={() => setShowMobileFilters(false)}
+          appliedFilters={appliedFilters}
+          onFiltersChange={setAppliedFilters}
+        />
+
+        <MobileMapModal
+          isOpen={showMobileMap}
+          onClose={() => setShowMobileMap(false)}
+        />
+
         {/* Footer */}
-        <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-6 py-12 max-w-full mobile:px-4 mobile:py-12 mt-8">
+        <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 md:px-6 py-12 max-w-full mobile:px-4 mobile:py-12 mt-8">
           <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
             <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
               <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">
