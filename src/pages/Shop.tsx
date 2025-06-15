@@ -258,11 +258,11 @@ function Shop() {
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
       {/* Desktop Layout */}
-      <div className="hidden md:flex w-full h-full">
+      <div className="hidden md:flex w-full h-full relative">
         {/* Left Side - Products */}
         <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
-          {/* Sticky Controls Bar */}
-          <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+          {/* Sticky Controls Bar - Fixed positioning for desktop */}
+          <div className="fixed top-[73px] left-0 right-1/2 z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -324,8 +324,8 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Grid/List */}
-          <div className="flex-1 overflow-y-auto p-6 bg-default-background">
+          {/* Products Grid/List - Add top margin to account for fixed controls */}
+          <div className="flex-1 overflow-y-auto p-6 bg-default-background mt-[73px]">
             <div className={`w-full ${
               viewMode === "grid" 
                 ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
@@ -349,9 +349,9 @@ function Shop() {
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden flex w-full flex-col items-start flex-1 pb-6 bg-default-background">
-        {/* Sticky Mobile Controls */}
-        <div className="sticky top-0 z-20 w-full bg-white border-b border-neutral-200 shadow-sm">
+      <div className="md:hidden flex w-full flex-col items-start flex-1 bg-default-background">
+        {/* Mobile Page Header - Sticky */}
+        <div className="sticky top-[73px] z-20 w-full bg-white border-b border-neutral-200 shadow-sm">
           <div className="flex w-full items-center justify-between px-4 py-4">
             <div className="flex flex-col gap-1">
               <span className="text-heading-2 font-heading-2 text-default-font">
@@ -405,8 +405,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Products Grid/List - No search bar on mobile */}
-        <div className="flex-1 w-full px-4 pt-4">
+        {/* Products Grid/List - Scrollable content */}
+        <div className="flex-1 w-full px-4 pt-4 pb-24 overflow-y-auto">
           <div className={`w-full ${
             viewMode === "grid" 
               ? "grid gap-4 grid-cols-1 sm:grid-cols-2" 
