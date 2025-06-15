@@ -26,6 +26,7 @@ import { FeatherTwitter } from "@subframe/core";
 import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
+import Map from "../components/Map";
 
 const products = [
   {
@@ -233,7 +234,7 @@ function Shop() {
             trigger={
               <div className="flex w-full items-center justify-between px-6 py-4 bg-white rounded-lg border border-neutral-border">
                 <span className="text-heading-3 font-heading-3 text-default-font">
-                  Map of Local Food
+                  Northwest Arkansas Local Food Map
                 </span>
                 <IconButton
                   variant="brand-primary"
@@ -245,10 +246,7 @@ function Shop() {
             defaultOpen={true}
           >
             <div className="flex w-full items-start gap-2 px-6 py-4">
-              <img
-                className="h-80 w-full rounded-lg object-cover"
-                src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3&w=1200"
-              />
+              <Map className="h-80 w-full" />
             </div>
           </Accordion>
         </div>
