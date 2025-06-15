@@ -258,28 +258,6 @@ function Shop() {
   return (
     <DefaultPageLayout>
       <div className="flex h-full w-full flex-col items-start bg-default-background">
-        {/* Mobile Action Bar */}
-        <div className="md:hidden w-full px-4 py-3 bg-white border-b border-neutral-200 sticky top-[73px] z-40">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="neutral-secondary"
-              icon={<FeatherMap />}
-              onClick={() => setShowMobileMap(true)}
-              className="flex-1"
-            >
-              Map
-            </Button>
-            <Button
-              variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
-              icon={<FeatherFilter />}
-              onClick={() => setShowMobileFilters(true)}
-              className="flex-1"
-            >
-              Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
-            </Button>
-          </div>
-        </div>
-
         {/* Desktop Map Section */}
         <div className="hidden md:block w-full px-6 py-6">
           <Accordion
@@ -568,6 +546,29 @@ function Shop() {
                 />
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Floating Action Buttons - Mobile Only */}
+        <div className="md:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
+            <Button
+              variant="neutral-secondary"
+              icon={<FeatherMap />}
+              onClick={() => setShowMobileMap(true)}
+              className="rounded-full px-6"
+            >
+              Map
+            </Button>
+            <div className="w-px h-6 bg-neutral-200"></div>
+            <Button
+              variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+              icon={<FeatherFilter />}
+              onClick={() => setShowMobileFilters(true)}
+              className="rounded-full px-6"
+            >
+              Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+            </Button>
           </div>
         </div>
 
