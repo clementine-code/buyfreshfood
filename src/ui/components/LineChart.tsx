@@ -23,12 +23,12 @@ const LineChartRoot = React.forwardRef<HTMLElement, LineChartRootProps>(
         className={SubframeUtils.twClassNames("h-80 w-full", className)}
         ref={ref as any}
         colors={[
-          "#5fa269",
-          "#d9f2dc",
-          "#44874e",
-          "#b4e1b9",
-          "#346e3e",
-          "#8ec796",
+          "#70af7d",
+          "#dcf5e1",
+          "#55915f",
+          "#bbe6c3",
+          "#41784b",
+          "#9ad2a5",
         ]}
         {...otherProps}
       />
