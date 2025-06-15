@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMap } from "@subframe/core";
 import { FeatherFilter } from "@subframe/core";
@@ -258,123 +257,35 @@ function Shop() {
 
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
-      {/* Navbar - Fixed at top with proper z-index */}
-      <div className="relative z-50">
-        <DefaultPageLayout>
-          <div></div>
-        </DefaultPageLayout>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Desktop Layout */}
-        <div className="hidden md:flex w-full h-full">
-          {/* Left Side - Products */}
-          <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
-            {/* Controls Bar */}
-            <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 relative z-10">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
-                  icon={<FeatherFilter />}
-                  onClick={() => setShowDesktopFilters(true)}
-                  className="rounded-full"
-                >
-                  Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
-                </Button>
-                
-                <div className="flex flex-col gap-1">
-                  <span className="text-heading-3 font-heading-3 text-default-font">
-                    {products.length} local products
-                  </span>
-                </div>
-              </div>
+      {/* Desktop Layout */}
+      <div className="hidden md:flex w-full h-full">
+        {/* Left Side - Products */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
+          {/* Controls Bar */}
+          <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 relative z-10">
+            <div className="flex items-center gap-4">
+              <Button
+                variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+                icon={<FeatherFilter />}
+                onClick={() => setShowDesktopFilters(true)}
+                className="rounded-full"
+              >
+                Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+              </Button>
               
-              <div className="flex items-center gap-2">
-                <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
-                  <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
-                  <ToggleGroup.Item icon={<FeatherList />} value="list" />
-                </ToggleGroup>
-                
-                <SubframeCore.DropdownMenu.Root>
-                  <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                    <Button
-                      variant="neutral-tertiary"
-                      iconRight={<FeatherChevronDown />}
-                      size="small"
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    >
-                      Sort
-                    </Button>
-                  </SubframeCore.DropdownMenu.Trigger>
-                  <SubframeCore.DropdownMenu.Portal>
-                    <SubframeCore.DropdownMenu.Content
-                      side="bottom"
-                      align="end"
-                      sideOffset={4}
-                      asChild={true}
-                    >
-                      <DropdownMenu>
-                        <DropdownMenu.DropdownItem icon={<FeatherStar />}>
-                          Top Rated
-                        </DropdownMenu.DropdownItem>
-                        <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
-                          Most Purchased
-                        </DropdownMenu.DropdownItem>
-                        <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                          Price - Low to High
-                        </DropdownMenu.DropdownItem>
-                        <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                          Price - High to Low
-                        </DropdownMenu.DropdownItem>
-                      </DropdownMenu>
-                    </SubframeCore.DropdownMenu.Content>
-                  </SubframeCore.DropdownMenu.Portal>
-                </SubframeCore.DropdownMenu.Root>
+              <div className="flex flex-col gap-1">
+                <span className="text-heading-3 font-heading-3 text-default-font">
+                  {products.length} local products
+                </span>
               </div>
             </div>
-
-            {/* Products Grid/List */}
-            <div className="flex-1 overflow-y-auto p-6 bg-default-background">
-              <div className={`w-full ${
-                viewMode === "grid" 
-                  ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
-                  : "flex flex-col gap-4"
-              }`}>
-                {products.map((product) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    isListView={viewMode === "list"} 
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side - Static Map */}
-          <div className="w-1/2 h-full border-l border-neutral-200 relative z-0">
-            <Map className="h-full w-full" />
-          </div>
-        </div>
-
-        {/* Mobile Layout */}
-        <div className="md:hidden flex w-full flex-col items-start flex-1 pb-6 bg-default-background">
-          {/* Controls */}
-          <div className="flex w-full items-center justify-between px-4 py-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-heading-2 font-heading-2 text-default-font">
-                Fresh Local Products
-              </span>
-              <span className="text-body font-body text-subtext-color">
-                {products.length} items available
-              </span>
-            </div>
+            
             <div className="flex items-center gap-2">
               <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
                 <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
                 <ToggleGroup.Item icon={<FeatherList />} value="list" />
               </ToggleGroup>
+              
               <SubframeCore.DropdownMenu.Root>
                 <SubframeCore.DropdownMenu.Trigger asChild={true}>
                   <Button
@@ -413,28 +324,11 @@ function Shop() {
             </div>
           </div>
 
-          {/* Search Bar - Mobile */}
-          <div className="w-full px-4 mb-4">
-            <TextField
-              className="h-auto w-full"
-              variant="filled"
-              label=""
-              helpText=""
-              icon={<FeatherSearch />}
-            >
-              <TextField.Input
-                placeholder="Search products..."
-                value=""
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
-              />
-            </TextField>
-          </div>
-
           {/* Products Grid/List */}
-          <div className="flex-1 w-full px-4">
+          <div className="flex-1 overflow-y-auto p-6 bg-default-background">
             <div className={`w-full ${
               viewMode === "grid" 
-                ? "grid gap-4 grid-cols-1 sm:grid-cols-2" 
+                ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
                 : "flex flex-col gap-4"
             }`}>
               {products.map((product) => (
@@ -445,6 +339,101 @@ function Shop() {
                 />
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Right Side - Static Map */}
+        <div className="w-1/2 h-full border-l border-neutral-200 relative z-0">
+          <Map className="h-full w-full" />
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="md:hidden flex w-full flex-col items-start flex-1 pb-6 bg-default-background">
+        {/* Controls */}
+        <div className="flex w-full items-center justify-between px-4 py-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-heading-2 font-heading-2 text-default-font">
+              Fresh Local Products
+            </span>
+            <span className="text-body font-body text-subtext-color">
+              {products.length} items available
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
+              <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
+              <ToggleGroup.Item icon={<FeatherList />} value="list" />
+            </ToggleGroup>
+            <SubframeCore.DropdownMenu.Root>
+              <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                <Button
+                  variant="neutral-tertiary"
+                  iconRight={<FeatherChevronDown />}
+                  size="small"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                >
+                  Sort
+                </Button>
+              </SubframeCore.DropdownMenu.Trigger>
+              <SubframeCore.DropdownMenu.Portal>
+                <SubframeCore.DropdownMenu.Content
+                  side="bottom"
+                  align="end"
+                  sideOffset={4}
+                  asChild={true}
+                >
+                  <DropdownMenu>
+                    <DropdownMenu.DropdownItem icon={<FeatherStar />}>
+                      Top Rated
+                    </DropdownMenu.DropdownItem>
+                    <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
+                      Most Purchased
+                    </DropdownMenu.DropdownItem>
+                    <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                      Price - Low to High
+                    </DropdownMenu.DropdownItem>
+                    <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                      Price - High to Low
+                    </DropdownMenu.DropdownItem>
+                  </DropdownMenu>
+                </SubframeCore.DropdownMenu.Content>
+              </SubframeCore.DropdownMenu.Portal>
+            </SubframeCore.DropdownMenu.Root>
+          </div>
+        </div>
+
+        {/* Search Bar - Mobile */}
+        <div className="w-full px-4 mb-4">
+          <TextField
+            className="h-auto w-full"
+            variant="filled"
+            label=""
+            helpText=""
+            icon={<FeatherSearch />}
+          >
+            <TextField.Input
+              placeholder="Search products..."
+              value=""
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
+            />
+          </TextField>
+        </div>
+
+        {/* Products Grid/List */}
+        <div className="flex-1 w-full px-4">
+          <div className={`w-full ${
+            viewMode === "grid" 
+              ? "grid gap-4 grid-cols-1 sm:grid-cols-2" 
+              : "flex flex-col gap-4"
+          }`}>
+            {products.map((product) => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                isListView={viewMode === "list"} 
+              />
+            ))}
           </div>
         </div>
       </div>
