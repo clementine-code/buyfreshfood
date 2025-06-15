@@ -255,7 +255,7 @@ function Shop() {
       <div className="hidden xl:flex w-full h-full relative">
         {/* Left Side - Products */}
         <div className="flex-1 flex flex-col overflow-hidden bg-default-background">
-          {/* Sticky Controls Bar - Perfectly aligned with navbar */}
+          {/* Sticky Controls Bar - Positioned directly below navbar */}
           <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
@@ -344,7 +344,7 @@ function Shop() {
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
       <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
-        {/* Mobile/Tablet Page Controls - Fixed positioning to prevent gaps */}
+        {/* Mobile/Tablet Page Controls - Fixed positioning */}
         <div className="fixed top-[73px] left-0 right-0 z-30 bg-white border-b border-neutral-200 shadow-sm">
           <div className="flex w-full items-center justify-between px-4 py-3">
             <div className="flex flex-col gap-1">
