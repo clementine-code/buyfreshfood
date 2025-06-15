@@ -337,7 +337,7 @@ function Shop() {
         </div>
 
         {/* Right Side - Static Map */}
-        <div className="w-1/2 h-full border-l border-neutral-200">
+        <div className="w-1/2 h-full border-l border-neutral-200 z-10">
           <Map className="h-full w-full" />
         </div>
       </div>
