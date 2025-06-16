@@ -90,6 +90,9 @@ function Shop() {
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
+  // Check if we're currently viewing the main product list (not in modal views)
+  const isMainProductView = !showMobileFilters && !showMobileMap;
+
   const getBadgeVariant = (tag: string) => {
     if (tag.includes('organic') || tag.includes('pesticide-free')) return 'success';
     if (tag.includes('limited') || tag.includes('seasonal')) return 'warning';
@@ -295,7 +298,7 @@ function Shop() {
                   <SubframeCore.DropdownMenu.Content
                     side="bottom"
                     align="end"
-                    sideOffset={4}
+                    sideOffset={8}
                     asChild={true}
                   >
                     <DropdownMenu>
@@ -372,7 +375,7 @@ function Shop() {
                   <SubframeCore.DropdownMenu.Content
                     side="bottom"
                     align="end"
-                    sideOffset={4}
+                    sideOffset={8}
                     asChild={true}
                   >
                     <DropdownMenu>
@@ -414,28 +417,30 @@ function Shop() {
         </div>
       </div>
 
-      {/* Floating Action Buttons - Mobile & Tablet Only (below 1280px) */}
-      <div className="xl:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[80]">
-        <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
-          <Button
-            variant="neutral-secondary"
-            icon={<FeatherMap />}
-            onClick={() => setShowMobileMap(true)}
-            className="rounded-full px-6"
-          >
-            Map
-          </Button>
-          <div className="w-px h-6 bg-neutral-200"></div>
-          <Button
-            variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
-            icon={<FeatherFilter />}
-            onClick={() => setShowMobileFilters(true)}
-            className="rounded-full px-6"
-          >
-            Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
-          </Button>
+      {/* Floating Action Buttons - Mobile & Tablet Only (below 1280px) - Only show on main product view */}
+      {isMainProductView && (
+        <div className="xl:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[80]">
+          <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
+            <Button
+              variant="neutral-secondary"
+              icon={<FeatherMap />}
+              onClick={() => setShowMobileMap(true)}
+              className="rounded-full px-6"
+            >
+              Map
+            </Button>
+            <div className="w-px h-6 bg-neutral-200"></div>
+            <Button
+              variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+              icon={<FeatherFilter />}
+              onClick={() => setShowMobileFilters(true)}
+              className="rounded-full px-6"
+            >
+              Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Modals */}
       <MobileFilterModal
