@@ -94,15 +94,16 @@ const DefaultPageLayoutRoot = React.forwardRef<
             </TextField>
           }
           rightSlot={
-            <>
+            <div className="flex items-center justify-end gap-2">
               <SubframeCore.DropdownMenu.Root>
                 <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                  <Button
-                    variant="destructive-secondary"
-                    icon={<FeatherMapPin />}
-                    className="flex-shrink-0"
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
+                  <div className="flex-shrink-0">
+                    <Button
+                      variant="destructive-secondary"
+                      icon={<FeatherMapPin />}
+                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                    />
+                  </div>
                 </SubframeCore.DropdownMenu.Trigger>
                 <SubframeCore.DropdownMenu.Portal>
                   <SubframeCore.DropdownMenu.Content
@@ -132,22 +133,24 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   </SubframeCore.DropdownMenu.Content>
                 </SubframeCore.DropdownMenu.Portal>
               </SubframeCore.DropdownMenu.Root>
-              <Button
-                variant="brand-secondary"
-                icon={<FeatherUser />}
-                className="flex-shrink-0"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Sign In
-              </Button>
-              <Button
-                icon={<FeatherShoppingCart />}
-                className="flex-shrink-0"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              >
-                Cart
-              </Button>
-            </>
+              <div className="flex-shrink-0">
+                <Button
+                  variant="brand-secondary"
+                  icon={<FeatherUser />}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                >
+                  Sign In
+                </Button>
+              </div>
+              <div className="flex-shrink-0">
+                <Button
+                  icon={<FeatherShoppingCart />}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                >
+                  Cart
+                </Button>
+              </div>
+            </div>
           }
         />
       </div>
@@ -173,15 +176,16 @@ const DefaultPageLayoutRoot = React.forwardRef<
             </TextField>
           }
           rightSlot={
-            <>
+            <div className="flex items-center justify-end gap-2">
               <SubframeCore.DropdownMenu.Root>
                 <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                  <Button
-                    variant="destructive-secondary"
-                    icon={<FeatherMapPin />}
-                    className="flex-shrink-0"
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
+                  <div className="flex-shrink-0">
+                    <Button
+                      variant="destructive-secondary"
+                      icon={<FeatherMapPin />}
+                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                    />
+                  </div>
                 </SubframeCore.DropdownMenu.Trigger>
                 <SubframeCore.DropdownMenu.Portal>
                   <SubframeCore.DropdownMenu.Content
@@ -211,19 +215,21 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   </SubframeCore.DropdownMenu.Content>
                 </SubframeCore.DropdownMenu.Portal>
               </SubframeCore.DropdownMenu.Root>
-              <IconButton
-                variant="brand-secondary"
-                icon={<FeatherUser />}
-                className="flex-shrink-0"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <IconButton
-                variant="brand-primary"
-                icon={<FeatherShoppingCart />}
-                className="flex-shrink-0"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-            </>
+              <div className="flex-shrink-0">
+                <IconButton
+                  variant="brand-secondary"
+                  icon={<FeatherUser />}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                />
+              </div>
+              <div className="flex-shrink-0">
+                <IconButton
+                  variant="brand-primary"
+                  icon={<FeatherShoppingCart />}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                />
+              </div>
+            </div>
           }
         />
         
