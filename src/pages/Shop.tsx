@@ -298,7 +298,8 @@ function Shop() {
                   <SubframeCore.DropdownMenu.Content
                     side="bottom"
                     align="end"
-                    sideOffset={8}
+                    sideOffset={12}
+                    className="z-[100]"
                     asChild={true}
                   >
                     <DropdownMenu>
@@ -375,7 +376,8 @@ function Shop() {
                   <SubframeCore.DropdownMenu.Content
                     side="bottom"
                     align="end"
-                    sideOffset={8}
+                    sideOffset={12}
+                    className="z-[100]"
                     asChild={true}
                   >
                     <DropdownMenu>
