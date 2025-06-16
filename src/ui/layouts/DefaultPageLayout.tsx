@@ -162,7 +162,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
               icon={<FeatherSearch />}
             >
               <TextField.Input
-                placeholder="Search"
+                placeholder="Search for fresh local food..."
                 value=""
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
