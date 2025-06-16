@@ -146,7 +146,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         }
       >
         <TextField.Input
-          placeholder="Enter your location to find fresh local food..."
+          placeholder="Enter location to find fresh local food..."
           value={location}
           onChange={handleLocationChange}
           onFocus={() => {
