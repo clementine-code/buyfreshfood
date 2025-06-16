@@ -7,6 +7,8 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: #fcfaf5; /* Ensure body has the default background color */
+  /* Prevent layout shift when scrollbar appears/disappears */
+  overflow-y: scroll;
 }
 
 #root {
@@ -14,4 +16,9 @@ html, body {
   display: flex;
   flex-direction: column;
   background-color: #fcfaf5; /* Ensure root has the default background color */
+}
+
+/* Ensure consistent scrollbar space is always reserved */
+html {
+  scrollbar-gutter: stable;
 }
