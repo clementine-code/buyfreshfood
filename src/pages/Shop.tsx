@@ -252,7 +252,7 @@ function Shop() {
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
       {/* Desktop Layout - Only show on extra large screens (1280px+) */}
-      <div className="hidden xl:flex w-full h-full">
+      <div className="hidden xl:flex w-full h-full pt-[73px]">
         {/* Left Side - Products */}
         <div className="flex-1 flex flex-col h-full bg-default-background">
           {/* Controls Bar - Fixed height, no scroll */}
