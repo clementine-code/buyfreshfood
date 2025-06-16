@@ -107,7 +107,8 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   <SubframeCore.DropdownMenu.Content
                     side="bottom"
                     align="end"
-                    sideOffset={4}
+                    sideOffset={8}
+                    className="z-[200]"
                     asChild={true}
                   >
                     <DropdownMenu>
@@ -182,7 +183,8 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   <SubframeCore.DropdownMenu.Content
                     side="bottom"
                     align="end"
-                    sideOffset={4}
+                    sideOffset={8}
+                    className="z-[200]"
                     asChild={true}
                   >
                     <DropdownMenu>
