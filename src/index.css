@@ -7,6 +7,8 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: #fcfaf5; /* Ensure body has the default background color */
+  /* Prevent layout shift when scrollbar appears/disappears */
+  overflow-y: scroll;
 }
 
 #root {
@@ -16,13 +18,7 @@ html, body {
   background-color: #fcfaf5; /* Ensure root has the default background color */
 }
 
-/* Prevent layout shift when modals open by reserving scrollbar space */
+/* Ensure consistent scrollbar space is always reserved */
 html {
   scrollbar-gutter: stable;
-}
-
-/* Ensure dropdowns and modals don't cause body scroll lock layout shifts */
-body.modal-open {
-  overflow: hidden;
-  padding-right: var(--scrollbar-width, 0px);
 }
