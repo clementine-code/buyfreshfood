@@ -336,8 +336,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Right Side - Static Map with full height */}
-        <div className="w-1/2 h-screen border-l border-neutral-200 z-10">
+        {/* Right Side - Static Map with full height and bottom padding for legend */}
+        <div className="w-1/2 h-screen border-l border-neutral-200 z-10 pb-20">
           <Map className="h-full w-full" />
         </div>
       </div>
@@ -396,8 +396,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Products Grid/List - Add proper top margin to account for both fixed bars */}
-        <div className="w-full pt-[130px] px-4 pb-24 overflow-y-auto">
+        {/* Products Grid/List - Reduced top margin to eliminate extra space */}
+        <div className="w-full pt-[73px] px-4 pb-24 overflow-y-auto">
           <div className={`w-full ${
             viewMode === "grid" 
               ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 
