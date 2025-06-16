@@ -20,13 +20,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
 
   return (
     <div className="fixed inset-0 z-[110] bg-black bg-opacity-50 flex">
-      {/* Overlay - clicking closes menu */}
-      <div 
-        className="flex-1" 
-        onClick={onClose}
-      />
-      
-      {/* Menu Panel */}
+      {/* Menu Panel - Slides from left */}
       <div className="w-80 h-full bg-white shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-200">
@@ -78,15 +72,21 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
           </nav>
         </div>
 
-        {/* Footer */}
+        {/* Footer with Slogan */}
         <div className="p-6 border-t border-neutral-200">
           <div className="text-center">
-            <span className="text-caption font-caption text-subtext-color">
-              Supporting local farmers and producers
+            <span className="text-body-bold font-body-bold text-brand-700">
+              "Where fresh means local."
             </span>
           </div>
         </div>
       </div>
+      
+      {/* Overlay - clicking closes menu */}
+      <div 
+        className="flex-1" 
+        onClick={onClose}
+      />
     </div>
   );
 };

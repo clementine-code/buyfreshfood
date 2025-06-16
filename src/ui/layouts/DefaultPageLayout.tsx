@@ -219,13 +219,14 @@ const DefaultPageLayoutRoot = React.forwardRef<
           }
         />
         
-        {/* Replace the hamburger menu icon in the mobile topbar */}
+        {/* Hamburger Menu Icon - Standard size and positioning */}
         <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
-          <IconButton
-            variant="neutral-tertiary"
-            icon={<FeatherMenu />}
+          <button
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors"
             onClick={() => setShowMobileNav(true)}
-          />
+          >
+            <FeatherMenu className="w-5 h-5 text-default-font" />
+          </button>
         </div>
       </div>
 
