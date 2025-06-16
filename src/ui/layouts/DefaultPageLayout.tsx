@@ -23,6 +23,7 @@ import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherLocateFixed } from "@subframe/core";
 import { FeatherMenu } from "@subframe/core";
 import MobileNavMenu from "../../components/MobileNavMenu";
+import LocationSearch from "../../components/LocationSearch";
 
 interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -39,6 +40,11 @@ const DefaultPageLayoutRoot = React.forwardRef<
 ) {
   const location = useLocation();
   const [showMobileNav, setShowMobileNav] = useState(false);
+
+  const handleLocationSelect = (selectedLocation: string) => {
+    console.log('Selected location:', selectedLocation);
+    // Here you could update global state, localStorage, or trigger a search
+  };
 
   return (
     <div
@@ -114,21 +120,10 @@ const DefaultPageLayoutRoot = React.forwardRef<
                     asChild={true}
                   >
                     <DropdownMenu>
-                      <TextField
-                        className="h-auto w-44 flex-none"
-                        variant="filled"
-                        label=""
-                        helpText=""
-                        icon={<FeatherLocateFixed />}
-                      >
-                        <TextField.Input
-                          placeholder="Enter location"
-                          value=""
-                          onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>
-                          ) => {}}
-                        />
-                      </TextField>
+                      <LocationSearch 
+                        className="w-80"
+                        onLocationSelect={handleLocationSelect}
+                      />
                     </DropdownMenu>
                   </SubframeCore.DropdownMenu.Content>
                 </SubframeCore.DropdownMenu.Portal>
@@ -196,21 +191,10 @@ const DefaultPageLayoutRoot = React.forwardRef<
                     asChild={true}
                   >
                     <DropdownMenu>
-                      <TextField
-                        className="h-auto w-44 flex-none"
-                        variant="filled"
-                        label=""
-                        helpText=""
-                        icon={<FeatherLocateFixed />}
-                      >
-                        <TextField.Input
-                          placeholder="Enter location"
-                          value=""
-                          onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>
-                          ) => {}}
-                        />
-                      </TextField>
+                      <LocationSearch 
+                        className="w-72"
+                        onLocationSelect={handleLocationSelect}
+                      />
                     </DropdownMenu>
                   </SubframeCore.DropdownMenu.Content>
                 </SubframeCore.DropdownMenu.Portal>

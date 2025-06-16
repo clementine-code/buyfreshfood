@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { TextField } from "@/ui/components/TextField";
 import { FeatherMapPin } from "@subframe/core";
 import { FeatherLocate } from "@subframe/core";
@@ -16,8 +16,17 @@ import { FeatherTwitter } from "@subframe/core";
 import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
+import LocationSearch from "../components/LocationSearch";
 
 function Home() {
+  const [location, setLocation] = useState("");
+
+  const handleLocationSelect = (selectedLocation: string) => {
+    setLocation(selectedLocation);
+    console.log('Selected location:', selectedLocation);
+    // Here you could redirect to shop page with location filter
+  };
+
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden min-h-screen">
       {/* Hero Section */}
@@ -33,20 +42,12 @@ function Home() {
               }
             </span>
           </div>
-          <TextField
-            className="h-auto w-full max-w-[384px] flex-none"
-            variant="filled"
-            label=""
-            helpText=""
-            icon={<FeatherMapPin />}
-            iconRight={<FeatherLocate />}
-          >
-            <TextField.Input
-              placeholder="Enter your location to find fresh local food..."
-              value=""
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
+          <div className="w-full max-w-[384px]">
+            <LocationSearch 
+              className="w-full"
+              onLocationSelect={handleLocationSelect}
             />
-          </TextField>
+          </div>
         </div>
         {/* Background Image - Full Coverage */}
         <img
