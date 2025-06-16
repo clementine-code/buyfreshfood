@@ -76,7 +76,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
         <div className="p-6 border-t border-neutral-200">
           <div className="text-center">
             <span className="text-body-bold font-body-bold text-brand-700">
-              "Where fresh means local."
+              Where fresh means local.
             </span>
           </div>
         </div>
