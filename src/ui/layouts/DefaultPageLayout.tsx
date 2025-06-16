@@ -6,7 +6,7 @@
  * Topbar with center search2 — https://app.subframe.com/6b5c53cba769/library?component=Topbar+with+center+search2_b7addef3-c5e9-4667-af46-c01b7b1bf439
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
@@ -39,6 +39,26 @@ const DefaultPageLayoutRoot = React.forwardRef<
 ) {
   const location = useLocation();
   const [showMobileNav, setShowMobileNav] = useState(false);
+  const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
+
+  // Calculate scrollbar width and set CSS variable
+  useEffect(() => {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+  }, []);
+
+  // Handle dropdown open/close to prevent layout shift
+  useEffect(() => {
+    if (isLocationDropdownOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [isLocationDropdownOpen]);
 
   return (
     <div
@@ -95,7 +115,9 @@ const DefaultPageLayoutRoot = React.forwardRef<
           }
           rightSlot={
             <div className="flex items-center justify-end gap-2">
-              <SubframeCore.DropdownMenu.Root>
+              <SubframeCore.DropdownMenu.Root 
+                onOpenChange={setIsLocationDropdownOpen}
+              >
                 <SubframeCore.DropdownMenu.Trigger asChild={true}>
                   <div className="flex-shrink-0">
                     <Button
@@ -177,7 +199,9 @@ const DefaultPageLayoutRoot = React.forwardRef<
           }
           rightSlot={
             <div className="flex items-center justify-end gap-2">
-              <SubframeCore.DropdownMenu.Root>
+              <SubframeCore.DropdownMenu.Root 
+                onOpenChange={setIsLocationDropdownOpen}
+              >
                 <SubframeCore.DropdownMenu.Trigger asChild={true}>
                   <div className="flex-shrink-0">
                     <Button
