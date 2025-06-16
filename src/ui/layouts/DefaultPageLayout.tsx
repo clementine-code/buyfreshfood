@@ -100,6 +100,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   <Button
                     variant="destructive-secondary"
                     icon={<FeatherMapPin />}
+                    className="flex-shrink-0"
                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                   />
                 </SubframeCore.DropdownMenu.Trigger>
@@ -134,12 +135,14 @@ const DefaultPageLayoutRoot = React.forwardRef<
               <Button
                 variant="brand-secondary"
                 icon={<FeatherUser />}
+                className="flex-shrink-0"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               >
                 Sign In
               </Button>
               <Button
                 icon={<FeatherShoppingCart />}
+                className="flex-shrink-0"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               >
                 Cart
@@ -176,6 +179,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   <Button
                     variant="destructive-secondary"
                     icon={<FeatherMapPin />}
+                    className="flex-shrink-0"
                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                   />
                 </SubframeCore.DropdownMenu.Trigger>
@@ -210,11 +214,13 @@ const DefaultPageLayoutRoot = React.forwardRef<
               <IconButton
                 variant="brand-secondary"
                 icon={<FeatherUser />}
+                className="flex-shrink-0"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
               <IconButton
                 variant="brand-primary"
                 icon={<FeatherShoppingCart />}
+                className="flex-shrink-0"
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
             </>
