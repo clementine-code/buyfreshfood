@@ -6,7 +6,7 @@
  * Topbar with center search2 — https://app.subframe.com/6b5c53cba769/library?component=Topbar+with+center+search2_b7addef3-c5e9-4667-af46-c01b7b1bf439
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
@@ -21,6 +21,8 @@ import { FeatherMapPin } from "@subframe/core";
 import { FeatherUser } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherLocateFixed } from "@subframe/core";
+import { FeatherMenu } from "@subframe/core";
+import MobileNavMenu from "../../components/MobileNavMenu";
 
 interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -36,6 +38,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
   ref
 ) {
   const location = useLocation();
+  const [showMobileNav, setShowMobileNav] = useState(false);
 
   return (
     <div
@@ -55,7 +58,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
               <Link to="/">
                 <img
                   className="h-6 flex-none object-cover cursor-pointer"
-                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye.png"
+                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye54aye.png"
                 />
               </Link>
               <div className="flex items-center gap-2">
@@ -215,7 +218,22 @@ const DefaultPageLayoutRoot = React.forwardRef<
             </>
           }
         />
+        
+        {/* Replace the hamburger menu icon in the mobile topbar */}
+        <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
+          <IconButton
+            variant="neutral-tertiary"
+            icon={<FeatherMenu />}
+            onClick={() => setShowMobileNav(true)}
+          />
+        </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      <MobileNavMenu
+        isOpen={showMobileNav}
+        onClose={() => setShowMobileNav(false)}
+      />
 
       {/* Main Content - Add top padding to account for fixed navbar */}
       {children ? (
