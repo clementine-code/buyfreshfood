@@ -252,11 +252,11 @@ function Shop() {
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
       {/* Desktop Layout - Only show on extra large screens (1280px+) */}
-      <div className="hidden xl:flex w-full h-full pt-[73px]">
+      <div className="hidden xl:flex w-full h-full">
         {/* Left Side - Products */}
         <div className="flex-1 flex flex-col h-full bg-default-background">
-          {/* Controls Bar - Fixed height, no scroll */}
-          <div className="flex-none flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+          {/* Controls Bar - Sticky to top of viewport, accounting for navbar */}
+          <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -336,8 +336,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Right Side - Static Map */}
-        <div className="w-1/2 h-full border-l border-neutral-200 z-10">
+        {/* Right Side - Static Map with full height */}
+        <div className="w-1/2 h-screen border-l border-neutral-200 z-10">
           <Map className="h-full w-full" />
         </div>
       </div>
