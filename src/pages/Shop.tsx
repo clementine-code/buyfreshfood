@@ -24,6 +24,8 @@ import { FeatherGithub } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { FeatherYoutube } from "@subframe/core";
 import { FeatherX } from "@subframe/core";
+import { FeatherChevronLeft } from "@subframe/core";
+import { FeatherChevronRight } from "@subframe/core";
 import { Loader } from "@/ui/components/Loader";
 import Map from "../components/Map";
 import MobileFilterModal from "../components/MobileFilterModal";
@@ -41,6 +43,10 @@ function Shop() {
     quality: [],
     sellers: []
   });
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12); // 12 items per page like Airbnb
   
   // Database state
   const [products, setProducts] = useState<Product[]>([]);
@@ -86,6 +92,18 @@ function Shop() {
 
     loadData();
   }, []);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [appliedFilters]);
+
+  // Calculate pagination
+  const totalItems = products.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = products.slice(startIndex, endIndex);
 
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
@@ -224,6 +242,81 @@ function Shop() {
     );
   };
 
+  const PaginationControls = () => {
+    if (totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+      const pages = [];
+      const maxVisible = 5;
+      
+      if (totalPages <= maxVisible) {
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (currentPage <= 3) {
+          for (let i = 1; i <= 4; i++) {
+            pages.push(i);
+          }
+          pages.push('...');
+          pages.push(totalPages);
+        } else if (currentPage >= totalPages - 2) {
+          pages.push(1);
+          pages.push('...');
+          for (let i = totalPages - 3; i <= totalPages; i++) {
+            pages.push(i);
+          }
+        } else {
+          pages.push(1);
+          pages.push('...');
+          for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+            pages.push(i);
+          }
+          pages.push('...');
+          pages.push(totalPages);
+        }
+      }
+      
+      return pages;
+    };
+
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          variant="neutral-secondary"
+          size="small"
+          icon={<FeatherChevronLeft />}
+          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          disabled={currentPage === 1}
+        />
+        
+        {getPageNumbers().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === '...' ? (
+              <span className="px-2 text-subtext-color">...</span>
+            ) : (
+              <Button
+                variant={currentPage === page ? "brand-primary" : "neutral-secondary"}
+                size="small"
+                onClick={() => setCurrentPage(page as number)}
+              >
+                {page}
+              </Button>
+            )}
+          </React.Fragment>
+        ))}
+        
+        <Button
+          variant="neutral-secondary"
+          size="small"
+          icon={<FeatherChevronRight />}
+          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+          disabled={currentPage === totalPages}
+        />
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-default-background">
@@ -251,11 +344,11 @@ function Shop() {
 
   return (
     <div className="flex h-screen w-full flex-col bg-default-background">
-      {/* Desktop Layout - Only show on extra large screens (1280px+) */}
+      {/* Desktop Layout - Airbnb Style */}
       <div className="hidden xl:flex w-full h-full">
-        {/* Left Side - Products */}
+        {/* Left Side - Products with Pagination */}
         <div className="flex-1 flex flex-col h-full bg-default-background">
-          {/* Controls Bar - Sticky to top of viewport, accounting for navbar */}
+          {/* Controls Bar - Sticky to top */}
           <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
@@ -269,7 +362,7 @@ function Shop() {
               
               <div className="flex flex-col gap-1">
                 <span className="text-heading-3 font-heading-3 text-default-font">
-                  {products.length} local products
+                  {totalItems} local products
                 </span>
               </div>
             </div>
@@ -319,25 +412,37 @@ function Shop() {
           </div>
 
           {/* Products Grid/List - Scrollable content area */}
-          <div className="flex-1 overflow-y-auto p-6 bg-default-background">
-            <div className={`w-full ${
-              viewMode === "grid" 
-                ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
-                : "flex flex-col gap-4"
-            }`}>
-              {products.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  isListView={viewMode === "list"} 
-                />
-              ))}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <div className={`w-full ${
+                viewMode === "grid" 
+                  ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
+                  : "flex flex-col gap-4"
+              }`}>
+                {currentProducts.map((product) => (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    isListView={viewMode === "list"} 
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Fixed Footer with Pagination - Airbnb Style */}
+          <div className="border-t border-neutral-200 bg-white px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="text-body font-body text-subtext-color">
+                Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} products
+              </div>
+              <PaginationControls />
             </div>
           </div>
         </div>
 
-        {/* Right Side - Static Map with full height and bottom padding for legend */}
-        <div className="w-1/2 h-screen border-l border-neutral-200 z-10 pb-20">
+        {/* Right Side - Static Map */}
+        <div className="w-1/2 h-screen border-l border-neutral-200 z-10">
           <Map className="h-full w-full" />
         </div>
       </div>
