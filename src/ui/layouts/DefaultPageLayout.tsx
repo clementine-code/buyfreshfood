@@ -225,7 +225,8 @@ const DefaultPageLayoutRoot = React.forwardRef<
                         variant="filled"
                         label=""
                         helpText=""
-                        icon={<FeatherLocateFixed />}
+                        icon={<FeatherMapPin />}
+                        iconRight={<FeatherLocate />}
                       >
                         <TextField.Input
                           placeholder="Enter location"
