@@ -10,7 +10,6 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
-import { TopbarWithCenterSearch2 } from "../components/TopbarWithCenterSearch2";
 import { TextField } from "../components/TextField";
 import { Button } from "../components/Button";
 import { IconButton } from "../components/IconButton";
@@ -152,10 +151,17 @@ const DefaultPageLayoutRoot = React.forwardRef<
 
       {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
       <div className="xl:hidden w-full fixed top-0 z-[100] bg-default-background border-b border-neutral-border h-[73px]">
-        <TopbarWithCenterSearch2
-          className="py-3 h-full"
-          mobile="default"
-          centerSlot={
+        <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
+          {/* Hamburger Menu Button */}
+          <button
+            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors"
+            onClick={() => setShowMobileNav(true)}
+          >
+            <FeatherMenu className="w-5 h-5 text-default-font" />
+          </button>
+
+          {/* Center Search */}
+          <div className="flex grow shrink-0 basis-0 items-center justify-center gap-4">
             <TextField
               className="h-auto grow shrink-0 basis-0"
               variant="filled"
@@ -169,63 +175,53 @@ const DefaultPageLayoutRoot = React.forwardRef<
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
               />
             </TextField>
-          }
-          rightSlot={
-            <div className="flex items-center justify-end gap-2">
-              <SubframeCore.DropdownMenu.Root>
-                <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                  <div className="flex-shrink-0">
-                    <Button
-                      variant="destructive-secondary"
-                      icon={<FeatherMapPin />}
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center justify-end gap-2">
+            <SubframeCore.DropdownMenu.Root>
+              <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                <div className="flex-shrink-0">
+                  <Button
+                    variant="destructive-secondary"
+                    icon={<FeatherMapPin />}
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  />
+                </div>
+              </SubframeCore.DropdownMenu.Trigger>
+              <SubframeCore.DropdownMenu.Portal>
+                <SubframeCore.DropdownMenu.Content
+                  side="bottom"
+                  align="end"
+                  sideOffset={8}
+                  className="z-[200]"
+                  asChild={true}
+                >
+                  <DropdownMenu>
+                    <LocationSearch 
+                      className="w-72"
+                      onLocationSelect={handleLocationSelect}
                     />
-                  </div>
-                </SubframeCore.DropdownMenu.Trigger>
-                <SubframeCore.DropdownMenu.Portal>
-                  <SubframeCore.DropdownMenu.Content
-                    side="bottom"
-                    align="end"
-                    sideOffset={8}
-                    className="z-[200]"
-                    asChild={true}
-                  >
-                    <DropdownMenu>
-                      <LocationSearch 
-                        className="w-72"
-                        onLocationSelect={handleLocationSelect}
-                      />
-                    </DropdownMenu>
-                  </SubframeCore.DropdownMenu.Content>
-                </SubframeCore.DropdownMenu.Portal>
-              </SubframeCore.DropdownMenu.Root>
-              <div className="flex-shrink-0">
-                <IconButton
-                  variant="brand-secondary"
-                  icon={<FeatherUser />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-              </div>
-              <div className="flex-shrink-0">
-                <IconButton
-                  variant="brand-primary"
-                  icon={<FeatherShoppingCart />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-              </div>
+                  </DropdownMenu>
+                </SubframeCore.DropdownMenu.Content>
+              </SubframeCore.DropdownMenu.Portal>
+            </SubframeCore.DropdownMenu.Root>
+            <div className="flex-shrink-0">
+              <IconButton
+                variant="brand-secondary"
+                icon={<FeatherUser />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
             </div>
-          }
-        />
-        
-        {/* Hamburger Menu Icon - Standard size and positioning */}
-        <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
-          <button
-            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors"
-            onClick={() => setShowMobileNav(true)}
-          >
-            <FeatherMenu className="w-5 h-5 text-default-font" />
-          </button>
-        </div>
+            <div className="flex-shrink-0">
+              <IconButton
+                variant="brand-primary"
+                icon={<FeatherShoppingCart />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+            </div>
+          </div>
+        </nav>
       </div>
 
       {/* Mobile Navigation Menu */}
