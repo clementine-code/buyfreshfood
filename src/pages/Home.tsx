@@ -60,7 +60,7 @@ function Home() {
 
       {/* Main Content */}
       <div className="flex w-full flex-col items-center gap-8 px-6 pt-6 pb-24 max-w-full mobile:px-4 mobile:pt-6 mobile:pb-24 bg-default-background">
-        {/* Action Cards - Fixed to be same size */}
+        {/* Action Cards - Constrained to same max width as community section */}
         <div className="w-full max-w-[1280px] flex-wrap items-stretch justify-center gap-8 grid grid-cols-1 md:grid-cols-2">
           <div className="flex min-w-[288px] flex-col items-start gap-6 rounded-xl bg-neutral-200 px-8 py-8 mobile:px-6 mobile:py-8 h-full">
             <FeatherShoppingBag className="text-body font-body text-sunny-600" />
@@ -105,8 +105,8 @@ function Home() {
           </div>
         </div>
 
-        {/* Community Section */}
-        <div className="flex w-full flex-col items-center gap-6 rounded-xl bg-brand-100 px-6 py-6 max-w-full">
+        {/* Community Section - Same max width as action cards */}
+        <div className="flex w-full max-w-[1280px] flex-col items-center gap-6 rounded-xl bg-brand-100 px-6 py-6">
           <span className="text-heading-1 font-heading-1 text-default-font text-center mobile:font-['Inter'] mobile:text-[24px] mobile:font-[400] mobile:leading-[28px] mobile:tracking-normal">
             Built on Community, Not Supply Chains
           </span>
