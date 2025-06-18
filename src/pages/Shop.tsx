@@ -19,16 +19,13 @@ import * as SubframeCore from "@subframe/core";
 import { FeatherChevronDown } from "@subframe/core";
 import { Badge } from "@/ui/components/Badge";
 import { FeatherHeart } from "@subframe/core";
-import { FeatherTwitter } from "@subframe/core";
-import { FeatherGithub } from "@subframe/core";
-import { FeatherSlack } from "@subframe/core";
-import { FeatherYoutube } from "@subframe/core";
 import { FeatherX } from "@subframe/core";
 import { Loader } from "@/ui/components/Loader";
 import Map from "../components/Map";
 import MobileFilterModal from "../components/MobileFilterModal";
 import MobileMapModal from "../components/MobileMapModal";
 import DesktopFilterModal from "../components/DesktopFilterModal";
+import Footer from "../components/Footer";
 import { getProducts, getCategories, getSellers, type Product } from "../lib/supabase";
 
 function Shop() {
@@ -469,68 +466,8 @@ function Shop() {
       />
 
       {/* Footer - Mobile & Tablet Only (below 1280px) */}
-      <div className="xl:hidden flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-4 py-12 max-w-full mt-8">
-        <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
-          <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
-            <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">
-              <img
-                className="h-5 w-5 flex-none object-cover"
-                src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye.png"
-              />
-              <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                BuyFresh.Food
-              </span>
-            </div>
-            <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
-              <IconButton
-                icon={<FeatherFacebook />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <IconButton
-                icon={<FeatherInstagram />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <IconButton
-                icon={<FeatherXTwitter />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <IconButton
-                icon={<FeatherSlack />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-            </div>
-          </div>
-          <div className="flex grow shrink-0 basis-0 flex-wrap items-start gap-4 self-stretch mobile:grid mobile:grid-cols-2">
-            <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-              <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                Product
-              </span>
-              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                Features
-              </span>
-              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                Integrations
-              </span>
-              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                Pricing
-              </span>
-            </div>
-            <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-              <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                Company
-              </span>
-              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                About us
-              </span>
-              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                Blog
-              </span>
-              <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                Careers
-              </span>
-            </div>
-          </div>
-        </div>
+      <div className="xl:hidden">
+        <Footer />
       </div>
     </div>
   );
