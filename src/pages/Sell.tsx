@@ -135,19 +135,19 @@ function Sell() {
             </div>
             <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
               <IconButton
-                icon={<FeatherTwitter />}
+                icon={<FeatherFacebook />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
               <IconButton
-                icon={<FeatherGithub />}
+                icon={<FeatherInstagram />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+              <IconButton
+                icon={<FeatherXTwitter />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
               <IconButton
                 icon={<FeatherSlack />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <IconButton
-                icon={<FeatherYoutube />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
             </div>
