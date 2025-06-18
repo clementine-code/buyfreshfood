@@ -18,7 +18,7 @@ const PasswordProtection: React.FC<PasswordProtectionProps> = ({ children }) => 
   const [isLoading, setIsLoading] = useState(false);
 
   // Configuration - easily changeable
-  const STAGING_PASSWORD = "staging2024";
+  const STAGING_PASSWORD = "dominatefreshfoodmarket2025";
   const SESSION_KEY = "fresh_food_staging_auth";
   const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
