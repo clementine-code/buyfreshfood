@@ -130,7 +130,7 @@ function Sell() {
                 alt="Fresh Local Food Logo"
               />
               <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                Fresh Local Food
+                BuyFresh.Food
               </span>
             </div>
             <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
