@@ -77,9 +77,11 @@ const DefaultPageLayoutRoot = React.forwardRef<
                     Shop
                   </TopbarWithCenterSearch3.NavItem>
                 </Link>
-                <TopbarWithCenterSearch3.NavItem>
-                  Sell
-                </TopbarWithCenterSearch3.NavItem>
+                <Link to="/sell">
+                  <TopbarWithCenterSearch3.NavItem selected={location.pathname === "/sell"}>
+                    Sell
+                  </TopbarWithCenterSearch3.NavItem>
+                </Link>
               </div>
             </>
           }
@@ -204,8 +206,8 @@ const DefaultPageLayoutRoot = React.forwardRef<
                     />
                   </DropdownMenu>
                 </SubframeCore.DropdownMenu.Content>
-              </SubframeCore.DropdownMenu.Portal>
-            </SubframeCore.DropdownMenu.Root>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
             <div className="flex-shrink-0">
               <IconButton
                 variant="brand-secondary"

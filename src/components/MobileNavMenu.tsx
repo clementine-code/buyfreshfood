@@ -30,7 +30,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye54aye.png"
             />
             <span className="text-heading-3 font-heading-3 text-default-font">
-              BuyFresh.Food
+              Fresh Local Food
             </span>
           </div>
           <IconButton
@@ -65,10 +65,16 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               </div>
             </Link>
 
-            <div className="flex items-center gap-4 p-4 rounded-lg hover:bg-neutral-50 text-default-font cursor-pointer">
-              <FeatherStore className="w-5 h-5" />
-              <span className="text-body-bold font-body-bold">Sell</span>
-            </div>
+            <Link to="/sell" onClick={onClose}>
+              <div className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
+                location.pathname === "/sell" 
+                  ? "bg-brand-100 text-brand-700" 
+                  : "hover:bg-neutral-50 text-default-font"
+              }`}>
+                <FeatherStore className="w-5 h-5" />
+                <span className="text-body-bold font-body-bold">Sell</span>
+              </div>
+            </Link>
           </nav>
         </div>
 
@@ -92,3 +98,5 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
 };
 
 export default MobileNavMenu;
+
+export default MobileNavMenu
