@@ -478,24 +478,24 @@ function Shop() {
                 src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye.png"
               />
               <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                Fresh Local Food
+                BuyFresh.Food
               </span>
             </div>
             <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
               <IconButton
-                icon={<FeatherTwitter />}
+                icon={<FeatherFacebook />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
               <IconButton
-                icon={<FeatherGithub />}
+                icon={<FeatherInstagram />}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              />
+              <IconButton
+                icon={<FeatherXTwitter />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
               <IconButton
                 icon={<FeatherSlack />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-              />
-              <IconButton
-                icon={<FeatherYoutube />}
                 onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
             </div>
