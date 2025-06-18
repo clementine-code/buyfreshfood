@@ -98,5 +98,3 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
 };
 
 export default MobileNavMenu;
-
-export default MobileNavMenu
