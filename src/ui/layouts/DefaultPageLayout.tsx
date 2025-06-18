@@ -55,7 +55,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
       {...otherProps}
     >
       {/* Desktop Topbar - Only show on large screens (1280px+) */}
-      <div className="hidden xl:block w-full fixed top-0 z-50 bg-default-background border-b border-neutral-border h-[73px]">
+      <div className="hidden xl:block fixed-navbar w-full bg-default-background border-b border-neutral-border">
         <TopbarWithCenterSearch3
           className="py-3 h-full"
           leftSlot={
@@ -150,7 +150,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
       </div>
 
       {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-      <div className="xl:hidden w-full fixed top-0 z-[100] bg-default-background border-b border-neutral-border h-[73px]">
+      <div className="xl:hidden fixed-navbar w-full bg-default-background border-b border-neutral-border z-[100]">
         <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
           {/* Hamburger Menu Button */}
           <button
@@ -230,9 +230,9 @@ const DefaultPageLayoutRoot = React.forwardRef<
         onClose={() => setShowMobileNav(false)}
       />
 
-      {/* Main Content - Add top padding to account for fixed navbar */}
+      {/* Main Content - Use main-content class for proper spacing */}
       {children ? (
-        <div className="flex w-full flex-col items-start bg-default-background pt-[73px]">
+        <div className="main-content flex w-full flex-col items-start bg-default-background">
           {children}
         </div>
       ) : null}

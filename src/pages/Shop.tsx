@@ -253,12 +253,12 @@ function Shop() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col bg-default-background">
+    <div className="flex w-full flex-col bg-default-background min-h-screen">
       {/* Desktop Layout - Only show on extra large screens (1280px+) */}
-      <div className="hidden xl:flex w-full h-full">
+      <div className="hidden xl:flex w-full h-screen">
         {/* Left Side - Products */}
         <div className="flex-1 flex flex-col h-full bg-default-background">
-          {/* Controls Bar - Sticky to top of viewport, accounting for navbar */}
+          {/* Controls Bar - Sticky to top, accounting for navbar */}
           <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
@@ -349,7 +349,7 @@ function Shop() {
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
       <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
         {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
-        <div className="fixed top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm">
+        <div className="sticky top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm">
           <div className="flex w-full items-center justify-between px-4 py-3">
             <div className="flex flex-col gap-1">
               <span className="text-body-bold font-body-bold text-default-font">
@@ -401,8 +401,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Products Grid/List - Reduced top margin to eliminate extra space */}
-        <div className="w-full pt-[73px] px-4 pb-24 overflow-y-auto">
+        {/* Products Grid/List */}
+        <div className="w-full px-4 pb-24 overflow-y-auto">
           <div className={`w-full ${
             viewMode === "grid" 
               ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 

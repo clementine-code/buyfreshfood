@@ -7,8 +7,10 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: #fcfaf5; /* Ensure body has the default background color */
-  /* Prevent layout shift when scrollbar appears/disappears */
-  overflow-y: scroll;
+  /* Ensure consistent scrollbar space is always reserved */
+  scrollbar-gutter: stable;
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
 }
 
 #root {
@@ -16,9 +18,34 @@ html, body {
   display: flex;
   flex-direction: column;
   background-color: #fcfaf5; /* Ensure root has the default background color */
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
 }
 
-/* Ensure consistent scrollbar space is always reserved */
+/* Ensure the main content area doesn't overlap with fixed navbar */
+.main-content {
+  padding-top: 73px;
+  min-height: calc(100vh - 73px);
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure fixed navbar stays above content */
+.fixed-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 73px;
+}
+
+/* Prevent content from appearing behind navbar */
+body {
+  padding-top: 0;
+}
+
+/* Ensure scrollbar doesn't interfere with fixed elements */
 html {
-  scrollbar-gutter: stable;
+  scroll-padding-top: 73px;
 }
