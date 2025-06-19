@@ -15,6 +15,7 @@ import { DropdownMenu } from "@/ui/components/DropdownMenu";
 import { FeatherStar } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherDollarSign } from "@subframe/core";
+import { FeatherMapPin } from "@subframe/core";
 import * as SubframeCore from "@subframe/core";
 import { FeatherChevronDown } from "@subframe/core";
 import { Badge } from "@/ui/components/Badge";
@@ -300,6 +301,9 @@ function Shop() {
                     asChild={true}
                   >
                     <DropdownMenu>
+                      <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
+                        Nearest to Me
+                      </DropdownMenu.DropdownItem>
                       <DropdownMenu.DropdownItem icon={<FeatherStar />}>
                         Top Rated
                       </DropdownMenu.DropdownItem>
@@ -346,7 +350,7 @@ function Shop() {
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
       <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
         {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
-        <div className="sticky top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm">
+        <div className="sticky top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full">
           <div className="flex w-full items-center justify-between px-4 py-3">
             <div className="flex flex-col gap-1">
               <span className="text-body-bold font-body-bold text-default-font">
@@ -378,6 +382,9 @@ function Shop() {
                     asChild={true}
                   >
                     <DropdownMenu>
+                      <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
+                        Nearest to Me
+                      </DropdownMenu.DropdownItem>
                       <DropdownMenu.DropdownItem icon={<FeatherStar />}>
                         Top Rated
                       </DropdownMenu.DropdownItem>
@@ -398,8 +405,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Products Grid/List */}
-        <div className="w-full px-4 pb-24 overflow-y-auto">
+        {/* Products Grid/List - Proper spacing to avoid overlap */}
+        <div className="w-full px-4 py-4 pb-24 flex-1">
           <div className={`w-full ${
             viewMode === "grid" 
               ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 
