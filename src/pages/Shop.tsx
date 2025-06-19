@@ -171,42 +171,44 @@ function Shop() {
     }
 
     return (
-      <div className="flex flex-col items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
-        <img
-          className="h-48 w-full flex-none rounded-md object-cover"
-          src={product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
-        />
-        <div className="flex w-full flex-col items-start gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            {product.is_organic && (
-              <Badge variant="success">Organic</Badge>
-            )}
-            {product.tags?.slice(0, 2).map((tag, index) => (
-              <Badge key={index} variant={getBadgeVariant(tag)}>
-                {tag.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </Badge>
-            ))}
-            {product.stock_quantity < 10 && (
-              <Badge variant="warning">Limited Stock</Badge>
-            )}
-          </div>
-          <span className="text-heading-3 font-heading-3 text-default-font">
-            {product.name}
-          </span>
-          <span className="text-caption font-caption text-subtext-color">
-            by {product.seller?.name}
-          </span>
-          {product.average_rating && (
-            <div className="flex items-center gap-1">
-              <FeatherStar className="w-4 h-4 text-yellow-500 fill-current" />
-              <span className="text-caption font-caption text-subtext-color">
-                {product.average_rating.toFixed(1)} ({product.reviews?.length || 0} reviews)
-              </span>
+      <div className="flex flex-col justify-between gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100 h-full">
+        <div className="flex flex-col gap-4">
+          <img
+            className="h-48 w-full flex-none rounded-md object-cover"
+            src={product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
+          />
+          <div className="flex w-full flex-col items-start gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {product.is_organic && (
+                <Badge variant="success">Organic</Badge>
+              )}
+              {product.tags?.slice(0, 2).map((tag, index) => (
+                <Badge key={index} variant={getBadgeVariant(tag)}>
+                  {tag.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </Badge>
+              ))}
+              {product.stock_quantity < 10 && (
+                <Badge variant="warning">Limited Stock</Badge>
+              )}
             </div>
-          )}
-          <span className="text-body-bold font-body-bold text-default-font">
-            {formatPrice(product.price, product.unit)}
-          </span>
+            <span className="text-heading-3 font-heading-3 text-default-font">
+              {product.name}
+            </span>
+            <span className="text-caption font-caption text-subtext-color">
+              by {product.seller?.name}
+            </span>
+            {product.average_rating && (
+              <div className="flex items-center gap-1">
+                <FeatherStar className="w-4 h-4 text-yellow-500 fill-current" />
+                <span className="text-caption font-caption text-subtext-color">
+                  {product.average_rating.toFixed(1)} ({product.reviews?.length || 0} reviews)
+                </span>
+              </div>
+            )}
+            <span className="text-body-bold font-body-bold text-default-font">
+              {formatPrice(product.price, product.unit)}
+            </span>
+          </div>
         </div>
         <div className="flex w-full items-center gap-2">
           <Button
@@ -351,7 +353,7 @@ function Shop() {
       <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
         {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
         <div className="sticky top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full">
-          <div className="flex w-full items-center justify-between px-4 py-3">
+          <div className="flex w-full items-center justify-between px-4 py-4">
             <div className="flex flex-col gap-1">
               <span className="text-body-bold font-body-bold text-default-font">
                 {products.length} local products
