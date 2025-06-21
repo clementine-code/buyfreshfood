@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { TextField } from "@/ui/components/TextField";
 import { Badge } from "@/ui/components/Badge";
 import { FeatherSearch, FeatherTrendingUp, FeatherTag, FeatherMapPin, FeatherStore, FeatherGrid } from "@subframe/core";
@@ -21,6 +22,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   placeholder = "Search for fresh local food...",
   showTrending = true
 }) => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<FoodSearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,21 +34,19 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const preventBlurRef = useRef(false);
 
-  // Search function with debouncing
+  // Search function - only trigger when user types
   const searchFood = useCallback(async (searchQuery: string) => {
+    // Don't show suggestions for empty query
     if (searchQuery.length === 0) {
-      // Show popular items for empty query
-      setIsLoading(true);
-      try {
-        const popularSuggestions = await foodSearchService.getFoodSuggestions("");
-        setSuggestions(popularSuggestions);
-        setShowSuggestions(true);
-      } catch (error) {
-        console.error('Error getting popular suggestions:', error);
-        setSuggestions([]);
-      } finally {
-        setIsLoading(false);
-      }
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Only search if query is at least 2 characters
+    if (searchQuery.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
       return;
     }
 
@@ -65,15 +65,49 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
+  // Navigate to Shop page with search query
+  const navigateToShop = useCallback((searchQuery: string, suggestion?: FoodSearchSuggestion) => {
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) return;
+
+    // Handle different suggestion types
+    if (suggestion) {
+      switch (suggestion.type) {
+        case 'category':
+          // Extract category name from "All [Category]" format
+          const categoryName = suggestion.title.replace(/^All\s+/, '');
+          navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+          break;
+        case 'product':
+          // Navigate to shop with product search
+          navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
+          break;
+        case 'seller':
+          // Navigate to shop with seller filter
+          navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
+          break;
+        default:
+          // Default to search
+          navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
+      }
+    } else {
+      // Direct search navigation
+      navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
+    }
+
+    // Clean up UI
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+    inputRef.current?.blur();
+  }, [navigate]);
+
   // Handle search button click
   const handleSearchClick = useCallback(() => {
     if (query.trim()) {
       onSearchSubmit?.(query.trim());
-      setShowSuggestions(false);
-      setSelectedIndex(-1);
-      inputRef.current?.blur();
+      navigateToShop(query);
     }
-  }, [query, onSearchSubmit]);
+  }, [query, onSearchSubmit, navigateToShop]);
 
   // Handle input changes with debouncing
   const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,10 +119,15 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
       clearTimeout(debounceRef.current);
     }
 
-    // Debounce search - shorter delay for better UX
-    debounceRef.current = setTimeout(() => {
-      searchFood(value);
-    }, 200);
+    // Debounce search - only for non-empty queries
+    if (value.trim().length >= 2) {
+      debounceRef.current = setTimeout(() => {
+        searchFood(value);
+      }, 300);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
   }, [searchFood]);
 
   // Handle keyboard navigation
@@ -138,25 +177,25 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     preventBlurRef.current = true;
     
     setQuery(suggestion.title);
-    setShowSuggestions(false);
-    setSelectedIndex(-1);
     
+    // Call the callback if provided
     onItemSelect?.(suggestion);
+    
+    // Navigate to Shop page
+    navigateToShop(suggestion.title, suggestion);
     
     setTimeout(() => {
       preventBlurRef.current = false;
     }, 100);
-  }, [onItemSelect]);
+  }, [onItemSelect, navigateToShop]);
 
-  // Handle input focus
+  // Handle input focus - don't auto-show suggestions
   const handleInputFocus = useCallback(() => {
-    if (suggestions.length > 0 || query.length === 0) {
+    // Only show suggestions if we already have them and query is not empty
+    if (suggestions.length > 0 && query.length >= 2) {
       setShowSuggestions(true);
-      if (query.length === 0) {
-        searchFood(""); // Load popular items
-      }
     }
-  }, [suggestions.length, query.length, searchFood]);
+  }, [suggestions.length, query.length]);
 
   // Handle input blur
   const handleInputBlur = useCallback(() => {
@@ -212,22 +251,12 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
-  // Memoized suggestion list
+  // Memoized suggestion list - only show when user has typed something
   const suggestionList = useMemo(() => {
-    if (!showSuggestions || suggestions.length === 0) return null;
+    if (!showSuggestions || suggestions.length === 0 || query.length < 2) return null;
 
     return (
       <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[60] max-h-96 overflow-y-auto">
-        {/* Header for empty query */}
-        {query.length === 0 && showTrending && (
-          <div className="px-3 py-2 border-b border-neutral-100 bg-neutral-50">
-            <div className="flex items-center gap-2 text-subtext-color">
-              <FeatherTrendingUp className="w-4 h-4" />
-              <span className="text-caption-bold font-caption-bold">Popular Items</span>
-            </div>
-          </div>
-        )}
-
         {/* Loading state */}
         {isLoading && (
           <div className="px-3 py-4 text-center">
@@ -238,7 +267,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           </div>
         )}
 
-        {/* Suggestions */}
+        {/* Suggestions - Categories first, then products */}
         {!isLoading && suggestions.map((suggestion, index) => (
           <button
             key={`${suggestion.type}-${suggestion.id}`}
@@ -283,6 +312,12 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                           Organic
                         </Badge>
                       )}
+                      {/* Highlight category suggestions */}
+                      {suggestion.type === 'category' && (
+                        <Badge variant="brand" className="text-xs">
+                          Browse All
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm text-subtext-color truncate">
                       {suggestion.subtitle}
@@ -323,18 +358,24 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         ))}
 
         {/* No results */}
-        {!isLoading && suggestions.length === 0 && query.length > 0 && (
+        {!isLoading && suggestions.length === 0 && query.length >= 2 && (
           <div className="px-3 py-4 text-center text-subtext-color">
             <div className="flex flex-col items-center gap-2">
               <FeatherSearch className="w-8 h-8 text-neutral-300" />
               <span className="text-body font-body">No items found for "{query}"</span>
               <span className="text-caption font-caption">Try searching for fruits, vegetables, or local sellers</span>
+              <button
+                onClick={handleSearchClick}
+                className="mt-2 px-3 py-1 bg-brand-600 text-white text-sm rounded hover:bg-brand-500 transition-colors"
+              >
+                Search anyway
+              </button>
             </div>
           </div>
         )}
       </div>
     );
-  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, showTrending, getSuggestionIcon, handleSuggestionClick]);
+  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick]);
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>

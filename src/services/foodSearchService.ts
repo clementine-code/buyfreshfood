@@ -461,10 +461,12 @@ const TYPO_CORRECTIONS: { [key: string]: string } = {
 class FoodSearchService {
   /**
    * Get fuzzy search suggestions with discovery focus - prioritize categories
+   * Only return suggestions for queries with 2+ characters
    */
   async getFoodSuggestions(query: string): Promise<FoodSearchSuggestion[]> {
+    // Don't return suggestions for empty or very short queries
     if (query.length < 2) {
-      return this.getPopularSuggestions();
+      return [];
     }
 
     const suggestions: FoodSearchSuggestion[] = [];
@@ -474,7 +476,7 @@ class FoodSearchService {
     const categoryMatches = this.findCategoryMatches(normalizedQuery);
     suggestions.push(...categoryMatches);
 
-    // 2. Direct product matches
+    // 2. Direct product matches (but keep generic)
     const productMatches = this.findProductMatches(normalizedQuery);
     suggestions.push(...productMatches);
 
@@ -482,7 +484,7 @@ class FoodSearchService {
     const relatedMatches = this.findRelatedItems(normalizedQuery);
     suggestions.push(...relatedMatches);
 
-    // 4. Seller matches
+    // 4. Seller matches (keep neutral)
     const sellerMatches = this.findSellerMatches(normalizedQuery);
     suggestions.push(...sellerMatches);
 
@@ -490,8 +492,8 @@ class FoodSearchService {
     const uniqueSuggestions = this.removeDuplicates(suggestions);
     const sortedSuggestions = this.sortByRelevance(uniqueSuggestions);
 
-    // Always return 8-10 suggestions for discovery
-    return this.ensureMinimumSuggestions(sortedSuggestions, normalizedQuery);
+    // Return 8-10 suggestions for discovery, but prioritize generic options
+    return this.ensureBalancedSuggestions(sortedSuggestions, normalizedQuery);
   }
 
   /**
@@ -511,7 +513,7 @@ class FoodSearchService {
   }
 
   /**
-   * Find category matches for discovery - PRIORITIZED
+   * Find category matches for discovery - PRIORITIZED and GENERIC
    */
   private findCategoryMatches(query: string): FoodSearchSuggestion[] {
     const matches: FoodSearchSuggestion[] = [];
@@ -525,14 +527,15 @@ class FoodSearchService {
           );
 
           if (categoryItems.length > 0) {
+            // Use a generic representative image, not from a specific seller
             const representativeItem = categoryItems[0];
             matches.push({
               id: `category-${category.toLowerCase().replace(/\s+/g, '-')}`,
               type: 'category',
               title: `All ${category}`,
-              subtitle: `${categoryItems.length} items available • Browse all options`,
+              subtitle: `Browse ${categoryItems.length} ${category.toLowerCase()} from local farms`,
               image: representativeItem.image,
-              matchScore: config.priority // Use priority as match score
+              matchScore: config.priority + 5 // Boost category scores even higher
             });
           }
         }
@@ -559,9 +562,9 @@ class FoodSearchService {
               id: categoryId,
               type: 'category',
               title: `All ${category}`,
-              subtitle: `${categoryItems.length} items available • Browse all options`,
+              subtitle: `Browse ${categoryItems.length} ${category.toLowerCase()} from local farms`,
               image: representativeItem.image,
-              matchScore: 8.0 // High score for direct category matches
+              matchScore: 13.0 // Very high score for direct category matches
             });
           }
         }
@@ -572,7 +575,7 @@ class FoodSearchService {
   }
 
   /**
-   * Find direct product matches
+   * Find direct product matches - but keep them generic
    */
   private findProductMatches(query: string): FoodSearchSuggestion[] {
     const matches: FoodSearchSuggestion[] = [];
@@ -580,12 +583,12 @@ class FoodSearchService {
     for (const item of MOCK_FOOD_INVENTORY) {
       const score = this.calculateMatchScore(query, item);
       
-      if (score > 0.3) { // Lower threshold for more discovery
+      if (score > 0.4) { // Slightly higher threshold to be more selective
         matches.push({
           id: item.id,
           type: 'product',
           title: item.name,
-          subtitle: `${item.seller} • ${item.location}`,
+          subtitle: `From local farms • ${item.location.split(',')[0]}`,
           image: item.image,
           price: `${item.price}/${item.unit}`,
           location: item.location,
@@ -668,12 +671,12 @@ class FoodSearchService {
         !item.keywords.some(k => k.includes(query)) // Exclude direct matches
       );
 
-      for (const item of relatedItems.slice(0, 3)) { // Limit related items
+      for (const item of relatedItems.slice(0, 2)) { // Limit related items
         matches.push({
           id: `related-${item.id}`,
           type: 'related',
           title: item.name,
-          subtitle: `Related to "${query}" • ${item.seller}`,
+          subtitle: `Related to "${query}" • From local farms`,
           image: item.image,
           price: `${item.price}/${item.unit}`,
           matchScore: 0.5,
@@ -711,7 +714,7 @@ class FoodSearchService {
   }
 
   /**
-   * Find seller matches
+   * Find seller matches - keep neutral
    */
   private findSellerMatches(query: string): FoodSearchSuggestion[] {
     const matches: FoodSearchSuggestion[] = [];
@@ -727,14 +730,14 @@ class FoodSearchService {
       }
     }
 
-    // Create seller suggestions
+    // Create seller suggestions - keep neutral
     for (const [seller, items] of sellerItems) {
       const representativeItem = items[0];
       matches.push({
         id: `seller-${seller.toLowerCase().replace(/\s+/g, '-')}`,
         type: 'seller',
-        title: seller,
-        subtitle: `${items.length} products • ${representativeItem.location}`,
+        title: `${seller}`,
+        subtitle: `Local farm • ${items.length} products available`,
         image: representativeItem.image,
         location: representativeItem.location,
         matchScore: 0.6
@@ -760,7 +763,7 @@ class FoodSearchService {
   }
 
   /**
-   * Sort suggestions by relevance - CATEGORIES FIRST
+   * Sort suggestions by relevance - CATEGORIES FIRST, then balanced
    */
   private sortByRelevance(suggestions: FoodSearchSuggestion[]): FoodSearchSuggestion[] {
     return suggestions.sort((a, b) => {
@@ -791,49 +794,38 @@ class FoodSearchService {
   }
 
   /**
-   * Ensure minimum suggestions for discovery
+   * Ensure balanced suggestions that don't favor specific sellers
    */
-  private ensureMinimumSuggestions(suggestions: FoodSearchSuggestion[], query: string): FoodSearchSuggestion[] {
-    if (suggestions.length >= 8) {
-      return suggestions.slice(0, 10);
+  private ensureBalancedSuggestions(suggestions: FoodSearchSuggestion[], query: string): FoodSearchSuggestion[] {
+    const balanced: FoodSearchSuggestion[] = [];
+    const sellerCounts = new Map<string, number>();
+
+    // First, add all category suggestions (these are generic)
+    const categories = suggestions.filter(s => s.type === 'category');
+    balanced.push(...categories.slice(0, 3)); // Max 3 categories
+
+    // Then add products, but limit per seller to avoid favoritism
+    const products = suggestions.filter(s => s.type === 'product');
+    for (const product of products) {
+      const sellerName = product.subtitle.split('•')[0].trim();
+      const currentCount = sellerCounts.get(sellerName) || 0;
+      
+      // Limit to 2 products per seller to avoid favoritism
+      if (currentCount < 2 && balanced.length < 8) {
+        balanced.push(product);
+        sellerCounts.set(sellerName, currentCount + 1);
+      }
     }
 
-    // Add popular items to reach minimum
-    const popularItems = this.getPopularSuggestions();
-    const additionalItems = popularItems.filter(popular => 
-      !suggestions.some(existing => existing.id === popular.id)
-    );
+    // Add related items if we have space
+    const related = suggestions.filter(s => s.type === 'related');
+    balanced.push(...related.slice(0, Math.max(0, 8 - balanced.length)));
 
-    const combined = [...suggestions, ...additionalItems];
-    return combined.slice(0, 10);
-  }
+    // Add sellers if we still have space
+    const sellers = suggestions.filter(s => s.type === 'seller');
+    balanced.push(...sellers.slice(0, Math.max(0, 10 - balanced.length)));
 
-  /**
-   * Get popular suggestions for empty queries
-   */
-  private getPopularSuggestions(): FoodSearchSuggestion[] {
-    const popular = [
-      'veg-001', 'fruit-001', 'dairy-001', 'meat-001', 'baked-001', 
-      'honey-001', 'specialty-001', 'fruit-002'
-    ];
-
-    return popular.map(id => {
-      const item = MOCK_FOOD_INVENTORY.find(i => i.id === id);
-      if (!item) return null;
-
-      return {
-        id: item.id,
-        type: 'product' as const,
-        title: item.name,
-        subtitle: `${item.seller} • ${item.location}`,
-        image: item.image,
-        price: `${item.price}/${item.unit}`,
-        location: item.location,
-        matchScore: 1.0,
-        isOrganic: item.isOrganic,
-        tags: item.tags
-      };
-    }).filter(Boolean) as FoodSearchSuggestion[];
+    return balanced.slice(0, 10);
   }
 
   /**
