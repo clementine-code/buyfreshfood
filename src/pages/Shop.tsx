@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMap } from "@subframe/core";
 import { FeatherFilter } from "@subframe/core";
@@ -28,8 +29,10 @@ import MobileMapModal from "../components/MobileMapModal";
 import DesktopFilterModal from "../components/DesktopFilterModal";
 import Footer from "../components/Footer";
 import { getProducts, getCategories, getSellers, type Product } from "../lib/supabase";
+import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 
 function Shop() {
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState("grid");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
@@ -47,7 +50,12 @@ function Shop() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load data from Supabase
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
+  const [isSearchMode, setIsSearchMode] = useState(false);
+
+  // Load data from Supabase and handle URL search params
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -74,6 +82,21 @@ function Shop() {
         setCategories(categoriesResult.data);
         setSellers(sellersResult.data);
         setError(null);
+
+        // Check for search query in URL
+        const urlSearchQuery = searchParams.get('search');
+        const urlCategory = searchParams.get('category');
+        
+        if (urlSearchQuery) {
+          setSearchQuery(urlSearchQuery);
+          await performSearch(urlSearchQuery);
+        } else if (urlCategory) {
+          // Handle category filter from URL
+          setAppliedFilters(prev => ({
+            ...prev,
+            categories: [urlCategory]
+          }));
+        }
       } catch (err) {
         console.error('Error loading data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -83,13 +106,61 @@ function Shop() {
     };
 
     loadData();
-  }, []);
+  }, [searchParams]);
+
+  // Perform search using food search service
+  const performSearch = async (query: string) => {
+    if (!query.trim()) {
+      setIsSearchMode(false);
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const results = await foodSearchService.searchProducts(query.trim());
+      setSearchResults(results);
+      setIsSearchMode(true);
+      setError(null);
+    } catch (err) {
+      console.error('Error searching products:', err);
+      setError('Failed to search products');
+      setSearchResults([]);
+      setIsSearchMode(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle search input
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  // Handle search submit
+  const handleSearchSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await performSearch(searchQuery);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery("");
+    setIsSearchMode(false);
+    setSearchResults([]);
+    // Update URL to remove search params
+    window.history.replaceState({}, '', '/shop');
+  };
 
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
   // Check if we're currently viewing the main product list (not in modal views)
   const isMainProductView = !showMobileFilters && !showMobileMap;
+
+  // Get current products to display (search results or regular products)
+  const currentProducts = isSearchMode ? searchResults : products;
+  const currentProductCount = currentProducts.length;
 
   const getBadgeVariant = (tag: string) => {
     if (tag.includes('organic') || tag.includes('pesticide-free')) return 'success';
@@ -98,55 +169,76 @@ function Shop() {
     return 'neutral';
   };
 
-  const formatPrice = (price: number, unit: string) => {
-    return `$${price.toFixed(2)}/${unit}`;
+  const formatPrice = (price: number | string, unit: string) => {
+    const priceNum = typeof price === 'string' ? parseFloat(price.replace('$', '')) : price;
+    return `$${priceNum.toFixed(2)}/${unit}`;
   };
 
-  const ProductCard = ({ product, isListView = false }: { product: Product; isListView?: boolean }) => {
+  // Convert FoodItem to Product-like structure for rendering
+  const convertFoodItemToProduct = (item: FoodItem): any => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    price: parseFloat(item.price.replace('$', '')),
+    unit: item.unit,
+    image_url: item.image,
+    stock_quantity: item.inStock ? (item.stockLevel === 'high' ? 50 : item.stockLevel === 'medium' ? 25 : 5) : 0,
+    is_organic: item.isOrganic,
+    tags: item.tags,
+    seller: { name: item.seller },
+    category: { name: item.category },
+    average_rating: Math.random() * 2 + 3, // Mock rating
+    reviews: []
+  });
+
+  const ProductCard = ({ product, isListView = false }: { product: any; isListView?: boolean }) => {
+    // Handle both Product and FoodItem types
+    const displayProduct = product.seller ? product : convertFoodItemToProduct(product);
+    
     if (isListView) {
       return (
         <div className="flex items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
           <img
             className="h-20 w-20 md:h-24 md:w-24 flex-none rounded-md object-cover"
-            src={product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
+            src={displayProduct.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
           />
           <div className="flex flex-1 flex-col gap-2 min-w-0">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
               <div className="flex flex-col gap-2 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  {product.is_organic && (
+                  {displayProduct.is_organic && (
                     <Badge variant="success">Organic</Badge>
                   )}
-                  {product.tags?.slice(0, 2).map((tag, index) => (
+                  {displayProduct.tags?.slice(0, 2).map((tag, index) => (
                     <Badge key={index} variant={getBadgeVariant(tag)}>
                       {tag.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                     </Badge>
                   ))}
-                  {product.stock_quantity < 10 && (
+                  {displayProduct.stock_quantity < 10 && (
                     <Badge variant="warning">Limited Stock</Badge>
                   )}
                 </div>
                 <span className="text-heading-3 font-heading-3 text-default-font truncate">
-                  {product.name}
+                  {displayProduct.name}
                 </span>
                 <span className="text-body font-body text-subtext-color line-clamp-2 hidden md:block">
-                  {product.description}
+                  {displayProduct.description}
                 </span>
                 <span className="text-caption font-caption text-subtext-color">
-                  by {product.seller?.name}
+                  by {displayProduct.seller?.name}
                 </span>
-                {product.average_rating && (
+                {displayProduct.average_rating && (
                   <div className="flex items-center gap-1">
                     <FeatherStar className="w-4 h-4 text-yellow-500 fill-current" />
                     <span className="text-caption font-caption text-subtext-color">
-                      {product.average_rating.toFixed(1)} ({product.reviews?.length || 0} reviews)
+                      {displayProduct.average_rating.toFixed(1)} ({displayProduct.reviews?.length || 0} reviews)
                     </span>
                   </div>
                 )}
               </div>
               <div className="flex flex-row md:flex-col items-center md:items-end gap-2 justify-between md:justify-start">
                 <span className="text-heading-3 font-heading-3 text-default-font whitespace-nowrap">
-                  {formatPrice(product.price, product.unit)}
+                  {formatPrice(displayProduct.price, displayProduct.unit)}
                 </span>
                 <div className="flex items-center gap-2">
                   <Button
@@ -175,38 +267,38 @@ function Shop() {
         <div className="flex flex-col gap-4">
           <img
             className="h-48 w-full flex-none rounded-md object-cover"
-            src={product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
+            src={displayProduct.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
           />
           <div className="flex w-full flex-col items-start gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              {product.is_organic && (
+              {displayProduct.is_organic && (
                 <Badge variant="success">Organic</Badge>
               )}
-              {product.tags?.slice(0, 2).map((tag, index) => (
+              {displayProduct.tags?.slice(0, 2).map((tag, index) => (
                 <Badge key={index} variant={getBadgeVariant(tag)}>
                   {tag.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </Badge>
               ))}
-              {product.stock_quantity < 10 && (
+              {displayProduct.stock_quantity < 10 && (
                 <Badge variant="warning">Limited Stock</Badge>
               )}
             </div>
             <span className="text-heading-3 font-heading-3 text-default-font">
-              {product.name}
+              {displayProduct.name}
             </span>
             <span className="text-caption font-caption text-subtext-color">
-              by {product.seller?.name}
+              by {displayProduct.seller?.name}
             </span>
-            {product.average_rating && (
+            {displayProduct.average_rating && (
               <div className="flex items-center gap-1">
                 <FeatherStar className="w-4 h-4 text-yellow-500 fill-current" />
                 <span className="text-caption font-caption text-subtext-color">
-                  {product.average_rating.toFixed(1)} ({product.reviews?.length || 0} reviews)
+                  {displayProduct.average_rating.toFixed(1)} ({displayProduct.reviews?.length || 0} reviews)
                 </span>
               </div>
             )}
             <span className="text-body-bold font-body-bold text-default-font">
-              {formatPrice(product.price, product.unit)}
+              {formatPrice(displayProduct.price, displayProduct.unit)}
             </span>
           </div>
         </div>
@@ -232,7 +324,9 @@ function Shop() {
       <div className="flex h-screen w-full items-center justify-center bg-default-background">
         <div className="flex flex-col items-center gap-4">
           <Loader size="large" />
-          <span className="text-body font-body text-subtext-color">Loading fresh local products...</span>
+          <span className="text-body font-body text-subtext-color">
+            {isSearchMode ? 'Searching fresh local products...' : 'Loading fresh local products...'}
+          </span>
         </div>
       </div>
     );
@@ -261,6 +355,37 @@ function Shop() {
           {/* Controls Bar - Sticky to top, accounting for navbar */}
           <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
+              {/* Search Bar */}
+              <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+                <TextField
+                  className="h-auto w-64"
+                  variant="filled"
+                  label=""
+                  helpText=""
+                  icon={<FeatherSearch />}
+                  iconRight={
+                    searchQuery && (
+                      <button
+                        type="button"
+                        onClick={clearSearch}
+                        className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors"
+                      >
+                        <FeatherX className="w-4 h-4" />
+                      </button>
+                    )
+                  }
+                >
+                  <TextField.Input
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                  />
+                </TextField>
+                <Button type="submit" size="small">
+                  Search
+                </Button>
+              </form>
+
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
                 icon={<FeatherFilter />}
@@ -272,7 +397,12 @@ function Shop() {
               
               <div className="flex flex-col gap-1">
                 <span className="text-heading-3 font-heading-3 text-default-font">
-                  {products.length} local products
+                  {currentProductCount} {isSearchMode ? 'search results' : 'local products'}
+                  {isSearchMode && (
+                    <span className="text-body font-body text-subtext-color ml-2">
+                      for "{searchQuery}"
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -327,19 +457,39 @@ function Shop() {
 
           {/* Products Grid/List - Scrollable content area */}
           <div className="flex-1 overflow-y-auto p-6 bg-default-background">
-            <div className={`w-full ${
-              viewMode === "grid" 
-                ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
-                : "flex flex-col gap-4"
-            }`}>
-              {products.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  isListView={viewMode === "list"} 
-                />
-              ))}
-            </div>
+            {currentProductCount === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <FeatherSearch className="w-16 h-16 text-neutral-300 mb-4" />
+                <span className="text-heading-2 font-heading-2 text-default-font mb-2">
+                  {isSearchMode ? 'No products found' : 'No products available'}
+                </span>
+                <span className="text-body font-body text-subtext-color">
+                  {isSearchMode 
+                    ? `Try searching for different terms or browse our categories`
+                    : 'Check back later for fresh local products'
+                  }
+                </span>
+                {isSearchMode && (
+                  <Button onClick={clearSearch} className="mt-4">
+                    Browse All Products
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className={`w-full ${
+                viewMode === "grid" 
+                  ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
+                  : "flex flex-col gap-4"
+              }`}>
+                {currentProducts.map((product) => (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    isListView={viewMode === "list"} 
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -353,75 +503,134 @@ function Shop() {
       <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
         {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
         <div className="sticky top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full">
-          <div className="flex w-full items-center justify-between px-4 py-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-body-bold font-body-bold text-default-font">
-                {products.length} local products
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
-                <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
-                <ToggleGroup.Item icon={<FeatherList />} value="list" />
-              </ToggleGroup>
-              <SubframeCore.DropdownMenu.Root>
-                <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                  <Button
-                    variant="neutral-tertiary"
-                    iconRight={<FeatherChevronDown />}
-                    size="small"
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  >
-                    Sort
-                  </Button>
-                </SubframeCore.DropdownMenu.Trigger>
-                <SubframeCore.DropdownMenu.Portal>
-                  <SubframeCore.DropdownMenu.Content
-                    side="bottom"
-                    align="end"
-                    sideOffset={12}
-                    className="z-[100]"
-                    asChild={true}
-                  >
-                    <DropdownMenu>
-                      <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
-                        Nearest to Me
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherStar />}>
-                        Top Rated
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
-                        Most Purchased
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                        Price - Low to High
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                        Price - High to Low
-                      </DropdownMenu.DropdownItem>
-                    </DropdownMenu>
-                  </SubframeCore.DropdownMenu.Content>
-                </SubframeCore.DropdownMenu.Portal>
-              </SubframeCore.DropdownMenu.Root>
+          <div className="flex w-full flex-col gap-3 px-4 py-4">
+            {/* Search Bar */}
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+              <TextField
+                className="h-auto flex-1"
+                variant="filled"
+                label=""
+                helpText=""
+                icon={<FeatherSearch />}
+                iconRight={
+                  searchQuery && (
+                    <button
+                      type="button"
+                      onClick={clearSearch}
+                      className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors"
+                    >
+                      <FeatherX className="w-4 h-4" />
+                    </button>
+                  )
+                }
+              >
+                <TextField.Input
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </TextField>
+              <Button type="submit" size="small">
+                Search
+              </Button>
+            </form>
+
+            {/* Controls */}
+            <div className="flex w-full items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <span className="text-body-bold font-body-bold text-default-font">
+                  {currentProductCount} {isSearchMode ? 'results' : 'products'}
+                  {isSearchMode && (
+                    <span className="text-caption font-caption text-subtext-color block">
+                      for "{searchQuery}"
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
+                  <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
+                  <ToggleGroup.Item icon={<FeatherList />} value="list" />
+                </ToggleGroup>
+                <SubframeCore.DropdownMenu.Root>
+                  <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                    <Button
+                      variant="neutral-tertiary"
+                      iconRight={<FeatherChevronDown />}
+                      size="small"
+                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                    >
+                      Sort
+                    </Button>
+                  </SubframeCore.DropdownMenu.Trigger>
+                  <SubframeCore.DropdownMenu.Portal>
+                    <SubframeCore.DropdownMenu.Content
+                      side="bottom"
+                      align="end"
+                      sideOffset={12}
+                      className="z-[100]"
+                      asChild={true}
+                    >
+                      <DropdownMenu>
+                        <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
+                          Nearest to Me
+                        </DropdownMenu.DropdownItem>
+                        <DropdownMenu.DropdownItem icon={<FeatherStar />}>
+                          Top Rated
+                        </DropdownMenu.DropdownItem>
+                        <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
+                          Most Purchased
+                        </DropdownMenu.DropdownItem>
+                        <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                          Price - Low to High
+                        </DropdownMenu.DropdownItem>
+                        <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                          Price - High to Low
+                        </DropdownMenu.DropdownItem>
+                      </DropdownMenu>
+                    </SubframeCore.DropdownMenu.Content>
+                  </SubframeCore.DropdownMenu.Portal>
+                </SubframeCore.DropdownMenu.Root>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Products Grid/List - Proper spacing to avoid overlap */}
         <div className="w-full px-4 py-4 pb-24 flex-1">
-          <div className={`w-full ${
-            viewMode === "grid" 
-              ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 
-              : "flex flex-col gap-4"
-          }`}>
-            {products.map((product) => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                isListView={viewMode === "list"} 
-              />
-            ))}
-          </div>
+          {currentProductCount === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-16">
+              <FeatherSearch className="w-16 h-16 text-neutral-300 mb-4" />
+              <span className="text-heading-2 font-heading-2 text-default-font mb-2">
+                {isSearchMode ? 'No products found' : 'No products available'}
+              </span>
+              <span className="text-body font-body text-subtext-color mb-4">
+                {isSearchMode 
+                  ? `Try searching for different terms or browse our categories`
+                  : 'Check back later for fresh local products'
+                }
+              </span>
+              {isSearchMode && (
+                <Button onClick={clearSearch}>
+                  Browse All Products
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className={`w-full ${
+              viewMode === "grid" 
+                ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 
+                : "flex flex-col gap-4"
+            }`}>
+              {currentProducts.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  isListView={viewMode === "list"} 
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

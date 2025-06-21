@@ -252,6 +252,44 @@ const MOCK_FOOD_INVENTORY: FoodItem[] = [
     inStock: true,
     stockLevel: 'medium'
   },
+  {
+    id: 'dairy-003',
+    name: 'Organic 2% Milk',
+    category: 'Dairy & Eggs',
+    subcategory: 'Milk',
+    keywords: ['milk', '2%', 'reduced-fat', 'organic', 'dairy', 'healthy', 'calcium'],
+    seller: "Hillside Dairy",
+    location: "Rogers, AR",
+    price: "$6.99",
+    unit: "half-gallon",
+    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800",
+    zipCode: "72756",
+    description: "Organic 2% milk from certified organic dairy",
+    isOrganic: true,
+    isLocal: true,
+    tags: ['organic', 'reduced-fat', 'calcium-rich'],
+    inStock: true,
+    stockLevel: 'high'
+  },
+  {
+    id: 'dairy-004',
+    name: 'Artisan Cheese Selection',
+    category: 'Dairy & Eggs',
+    subcategory: 'Cheese',
+    keywords: ['cheese', 'artisan', 'aged', 'variety', 'local', 'gourmet', 'selection'],
+    seller: "Hillside Dairy",
+    location: "Rogers, AR",
+    price: "$18.99",
+    unit: "pack",
+    image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800",
+    zipCode: "72756",
+    description: "Curated selection of locally made artisan cheeses",
+    isOrganic: false,
+    isLocal: true,
+    tags: ['artisan', 'variety-pack', 'aged'],
+    inStock: true,
+    stockLevel: 'medium'
+  },
 
   // Meat & Poultry
   {
@@ -376,21 +414,28 @@ const MOCK_FOOD_INVENTORY: FoodItem[] = [
   }
 ];
 
-// Category mappings for discovery
-const CATEGORY_EXPANSIONS: { [key: string]: string[] } = {
-  'fruit': ['Fruits', 'Berries', 'Tree Fruits'],
-  'fruits': ['Fruits', 'Berries', 'Tree Fruits'],
-  'berry': ['Berries'],
-  'berries': ['Berries'],
-  'vegetable': ['Vegetables', 'Leafy Greens', 'Root Vegetables'],
-  'vegetables': ['Vegetables', 'Leafy Greens', 'Root Vegetables'],
-  'greens': ['Leafy Greens'],
-  'meat': ['Meat & Poultry', 'Beef', 'Chicken', 'Pork'],
-  'dairy': ['Dairy & Eggs', 'Milk', 'Cheese'],
-  'bread': ['Baked Goods', 'Bread'],
-  'honey': ['Honey & Preserves', 'Honey'],
-  'mushroom': ['Mushrooms'],
-  'mushrooms': ['Mushrooms']
+// Enhanced category mappings for discovery - prioritize these
+const CATEGORY_EXPANSIONS: { [key: string]: { categories: string[], priority: number } } = {
+  'berry': { categories: ['Berries'], priority: 10 },
+  'berries': { categories: ['Berries'], priority: 10 },
+  'fruit': { categories: ['Fruits', 'Tree Fruits'], priority: 9 },
+  'fruits': { categories: ['Fruits', 'Tree Fruits'], priority: 9 },
+  'vegetable': { categories: ['Vegetables', 'Leafy Greens'], priority: 9 },
+  'vegetables': { categories: ['Vegetables', 'Leafy Greens'], priority: 9 },
+  'tomato': { categories: ['Tomatoes'], priority: 8 },
+  'tomatoes': { categories: ['Tomatoes'], priority: 8 },
+  'greens': { categories: ['Leafy Greens'], priority: 8 },
+  'milk': { categories: ['Milk', 'Dairy & Eggs'], priority: 8 },
+  'dairy': { categories: ['Dairy & Eggs', 'Milk', 'Cheese'], priority: 7 },
+  'meat': { categories: ['Meat & Poultry', 'Beef', 'Chicken'], priority: 7 },
+  'bread': { categories: ['Baked Goods', 'Bread'], priority: 6 },
+  'honey': { categories: ['Honey & Preserves', 'Honey'], priority: 6 },
+  'mushroom': { categories: ['Mushrooms'], priority: 6 },
+  'mushrooms': { categories: ['Mushrooms'], priority: 6 },
+  'cheese': { categories: ['Cheese'], priority: 6 },
+  'eggs': { categories: ['Eggs'], priority: 6 },
+  'chicken': { categories: ['Chicken', 'Meat & Poultry'], priority: 6 },
+  'beef': { categories: ['Beef', 'Meat & Poultry'], priority: 6 }
 };
 
 // Common typos and variations
@@ -407,12 +452,15 @@ const TYPO_CORRECTIONS: { [key: string]: string } = {
   'mushrrom': 'mushroom',
   'mushrom': 'mushroom',
   'honney': 'honey',
-  'honny': 'honey'
+  'honny': 'honey',
+  'milks': 'milk',
+  'chees': 'cheese',
+  'cheeze': 'cheese'
 };
 
 class FoodSearchService {
   /**
-   * Get fuzzy search suggestions with discovery focus
+   * Get fuzzy search suggestions with discovery focus - prioritize categories
    */
   async getFoodSuggestions(query: string): Promise<FoodSearchSuggestion[]> {
     if (query.length < 2) {
@@ -422,13 +470,13 @@ class FoodSearchService {
     const suggestions: FoodSearchSuggestion[] = [];
     const normalizedQuery = this.normalizeQuery(query);
 
-    // 1. Direct product matches (highest priority)
-    const productMatches = this.findProductMatches(normalizedQuery);
-    suggestions.push(...productMatches);
-
-    // 2. Category matches
+    // 1. Category matches FIRST (highest priority for discovery)
     const categoryMatches = this.findCategoryMatches(normalizedQuery);
     suggestions.push(...categoryMatches);
+
+    // 2. Direct product matches
+    const productMatches = this.findProductMatches(normalizedQuery);
+    suggestions.push(...productMatches);
 
     // 3. Related/similar items
     const relatedMatches = this.findRelatedItems(normalizedQuery);
@@ -460,6 +508,67 @@ class FoodSearchService {
     }
 
     return normalized;
+  }
+
+  /**
+   * Find category matches for discovery - PRIORITIZED
+   */
+  private findCategoryMatches(query: string): FoodSearchSuggestion[] {
+    const matches: FoodSearchSuggestion[] = [];
+
+    // Check for category expansions with priority scoring
+    for (const [searchTerm, config] of Object.entries(CATEGORY_EXPANSIONS)) {
+      if (query.includes(searchTerm) || searchTerm.includes(query)) {
+        for (const category of config.categories) {
+          const categoryItems = MOCK_FOOD_INVENTORY.filter(item => 
+            item.category === category || item.subcategory === category
+          );
+
+          if (categoryItems.length > 0) {
+            const representativeItem = categoryItems[0];
+            matches.push({
+              id: `category-${category.toLowerCase().replace(/\s+/g, '-')}`,
+              type: 'category',
+              title: `All ${category}`,
+              subtitle: `${categoryItems.length} items available • Browse all options`,
+              image: representativeItem.image,
+              matchScore: config.priority // Use priority as match score
+            });
+          }
+        }
+      }
+    }
+
+    // Also check for direct category name matches
+    const allCategories = [...new Set(MOCK_FOOD_INVENTORY.map(item => item.category))];
+    const allSubcategories = [...new Set(MOCK_FOOD_INVENTORY.map(item => item.subcategory).filter(Boolean))];
+    
+    for (const category of [...allCategories, ...allSubcategories]) {
+      if (category.toLowerCase().includes(query) || query.includes(category.toLowerCase())) {
+        const categoryItems = MOCK_FOOD_INVENTORY.filter(item => 
+          item.category === category || item.subcategory === category
+        );
+
+        if (categoryItems.length > 0) {
+          const representativeItem = categoryItems[0];
+          const categoryId = `category-${category.toLowerCase().replace(/\s+/g, '-')}`;
+          
+          // Avoid duplicates
+          if (!matches.some(m => m.id === categoryId)) {
+            matches.push({
+              id: categoryId,
+              type: 'category',
+              title: `All ${category}`,
+              subtitle: `${categoryItems.length} items available • Browse all options`,
+              image: representativeItem.image,
+              matchScore: 8.0 // High score for direct category matches
+            });
+          }
+        }
+      }
+    }
+
+    return matches;
   }
 
   /**
@@ -542,38 +651,6 @@ class FoodSearchService {
     }
 
     return Math.min(score, 2.0); // Cap at 2.0
-  }
-
-  /**
-   * Find category matches for discovery
-   */
-  private findCategoryMatches(query: string): FoodSearchSuggestion[] {
-    const matches: FoodSearchSuggestion[] = [];
-
-    // Check for category expansions
-    for (const [searchTerm, categories] of Object.entries(CATEGORY_EXPANSIONS)) {
-      if (query.includes(searchTerm)) {
-        for (const category of categories) {
-          const categoryItems = MOCK_FOOD_INVENTORY.filter(item => 
-            item.category === category || item.subcategory === category
-          );
-
-          if (categoryItems.length > 0) {
-            const representativeItem = categoryItems[0];
-            matches.push({
-              id: `category-${category.toLowerCase().replace(/\s+/g, '-')}`,
-              type: 'category',
-              title: `All ${category}`,
-              subtitle: `${categoryItems.length} items available`,
-              image: representativeItem.image,
-              matchScore: 0.8
-            });
-          }
-        }
-      }
-    }
-
-    return matches;
   }
 
   /**
@@ -683,12 +760,25 @@ class FoodSearchService {
   }
 
   /**
-   * Sort suggestions by relevance
+   * Sort suggestions by relevance - CATEGORIES FIRST
    */
   private sortByRelevance(suggestions: FoodSearchSuggestion[]): FoodSearchSuggestion[] {
     return suggestions.sort((a, b) => {
-      // Prioritize by type: product > category > related > seller
-      const typeOrder = { product: 4, category: 3, related: 2, seller: 1 };
+      // PRIORITIZE CATEGORIES FIRST
+      if (a.type === 'category' && b.type !== 'category') {
+        return -1; // Category comes first
+      }
+      if (b.type === 'category' && a.type !== 'category') {
+        return 1; // Category comes first
+      }
+
+      // If both are categories, sort by match score
+      if (a.type === 'category' && b.type === 'category') {
+        return b.matchScore - a.matchScore;
+      }
+
+      // For non-categories, prioritize by type: product > related > seller
+      const typeOrder = { product: 3, related: 2, seller: 1 };
       const typeDiff = (typeOrder[b.type] || 0) - (typeOrder[a.type] || 0);
       
       if (typeDiff !== 0) {
@@ -744,6 +834,62 @@ class FoodSearchService {
         tags: item.tags
       };
     }).filter(Boolean) as FoodSearchSuggestion[];
+  }
+
+  /**
+   * Search products for Shop page results
+   */
+  async searchProducts(query: string, filters?: {
+    category?: string;
+    organic?: boolean;
+    priceRange?: [number, number];
+    location?: string;
+  }): Promise<FoodItem[]> {
+    let results = [...MOCK_FOOD_INVENTORY];
+
+    // Apply text search
+    if (query && query.trim()) {
+      const normalizedQuery = this.normalizeQuery(query);
+      results = results.filter(item => {
+        const score = this.calculateMatchScore(normalizedQuery, item);
+        return score > 0.1; // Lower threshold for search results
+      });
+
+      // Sort by relevance
+      results.sort((a, b) => {
+        const scoreA = this.calculateMatchScore(normalizedQuery, a);
+        const scoreB = this.calculateMatchScore(normalizedQuery, b);
+        return scoreB - scoreA;
+      });
+    }
+
+    // Apply filters
+    if (filters?.category) {
+      results = results.filter(item => 
+        item.category.toLowerCase() === filters.category?.toLowerCase() ||
+        item.subcategory?.toLowerCase() === filters.category?.toLowerCase()
+      );
+    }
+
+    if (filters?.organic) {
+      results = results.filter(item => item.isOrganic);
+    }
+
+    if (filters?.priceRange) {
+      const [min, max] = filters.priceRange;
+      results = results.filter(item => {
+        const price = parseFloat(item.price.replace('$', ''));
+        return price >= min && price <= max;
+      });
+    }
+
+    if (filters?.location) {
+      results = results.filter(item => 
+        item.location.toLowerCase().includes(filters.location?.toLowerCase() || '')
+      );
+    }
+
+    return results;
   }
 
   /**
