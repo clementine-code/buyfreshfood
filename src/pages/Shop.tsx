@@ -447,11 +447,11 @@ function Shop() {
 
   return (
     <div className="flex w-full flex-col bg-default-background min-h-screen">
-      {/* Desktop Layout - Only show on extra large screens (1280px+) */}
+      {/* Desktop Layout - Airbnb Style: Left scrolls, Right map is frozen */}
       <div className="hidden xl:flex w-full h-screen overflow-hidden">
-        {/* Left Side - Products */}
-        <div className="flex-1 flex flex-col h-full bg-default-background">
-          {/* Controls Bar - Fixed at top */}
+        {/* Left Side - Products (Scrollable) */}
+        <div className="w-1/2 flex flex-col h-full bg-default-background">
+          {/* Controls Bar - Sticky at top */}
           <div className="flex-shrink-0 sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
@@ -531,8 +531,9 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Grid/List - Scrollable content area */}
+          {/* Products Area - Scrollable with all content */}
           <div className="flex-1 overflow-y-auto bg-default-background">
+            {/* Products Grid/List */}
             <div className="p-6">
               {currentProducts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-16">
@@ -555,7 +556,7 @@ function Shop() {
               ) : (
                 <div className={`w-full ${
                   viewMode === "grid" 
-                    ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
+                    ? "grid gap-4 grid-cols-1 lg:grid-cols-2" 
                     : "flex flex-col gap-4"
                 }`}>
                   {currentProducts.map((product) => (
@@ -568,16 +569,17 @@ function Shop() {
                 </div>
               )}
             </div>
-          </div>
-          
-          {/* Pagination - Fixed at bottom */}
-          <div className="flex-shrink-0">
+            
+            {/* Pagination */}
             <PaginationControls />
+            
+            {/* Footer */}
+            <Footer />
           </div>
         </div>
 
-        {/* Right Side - Static Map */}
-        <div className="w-1/2 h-screen border-l border-neutral-200 flex-shrink-0">
+        {/* Right Side - Map (Completely Frozen) */}
+        <div className="w-1/2 h-screen border-l border-neutral-200 flex-shrink-0 overflow-hidden">
           <Map className="h-full w-full" />
         </div>
       </div>
