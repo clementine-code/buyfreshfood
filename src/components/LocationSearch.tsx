@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { TextField } from "@/ui/components/TextField";
 import { FeatherMapPin, FeatherLocate, FeatherAlertCircle, FeatherCheck } from "@subframe/core";
 import { locationService, type LocationData, type LocationSuggestion, formatLocationDisplay, getLocationErrorMessage } from "../services/locationService";
@@ -30,16 +30,19 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   
   const debounceRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
+  const isProcessingRef = useRef(false);
 
-  // Debounced search for location suggestions
-  const searchLocations = async (query: string) => {
-    if (!query.trim() || query.length < 3) {
+  // Memoized search function to prevent recreation on every render
+  const searchLocations = useCallback(async (query: string) => {
+    if (!query.trim() || query.length < 3 || isProcessingRef.current) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
+    isProcessingRef.current = true;
     setIsLoading(true);
+    
     try {
       const results = await locationService.getLocationSuggestions(query);
       setSuggestions(results);
@@ -50,30 +53,47 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       setShowSuggestions(false);
     } finally {
       setIsLoading(false);
+      isProcessingRef.current = false;
     }
-  };
+  }, []);
 
-  const handleLocationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Optimized input handler with immediate state update
+  const handleLocationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
+    
+    // Update input value immediately for responsive typing
     setLocation(value);
-    setSelectedLocation(null);
-    setValidationError(null);
+    
+    // Reset other states without blocking
+    requestAnimationFrame(() => {
+      setSelectedLocation(null);
+      setValidationError(null);
 
-    // Clear existing debounce
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
+      // Clear existing debounce
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
 
-    // Debounce search
-    debounceRef.current = setTimeout(() => {
-      searchLocations(value);
-    }, 300);
-  };
+      // Only search if we have enough characters
+      if (value.trim().length >= 3) {
+        debounceRef.current = setTimeout(() => {
+          searchLocations(value);
+        }, 500); // Increased debounce time to reduce API calls
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    });
+  }, [searchLocations]);
 
-  const handleSuggestionClick = async (suggestion: LocationSuggestion) => {
+  const handleSuggestionClick = useCallback(async (suggestion: LocationSuggestion) => {
+    if (isProcessingRef.current) return;
+    
     setLocation(suggestion.description);
     setSuggestions([]);
     setShowSuggestions(false);
+    
+    isProcessingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -96,12 +116,16 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       setValidationError('Unable to get location details. Please try again.');
     } finally {
       setIsLoading(false);
+      isProcessingRef.current = false;
     }
-  };
+  }, [onLocationSelect, onLocationError]);
 
-  const handleCurrentLocationClick = async () => {
+  const handleCurrentLocationClick = useCallback(async () => {
+    if (isProcessingRef.current) return;
+    
     setIsGettingLocation(true);
     setValidationError(null);
+    isProcessingRef.current = true;
 
     try {
       const locationData = await locationService.getCurrentLocation();
@@ -129,17 +153,20 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       onLocationError?.('Location access denied. Please enter your location manually.');
     } finally {
       setIsGettingLocation(false);
+      isProcessingRef.current = false;
     }
-  };
+  }, [onLocationSelect, onLocationError]);
 
-  const handleInputBlur = async () => {
-    // Small delay to allow suggestion clicks to register
+  const handleInputBlur = useCallback(() => {
+    // Use a longer delay to ensure suggestion clicks work properly
     setTimeout(async () => {
       setShowSuggestions(false);
       
-      // If user typed something but didn't select a suggestion, try to validate it
-      if (location && !selectedLocation) {
+      // Only validate if we're not already processing and have input
+      if (location && !selectedLocation && !isProcessingRef.current) {
+        isProcessingRef.current = true;
         setIsLoading(true);
+        
         try {
           const locationData = await locationService.validateLocationInput(location);
           
@@ -164,16 +191,17 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           setValidationError('Unable to validate location. Please try again.');
         } finally {
           setIsLoading(false);
+          isProcessingRef.current = false;
         }
       }
-    }, 200);
-  };
+    }, 300);
+  }, [location, selectedLocation, onLocationSelect, onLocationError]);
 
-  const handleInputFocus = () => {
+  const handleInputFocus = useCallback(() => {
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
-  };
+  }, [suggestions.length]);
 
   // Cleanup debounce on unmount
   useEffect(() => {
@@ -181,19 +209,29 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
+      isProcessingRef.current = false;
     };
   }, []);
 
-  // Determine validation state
-  const getValidationState = () => {
+  // Memoized validation state to prevent unnecessary recalculations
+  const validationState = useMemo(() => {
     if (!showValidation) return null;
     
     if (validationError) return 'error';
     if (selectedLocation && selectedLocation.isNWA) return 'success';
     return null;
-  };
+  }, [showValidation, validationError, selectedLocation]);
 
-  const validationState = getValidationState();
+  // Memoized validation icon to prevent recreation
+  const validationIcon = useMemo(() => {
+    if (!showValidation || !selectedLocation) return null;
+    
+    return selectedLocation.isNWA ? (
+      <FeatherCheck className="w-4 h-4 text-success-600" />
+    ) : (
+      <FeatherAlertCircle className="w-4 h-4 text-error-600" />
+    );
+  }, [showValidation, selectedLocation]);
 
   return (
     <div className={`relative ${className}`}>
@@ -207,15 +245,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         iconRight={
           <div className="flex items-center gap-1">
             {/* Validation indicator */}
-            {showValidation && selectedLocation && (
-              <>
-                {selectedLocation.isNWA ? (
-                  <FeatherCheck className="w-4 h-4 text-success-600" />
-                ) : (
-                  <FeatherAlertCircle className="w-4 h-4 text-error-600" />
-                )}
-              </>
-            )}
+            {validationIcon}
             
             {/* Current location button */}
             <button
@@ -238,13 +268,14 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           disabled={isLoading || isGettingLocation}
+          autoComplete="off"
         />
       </TextField>
 
       {/* Location Suggestions Dropdown */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
-          {suggestions.map((suggestion, index) => (
+          {suggestions.map((suggestion) => (
             <button
               key={suggestion.place_id}
               className="w-full text-left px-3 py-2 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 text-body font-body text-default-font"
