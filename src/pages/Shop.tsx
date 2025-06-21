@@ -447,11 +447,11 @@ function Shop() {
 
   return (
     <div className="flex w-full flex-col bg-default-background min-h-screen">
-      {/* Desktop Layout - Airbnb Style: Left scrolls, Right map is frozen */}
+      {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
       <div className="hidden xl:flex w-full h-screen overflow-hidden">
-        {/* Left Side - Products (Scrollable) */}
-        <div className="w-1/2 flex flex-col h-full bg-default-background">
-          {/* Controls Bar - Sticky at top */}
+        {/* Left Side - Products (50% width, scrollable content) */}
+        <div className="w-1/2 h-full flex flex-col bg-default-background overflow-hidden">
+          {/* Controls Bar - Fixed at top */}
           <div className="flex-shrink-0 sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
@@ -531,7 +531,7 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Area - Scrollable with all content */}
+          {/* Products Area - Scrollable with ALL content (products + pagination + footer) */}
           <div className="flex-1 overflow-y-auto bg-default-background">
             {/* Products Grid/List */}
             <div className="p-6">
@@ -578,8 +578,8 @@ function Shop() {
           </div>
         </div>
 
-        {/* Right Side - Map (Completely Frozen) */}
-        <div className="w-1/2 h-screen border-l border-neutral-200 flex-shrink-0 overflow-hidden">
+        {/* Right Side - Map (50% width, COMPLETELY FROZEN) */}
+        <div className="w-1/2 h-full overflow-hidden">
           <Map className="h-full w-full" />
         </div>
       </div>
