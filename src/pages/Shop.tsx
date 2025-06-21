@@ -450,9 +450,9 @@ function Shop() {
       {/* Desktop Layout - Only show on extra large screens (1280px+) */}
       <div className="hidden xl:flex w-full h-screen overflow-hidden">
         {/* Left Side - Products */}
-        <div className="flex-1 flex flex-col h-full bg-default-background overflow-hidden">
-          {/* Controls Bar - Sticky to top, accounting for navbar */}
-          <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm flex-shrink-0">
+        <div className="flex-1 flex flex-col h-full bg-default-background">
+          {/* Controls Bar - Fixed at top */}
+          <div className="flex-shrink-0 sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -531,11 +531,11 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Grid/List - Scrollable content area with flex layout */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-6 bg-default-background">
+          {/* Products Grid/List - Scrollable content area */}
+          <div className="flex-1 overflow-y-auto bg-default-background">
+            <div className="p-6">
               {currentProducts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="flex flex-col items-center justify-center h-full text-center py-16">
                   <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
                   <span className="text-heading-2 font-heading-2 text-default-font mb-2">
                     {isSearchMode ? 'No products found' : 'No products available'}
@@ -568,16 +568,16 @@ function Shop() {
                 </div>
               )}
             </div>
-            
-            {/* Pagination - Fixed at bottom */}
-            <div className="flex-shrink-0">
-              <PaginationControls />
-            </div>
+          </div>
+          
+          {/* Pagination - Fixed at bottom */}
+          <div className="flex-shrink-0">
+            <PaginationControls />
           </div>
         </div>
 
-        {/* Right Side - Static Map with full height */}
-        <div className="w-1/2 h-screen border-l border-neutral-200 z-10 overflow-hidden">
+        {/* Right Side - Static Map */}
+        <div className="w-1/2 h-screen border-l border-neutral-200 flex-shrink-0">
           <Map className="h-full w-full" />
         </div>
       </div>
