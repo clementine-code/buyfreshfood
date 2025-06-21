@@ -397,8 +397,9 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
                       </div>
                     </div>
                   </DropdownMenu>
-                </SubframeCore.DropdownMenu.Portal>
-              </SubframeCore.DropdownMenu.Root>
+                </SubframeCore.DropdownMenu.Content>
+              </SubframeCore.DropdownMenu.Portal>
+            </SubframeCore.DropdownMenu.Root>
 
             <div className="flex-shrink-0">
               <IconButton
@@ -411,7 +412,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
               <IconButton
                 variant="brand-primary"
                 icon={<FeatherShoppingCart />}
-                onClick={(event: React.MouseEvent<HTMLButtonButton>) => {}}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
               />
             </div>
           </div>
