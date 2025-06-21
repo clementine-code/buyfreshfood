@@ -68,7 +68,7 @@ function Home() {
               className="w-full"
               onLocationSelect={handleLocationSelect}
               onLocationError={handleLocationError}
-              placeholder="Enter your zip code to find fresh local food near you..."
+              placeholder="Enter your locaiton to find fresh local food near you..."
               showValidation={true}
             />
             
