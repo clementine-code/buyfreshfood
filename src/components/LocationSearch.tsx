@@ -33,9 +33,9 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const isProcessingRef = useRef(false);
   const lastSearchRef = useRef<string>("");
-  const shouldMaintainFocusRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Improved search function with better status tracking
+  // Improved search function with better error handling
   const searchLocations = useCallback(async (query: string) => {
     if (!query.trim() || query.length < 3 || isProcessingRef.current || lastSearchRef.current === query) {
       if (query.length < 3) {
@@ -88,28 +88,27 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         setSearchStatus('not-found');
       }
     } finally {
-      // Keep loading state visible for at least 500ms for better UX
+      // Keep loading state visible for better UX but don't lose focus
       setTimeout(() => {
-        setIsLoading(false);
-        isProcessingRef.current = false;
-      }, 500);
+        if (lastSearchRef.current === query) {
+          setIsLoading(false);
+          isProcessingRef.current = false;
+        }
+      }, 300);
     }
   }, []);
 
-  // Optimized input handler that maintains focus
+  // Improved input handler that maintains focus better
   const handleLocationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     
-    // Update input value immediately without losing focus
+    // Update input value immediately
     setLocation(value);
     
     // Reset validation states
     setSelectedLocation(null);
     setValidationError(null);
     setSearchStatus('idle');
-    
-    // Maintain focus flag
-    shouldMaintainFocusRef.current = true;
 
     // Clear existing debounce
     if (debounceRef.current) {
@@ -120,7 +119,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     if (value.trim().length >= 3) {
       debounceRef.current = setTimeout(() => {
         searchLocations(value);
-      }, 400); // Slightly longer debounce for better API usage
+      }, 300);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -136,7 +135,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     setSuggestions([]);
     setShowSuggestions(false);
     lastSearchRef.current = suggestion.description;
-    shouldMaintainFocusRef.current = false; // Don't maintain focus after selection
     
     isProcessingRef.current = true;
     setIsLoading(true);
@@ -177,7 +175,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       setTimeout(() => {
         setIsLoading(false);
         isProcessingRef.current = false;
-      }, 300);
+      }, 200);
     }
   }, [onLocationSelect, onLocationError]);
 
@@ -188,7 +186,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     setValidationError(null);
     setSearchStatus('searching');
     isProcessingRef.current = true;
-    shouldMaintainFocusRef.current = false;
 
     try {
       const locationData = await locationService.getCurrentLocation();
@@ -224,34 +221,21 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, [onLocationSelect, onLocationError]);
 
-  const handleInputBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
-    // Only hide suggestions if we're not maintaining focus
-    if (!shouldMaintainFocusRef.current) {
-      setTimeout(() => {
-        setShowSuggestions(false);
-      }, 150);
-    }
-  }, []);
-
+  // Improved focus management
   const handleInputFocus = useCallback(() => {
-    shouldMaintainFocusRef.current = true;
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
   }, [suggestions.length]);
 
-  // Maintain focus after state updates
-  useEffect(() => {
-    if (shouldMaintainFocusRef.current && inputRef.current && document.activeElement !== inputRef.current) {
-      const timeoutId = setTimeout(() => {
-        if (inputRef.current && shouldMaintainFocusRef.current) {
-          inputRef.current.focus();
-        }
-      }, 0);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [location, isLoading]);
+  const handleInputBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
+    // Only hide suggestions if clicking outside the container
+    setTimeout(() => {
+      if (containerRef.current && !containerRef.current.contains(document.activeElement)) {
+        setShowSuggestions(false);
+      }
+    }, 150);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -260,7 +244,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         clearTimeout(debounceRef.current);
       }
       isProcessingRef.current = false;
-      shouldMaintainFocusRef.current = false;
     };
   }, []);
 
@@ -294,8 +277,11 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     return null;
   }, [isLoading, isGettingLocation, searchStatus]);
 
+  // Show status message when not showing suggestions
+  const showStatusMessage = (loadingMessage || searchStatus === 'not-found') && !showSuggestions && location.length >= 3;
+
   return (
-    <div className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`}>
       <TextField
         className="h-auto w-full flex-none"
         variant="filled"
@@ -321,7 +307,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
               </button>
               
               {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[60]">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[70]">
                 Find exact location
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-neutral-800"></div>
               </div>
@@ -342,9 +328,9 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         />
       </TextField>
 
-      {/* Location Suggestions Dropdown */}
+      {/* Location Suggestions Dropdown - Higher z-index */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[60] max-h-48 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
             <button
               key={suggestion.place_id || index}
@@ -353,7 +339,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
               type="button"
               onMouseDown={(e) => {
                 e.preventDefault(); // Prevent input blur
-                shouldMaintainFocusRef.current = false; // Allow blur after click
               }}
             >
               <div className="flex items-center gap-2">
@@ -370,23 +355,22 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         </div>
       )}
 
-      {/* Enhanced loading indicator with persistent status */}
-      {loadingMessage && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 p-3">
-          <div className="flex items-center gap-2 text-subtext-color">
-            <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-body font-body">{loadingMessage}</span>
-          </div>
-        </div>
-      )}
-
-      {/* No results message */}
-      {searchStatus === 'not-found' && !isLoading && location.length >= 3 && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 p-3">
-          <div className="flex items-center gap-2 text-subtext-color">
-            <FeatherAlertCircle className="w-4 h-4 text-warning-600" />
-            <span className="text-body font-body">No locations found. Try a different search term.</span>
-          </div>
+      {/* Status messages - Only show when not showing suggestions, lower z-index */}
+      {showStatusMessage && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[55] p-3">
+          {loadingMessage && (
+            <div className="flex items-center gap-2 text-subtext-color">
+              <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-body font-body">{loadingMessage}</span>
+            </div>
+          )}
+          
+          {searchStatus === 'not-found' && !isLoading && (
+            <div className="flex items-center gap-2 text-subtext-color">
+              <FeatherAlertCircle className="w-4 h-4 text-warning-600" />
+              <span className="text-body font-body">No locations found. Try a different search term.</span>
+            </div>
+          )}
         </div>
       )}
     </div>
