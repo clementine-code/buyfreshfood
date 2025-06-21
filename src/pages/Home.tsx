@@ -39,16 +39,8 @@ function Home() {
   };
 
   const handleShopClick = () => {
-    if (selectedLocation && selectedLocation.isNWA) {
-      // Redirect to shop with location
-      navigate('/shop');
-    } else if (selectedLocation && !selectedLocation.isNWA) {
-      // Redirect to waitlist for out-of-area locations
-      navigate('/waitlist');
-    } else {
-      // Show error or prompt for location
-      setLocationError('Please enter a valid location to start shopping.');
-    }
+    // Always navigate to shop - let users browse regardless of location
+    navigate('/shop');
   };
 
   const handleSellClick = () => {
