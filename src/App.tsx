@@ -7,6 +7,8 @@ import PasswordProtection from "./components/PasswordProtection";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import Sell from "./pages/Sell";
+import Waitlist from "./pages/Waitlist";
+import ProductDetail from "./pages/ProductDetail";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/sell" element={<Sell />} />
+            <Route path="/waitlist" element={<Waitlist />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
           </Routes>
         </DefaultPageLayout>
       </Router>

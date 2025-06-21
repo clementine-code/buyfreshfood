@@ -1,19 +1,23 @@
 "use client";
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/ui/components/Badge";
 import { Button } from "@/ui/components/Button";
 import { FeatherArrowRight } from "@subframe/core";
 import { FeatherClipboard } from "@subframe/core";
 import { FeatherUsers } from "@subframe/core";
 import { FeatherDollarSign } from "@subframe/core";
-import { FeatherFacebook } from "@subframe/core";
-import { FeatherInstagram } from "@subframe/core";
-import { FeatherXTwitter } from "@subframe/core";
-import { FeatherSlack } from "@subframe/core";
 import Footer from "../components/Footer";
 
 function Sell() {
+  const navigate = useNavigate();
+
+  const handleStartSellingClick = () => {
+    // For now, navigate to waitlist since seller onboarding isn't implemented
+    navigate('/waitlist');
+  };
+
   return (
     <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden">
       {/* Hero Section */}
@@ -33,7 +37,7 @@ function Sell() {
               className="h-12 w-auto flex-none mobile:w-full"
               size="large"
               icon={<FeatherArrowRight />}
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              onClick={handleStartSellingClick}
             >
               Start Selling Today
             </Button>
@@ -112,7 +116,7 @@ function Sell() {
             className="h-12 w-auto flex-none mobile:w-full mobile:max-w-[300px]"
             size="large"
             icon={<FeatherArrowRight />}
-            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+            onClick={handleStartSellingClick}
           >
             Start Selling Today
           </Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { TextField } from "@/ui/components/TextField";
 import { FeatherMapPin } from "@subframe/core";
 import { FeatherLocate } from "@subframe/core";
@@ -17,6 +18,7 @@ import Footer from "../components/Footer";
 import { type LocationData } from "../services/locationService";
 
 function Home() {
+  const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
 
@@ -28,7 +30,6 @@ function Home() {
     // Here you could:
     // - Store location in global state/context
     // - Save to localStorage
-    // - Redirect to shop page with location filter
     // - Update URL with location parameters
   };
 
@@ -40,11 +41,18 @@ function Home() {
   const handleShopClick = () => {
     if (selectedLocation && selectedLocation.isNWA) {
       // Redirect to shop with location
-      window.location.href = '/shop';
+      navigate('/shop');
+    } else if (selectedLocation && !selectedLocation.isNWA) {
+      // Redirect to waitlist for out-of-area locations
+      navigate('/waitlist');
     } else {
       // Show error or prompt for location
-      setLocationError('Please enter a valid Northwest Arkansas location to start shopping.');
+      setLocationError('Please enter a valid location to start shopping.');
     }
+  };
+
+  const handleSellClick = () => {
+    navigate('/sell');
   };
 
   return (
@@ -81,10 +89,18 @@ function Home() {
               />
             )}
             
+            {selectedLocation && !selectedLocation.isNWA && (
+              <Alert
+                variant="warning"
+                title="Coming soon to your area"
+                description="We're expanding! Join our waitlist to be notified when we launch in your location."
+              />
+            )}
+            
             {locationError && (
               <Alert
                 variant="error"
-                title="Location not supported"
+                title="Location not found"
                 description={locationError}
               />
             )}
@@ -139,7 +155,7 @@ function Home() {
               className="h-8 w-full flex-none mobile:h-12 mobile:w-full mobile:flex-none mt-auto"
               variant="destructive-primary"
               icon={<FeatherArrowRight />}
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              onClick={handleSellClick}
             >
               Become a Seller
             </Button>
