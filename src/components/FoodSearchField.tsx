@@ -65,6 +65,16 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
+  // Handle search button click
+  const handleSearchClick = useCallback(() => {
+    if (query.trim()) {
+      onSearchSubmit?.(query.trim());
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+      inputRef.current?.blur();
+    }
+  }, [query, onSearchSubmit]);
+
   // Handle input changes with debouncing
   const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -86,8 +96,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     if (!showSuggestions || suggestions.length === 0) {
       if (event.key === 'Enter') {
         event.preventDefault();
-        onSearchSubmit?.(query);
-        setShowSuggestions(false);
+        handleSearchClick();
       }
       return;
     }
@@ -112,8 +121,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
           handleSuggestionClick(suggestions[selectedIndex]);
         } else {
-          onSearchSubmit?.(query);
-          setShowSuggestions(false);
+          handleSearchClick();
         }
         break;
       
@@ -123,7 +131,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         inputRef.current?.blur();
         break;
     }
-  }, [showSuggestions, suggestions, selectedIndex, query, onSearchSubmit]);
+  }, [showSuggestions, suggestions, selectedIndex, handleSearchClick]);
 
   // Handle suggestion clicks
   const handleSuggestionClick = useCallback((suggestion: FoodSearchSuggestion) => {
@@ -335,7 +343,17 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         variant="filled"
         label=""
         helpText=""
-        icon={<FeatherSearch />}
+        iconRight={
+          <button
+            onClick={handleSearchClick}
+            disabled={!query.trim()}
+            className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button"
+            title="Search for food items"
+          >
+            <FeatherSearch className="w-4 h-4" />
+          </button>
+        }
       >
         <TextField.Input
           ref={inputRef}
