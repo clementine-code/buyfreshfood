@@ -11,6 +11,8 @@ html, body {
   scrollbar-gutter: stable;
   /* Prevent horizontal overflow */
   overflow-x: hidden;
+  /* Ensure smooth scrolling behavior */
+  scroll-behavior: auto; /* Changed from smooth to auto for instant scroll to top */
 }
 
 #root {
@@ -48,4 +50,9 @@ body {
 /* Ensure scrollbar doesn't interfere with fixed elements */
 html {
   scroll-padding-top: 73px;
+}
+
+/* Override any smooth scrolling that might interfere with scroll to top */
+* {
+  scroll-behavior: auto !important;
 }
