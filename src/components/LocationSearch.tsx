@@ -31,60 +31,90 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const debounceRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const isProcessingRef = useRef(false);
+  const lastSearchRef = useRef<string>("");
+  const cursorPositionRef = useRef<number>(0);
 
-  // Memoized search function to prevent recreation on every render
+  // Preserve cursor position during updates
+  const preserveCursorPosition = useCallback(() => {
+    if (inputRef.current) {
+      cursorPositionRef.current = inputRef.current.selectionStart || 0;
+    }
+  }, []);
+
+  const restoreCursorPosition = useCallback(() => {
+    if (inputRef.current && document.activeElement === inputRef.current) {
+      const position = Math.min(cursorPositionRef.current, inputRef.current.value.length);
+      inputRef.current.setSelectionRange(position, position);
+    }
+  }, []);
+
+  // Improved search function with better error handling
   const searchLocations = useCallback(async (query: string) => {
-    if (!query.trim() || query.length < 3 || isProcessingRef.current) {
-      setSuggestions([]);
-      setShowSuggestions(false);
+    if (!query.trim() || query.length < 3 || isProcessingRef.current || lastSearchRef.current === query) {
+      if (query.length < 3) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
       return;
     }
 
+    lastSearchRef.current = query;
     isProcessingRef.current = true;
     setIsLoading(true);
     
     try {
       const results = await locationService.getLocationSuggestions(query);
-      setSuggestions(results);
-      setShowSuggestions(results.length > 0);
+      
+      // Only update if this is still the current search
+      if (lastSearchRef.current === query) {
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      }
     } catch (error) {
       console.error('Error searching locations:', error);
-      setSuggestions([]);
-      setShowSuggestions(false);
+      if (lastSearchRef.current === query) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
     } finally {
       setIsLoading(false);
       isProcessingRef.current = false;
     }
   }, []);
 
-  // Optimized input handler with immediate state update
+  // Optimized input handler that preserves cursor position
   const handleLocationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     
-    // Update input value immediately for responsive typing
+    // Preserve cursor position before any state updates
+    preserveCursorPosition();
+    
+    // Update input value immediately
     setLocation(value);
     
-    // Reset other states without blocking
-    requestAnimationFrame(() => {
-      setSelectedLocation(null);
-      setValidationError(null);
+    // Reset validation states immediately
+    setSelectedLocation(null);
+    setValidationError(null);
 
-      // Clear existing debounce
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
+    // Clear existing debounce
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
-      // Only search if we have enough characters
-      if (value.trim().length >= 3) {
-        debounceRef.current = setTimeout(() => {
-          searchLocations(value);
-        }, 500); // Increased debounce time to reduce API calls
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    });
-  }, [searchLocations]);
+    // Only search if we have enough characters
+    if (value.trim().length >= 3) {
+      debounceRef.current = setTimeout(() => {
+        searchLocations(value);
+      }, 400); // Reduced debounce for better responsiveness
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      lastSearchRef.current = "";
+    }
+
+    // Restore cursor position after React updates
+    setTimeout(restoreCursorPosition, 0);
+  }, [searchLocations, preserveCursorPosition, restoreCursorPosition]);
 
   const handleSuggestionClick = useCallback(async (suggestion: LocationSuggestion) => {
     if (isProcessingRef.current) return;
@@ -92,6 +122,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     setLocation(suggestion.description);
     setSuggestions([]);
     setShowSuggestions(false);
+    lastSearchRef.current = suggestion.description;
     
     isProcessingRef.current = true;
     setIsLoading(true);
@@ -134,6 +165,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         const displayText = formatLocationDisplay(locationData);
         setLocation(displayText);
         setSelectedLocation(locationData);
+        lastSearchRef.current = displayText;
         
         const errorMessage = getLocationErrorMessage(locationData);
         if (errorMessage) {
@@ -158,44 +190,11 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   }, [onLocationSelect, onLocationError]);
 
   const handleInputBlur = useCallback(() => {
-    // Use a longer delay to ensure suggestion clicks work properly
-    setTimeout(async () => {
+    // Delay hiding suggestions to allow clicks
+    setTimeout(() => {
       setShowSuggestions(false);
-      
-      // Only validate if we're not already processing and have input
-      if (location && !selectedLocation && !isProcessingRef.current) {
-        isProcessingRef.current = true;
-        setIsLoading(true);
-        
-        try {
-          const locationData = await locationService.validateLocationInput(location);
-          
-          if (locationData) {
-            setSelectedLocation(locationData);
-            setLocation(formatLocationDisplay(locationData));
-            
-            const errorMessage = getLocationErrorMessage(locationData);
-            if (errorMessage) {
-              setValidationError(errorMessage);
-              onLocationError?.(errorMessage);
-            } else {
-              setValidationError(null);
-              onLocationSelect?.(locationData);
-            }
-          } else {
-            setValidationError('Unable to find this location. Please try a different address or zip code.');
-            onLocationError?.('Unable to find this location. Please try a different address or zip code.');
-          }
-        } catch (error) {
-          console.error('Error validating location:', error);
-          setValidationError('Unable to validate location. Please try again.');
-        } finally {
-          setIsLoading(false);
-          isProcessingRef.current = false;
-        }
-      }
-    }, 300);
-  }, [location, selectedLocation, onLocationSelect, onLocationError]);
+    }, 200);
+  }, []);
 
   const handleInputFocus = useCallback(() => {
     if (suggestions.length > 0) {
@@ -203,7 +202,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, [suggestions.length]);
 
-  // Cleanup debounce on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -213,7 +212,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     };
   }, []);
 
-  // Memoized validation state to prevent unnecessary recalculations
+  // Memoized validation state
   const validationState = useMemo(() => {
     if (!showValidation) return null;
     
@@ -222,7 +221,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     return null;
   }, [showValidation, validationError, selectedLocation]);
 
-  // Memoized validation icon to prevent recreation
+  // Memoized validation icon
   const validationIcon = useMemo(() => {
     if (!showValidation || !selectedLocation) return null;
     
@@ -247,16 +246,23 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
             {/* Validation indicator */}
             {validationIcon}
             
-            {/* Current location button */}
-            <button
-              onClick={handleCurrentLocationClick}
-              disabled={isGettingLocation || isLoading}
-              className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50"
-              title="Use my current location"
-              type="button"
-            >
-              <FeatherLocate className={`w-4 h-4 ${isGettingLocation ? 'animate-pulse' : ''}`} />
-            </button>
+            {/* Current location button with tooltip */}
+            <div className="relative group">
+              <button
+                onClick={handleCurrentLocationClick}
+                disabled={isGettingLocation || isLoading}
+                className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50"
+                type="button"
+              >
+                <FeatherLocate className={`w-4 h-4 ${isGettingLocation ? 'animate-pulse' : ''}`} />
+              </button>
+              
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-neutral-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[60]">
+                Find exact location
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-neutral-800"></div>
+              </div>
+            </div>
           </div>
         }
       >
@@ -269,6 +275,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           onBlur={handleInputBlur}
           disabled={isLoading || isGettingLocation}
           autoComplete="off"
+          spellCheck={false}
         />
       </TextField>
 
@@ -278,9 +285,10 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.place_id}
-              className="w-full text-left px-3 py-2 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 text-body font-body text-default-font"
+              className="w-full text-left px-3 py-2 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 text-body font-body text-default-font transition-colors"
               onClick={() => handleSuggestionClick(suggestion)}
               type="button"
+              onMouseDown={(e) => e.preventDefault()} // Prevent input blur
             >
               <div className="flex items-center gap-2">
                 <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
