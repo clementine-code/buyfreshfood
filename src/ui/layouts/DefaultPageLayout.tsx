@@ -10,20 +10,19 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
-import { TextField } from "../components/TextField";
 import { Button } from "../components/Button";
 import { IconButton } from "../components/IconButton";
 import { DropdownMenu } from "../components/DropdownMenu";
 import * as SubframeCore from "@subframe/core";
-import { FeatherSearch } from "@subframe/core";
 import { FeatherMapPin } from "@subframe/core";
 import { FeatherUser } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
-import { FeatherLocateFixed } from "@subframe/core";
 import { FeatherMenu } from "@subframe/core";
 import MobileNavMenu from "../../components/MobileNavMenu";
 import LocationSearch from "../../components/LocationSearch";
+import FoodSearchField from "../../components/FoodSearchField";
 import { type LocationData } from "../../services/locationService";
+import { type FoodSearchSuggestion } from "../../services/foodSearchService";
 
 interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -48,6 +47,36 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
   const handleLocationError = (error: string) => {
     console.warn('Location error in navbar:', error);
     // Handle location errors (show toast, etc.)
+  };
+
+  const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
+    console.log('Selected food item:', suggestion);
+    // Handle food item selection - could navigate to product page, add to cart, etc.
+    
+    // Example: Navigate based on suggestion type
+    switch (suggestion.type) {
+      case 'product':
+        // Navigate to product detail page
+        // window.location.href = `/product/${suggestion.id}`;
+        break;
+      case 'category':
+        // Navigate to category page
+        // window.location.href = `/shop?category=${suggestion.title}`;
+        break;
+      case 'seller':
+        // Navigate to seller page
+        // window.location.href = `/seller/${suggestion.id}`;
+        break;
+      default:
+        // Navigate to search results
+        // window.location.href = `/shop?search=${suggestion.title}`;
+    }
+  };
+
+  const handleFoodSearchSubmit = (query: string) => {
+    console.log('Food search submitted:', query);
+    // Navigate to search results page
+    // window.location.href = `/shop?search=${encodeURIComponent(query)}`;
   };
 
   return (
@@ -91,19 +120,13 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
             </>
           }
           centerSlot={
-            <TextField
+            <FoodSearchField
               className="h-auto grow shrink-0 basis-0"
-              variant="filled"
-              label=""
-              helpText=""
-              icon={<FeatherSearch />}
-            >
-              <TextField.Input
-                placeholder="Search fresh local food..."
-                value=""
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
-              />
-            </TextField>
+              onItemSelect={handleFoodItemSelect}
+              onSearchSubmit={handleFoodSearchSubmit}
+              placeholder="Search for fresh local food..."
+              showTrending={true}
+            />
           }
           rightSlot={
             <div className="flex items-center justify-end gap-2">
@@ -184,19 +207,13 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
 
           {/* Center Search */}
           <div className="flex grow shrink-0 basis-0 items-center justify-center gap-4">
-            <TextField
+            <FoodSearchField
               className="h-auto grow shrink-0 basis-0"
-              variant="filled"
-              label=""
-              helpText=""
-              icon={<FeatherSearch />}
-            >
-              <TextField.Input
-                placeholder="Search fresh local food..."
-                value=""
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {}}
-              />
-            </TextField>
+              onItemSelect={handleFoodItemSelect}
+              onSearchSubmit={handleFoodSearchSubmit}
+              placeholder="Search fresh food..."
+              showTrending={false}
+            />
           </div>
 
           {/* Right Actions */}
