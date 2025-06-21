@@ -6,9 +6,6 @@ import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMap } from "@subframe/core";
 import { FeatherFilter } from "@subframe/core";
 import { Button } from "@/ui/components/Button";
-import { CheckboxCard } from "@/ui/components/CheckboxCard";
-import { TextField } from "@/ui/components/TextField";
-import { FeatherSearch } from "@subframe/core";
 import { ToggleGroup } from "@/ui/components/ToggleGroup";
 import { FeatherGrid } from "@subframe/core";
 import { FeatherList } from "@subframe/core";
@@ -51,9 +48,9 @@ function Shop() {
   const [error, setError] = useState<string | null>(null);
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [currentSearchQuery, setCurrentSearchQuery] = useState("");
 
   // Load data from Supabase and handle URL search params
   useEffect(() => {
@@ -86,9 +83,10 @@ function Shop() {
         // Check for search query in URL
         const urlSearchQuery = searchParams.get('search');
         const urlCategory = searchParams.get('category');
+        const urlSeller = searchParams.get('seller');
         
         if (urlSearchQuery) {
-          setSearchQuery(urlSearchQuery);
+          setCurrentSearchQuery(urlSearchQuery);
           await performSearch(urlSearchQuery);
         } else if (urlCategory) {
           // Handle category filter from URL
@@ -96,6 +94,18 @@ function Shop() {
             ...prev,
             categories: [urlCategory]
           }));
+          setIsSearchMode(false);
+        } else if (urlSeller) {
+          // Handle seller filter from URL
+          setAppliedFilters(prev => ({
+            ...prev,
+            sellers: [urlSeller]
+          }));
+          setIsSearchMode(false);
+        } else {
+          // No search parameters, show all products
+          setIsSearchMode(false);
+          setCurrentSearchQuery("");
         }
       } catch (err) {
         console.error('Error loading data:', err);
@@ -132,22 +142,16 @@ function Shop() {
     }
   };
 
-  // Handle search input
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-  };
-
-  // Handle search submit
-  const handleSearchSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    await performSearch(searchQuery);
-  };
-
-  // Clear search
+  // Clear search and return to all products
   const clearSearch = () => {
-    setSearchQuery("");
     setIsSearchMode(false);
     setSearchResults([]);
+    setCurrentSearchQuery("");
+    setAppliedFilters({
+      categories: [],
+      quality: [],
+      sellers: []
+    });
     // Update URL to remove search params
     window.history.replaceState({}, '', '/shop');
   };
@@ -355,37 +359,6 @@ function Shop() {
           {/* Controls Bar - Sticky to top, accounting for navbar */}
           <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
-              {/* Search Bar */}
-              <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-                <TextField
-                  className="h-auto w-64"
-                  variant="filled"
-                  label=""
-                  helpText=""
-                  icon={<FeatherSearch />}
-                  iconRight={
-                    searchQuery && (
-                      <button
-                        type="button"
-                        onClick={clearSearch}
-                        className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors"
-                      >
-                        <FeatherX className="w-4 h-4" />
-                      </button>
-                    )
-                  }
-                >
-                  <TextField.Input
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                  />
-                </TextField>
-                <Button type="submit" size="small">
-                  Search
-                </Button>
-              </form>
-
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
                 icon={<FeatherFilter />}
@@ -398,12 +371,20 @@ function Shop() {
               <div className="flex flex-col gap-1">
                 <span className="text-heading-3 font-heading-3 text-default-font">
                   {currentProductCount} {isSearchMode ? 'search results' : 'local products'}
-                  {isSearchMode && (
+                  {isSearchMode && currentSearchQuery && (
                     <span className="text-body font-body text-subtext-color ml-2">
-                      for "{searchQuery}"
+                      for "{currentSearchQuery}"
                     </span>
                   )}
                 </span>
+                {isSearchMode && (
+                  <button
+                    onClick={clearSearch}
+                    className="text-caption font-caption text-brand-600 hover:text-brand-700 text-left"
+                  >
+                    ← Back to all products
+                  </button>
+                )}
               </div>
             </div>
             
@@ -459,13 +440,13 @@ function Shop() {
           <div className="flex-1 overflow-y-auto p-6 bg-default-background">
             {currentProductCount === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <FeatherSearch className="w-16 h-16 text-neutral-300 mb-4" />
+                <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
                 <span className="text-heading-2 font-heading-2 text-default-font mb-2">
                   {isSearchMode ? 'No products found' : 'No products available'}
                 </span>
                 <span className="text-body font-body text-subtext-color">
                   {isSearchMode 
-                    ? `Try searching for different terms or browse our categories`
+                    ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
                     : 'Check back later for fresh local products'
                   }
                 </span>
@@ -504,48 +485,25 @@ function Shop() {
         {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
         <div className="sticky top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full">
           <div className="flex w-full flex-col gap-3 px-4 py-4">
-            {/* Search Bar */}
-            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-              <TextField
-                className="h-auto flex-1"
-                variant="filled"
-                label=""
-                helpText=""
-                icon={<FeatherSearch />}
-                iconRight={
-                  searchQuery && (
-                    <button
-                      type="button"
-                      onClick={clearSearch}
-                      className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors"
-                    >
-                      <FeatherX className="w-4 h-4" />
-                    </button>
-                  )
-                }
-              >
-                <TextField.Input
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-              </TextField>
-              <Button type="submit" size="small">
-                Search
-              </Button>
-            </form>
-
-            {/* Controls */}
+            {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
               <div className="flex flex-col gap-1">
                 <span className="text-body-bold font-body-bold text-default-font">
                   {currentProductCount} {isSearchMode ? 'results' : 'products'}
-                  {isSearchMode && (
+                  {isSearchMode && currentSearchQuery && (
                     <span className="text-caption font-caption text-subtext-color block">
-                      for "{searchQuery}"
+                      for "{currentSearchQuery}"
                     </span>
                   )}
                 </span>
+                {isSearchMode && (
+                  <button
+                    onClick={clearSearch}
+                    className="text-caption font-caption text-brand-600 hover:text-brand-700 text-left"
+                  >
+                    ← Back to all products
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
@@ -600,13 +558,13 @@ function Shop() {
         <div className="w-full px-4 py-4 pb-24 flex-1">
           {currentProductCount === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
-              <FeatherSearch className="w-16 h-16 text-neutral-300 mb-4" />
+              <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
               <span className="text-heading-2 font-heading-2 text-default-font mb-2">
                 {isSearchMode ? 'No products found' : 'No products available'}
               </span>
               <span className="text-body font-body text-subtext-color mb-4">
                 {isSearchMode 
-                  ? `Try searching for different terms or browse our categories`
+                  ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
                   : 'Check back later for fresh local products'
                 }
               </span>

@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
 import { Button } from "../components/Button";
@@ -35,6 +35,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
   ref
 ) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
 
@@ -51,32 +52,32 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
 
   const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
     console.log('Selected food item:', suggestion);
-    // Handle food item selection - could navigate to product page, add to cart, etc.
     
-    // Example: Navigate based on suggestion type
+    // Navigate based on suggestion type
     switch (suggestion.type) {
       case 'product':
-        // Navigate to product detail page
-        // window.location.href = `/product/${suggestion.id}`;
+        // Navigate to shop with product search
+        navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
         break;
       case 'category':
-        // Navigate to category page
-        // window.location.href = `/shop?category=${suggestion.title}`;
+        // Extract category name from "All [Category]" format
+        const categoryName = suggestion.title.replace(/^All\s+/, '');
+        navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
         break;
       case 'seller':
-        // Navigate to seller page
-        // window.location.href = `/seller/${suggestion.id}`;
+        // Navigate to shop with seller filter
+        navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
         break;
       default:
         // Navigate to search results
-        // window.location.href = `/shop?search=${suggestion.title}`;
+        navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
     }
   };
 
   const handleFoodSearchSubmit = (query: string) => {
     console.log('Food search submitted:', query);
     // Navigate to search results page
-    // window.location.href = `/shop?search=${encodeURIComponent(query)}`;
+    navigate(`/shop?search=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -257,9 +258,8 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
                       )}
                     </div>
                   </DropdownMenu>
-                </SubframeCore.DropdownMenu.Content>
-              </SubframeCore.DropdownMenu.Portal>
-            </SubframeCore.DropdownMenu.Root>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
             <div className="flex-shrink-0">
               <IconButton
                 variant="brand-secondary"
