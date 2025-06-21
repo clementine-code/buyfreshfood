@@ -101,19 +101,15 @@ const TopbarWithCenterSearch3Root = React.forwardRef<
       {...otherProps}
     >
       {leftSlot ? (
-        <div className="flex grow shrink-0 basis-0 items-center gap-6">
-          {leftSlot}
-        </div>
+        <div className="flex items-center gap-6">{leftSlot}</div>
       ) : null}
       {centerSlot ? (
-        <div className="flex w-96 flex-none items-center justify-center gap-2">
+        <div className="flex grow shrink-0 basis-0 items-center justify-center gap-2">
           {centerSlot}
         </div>
       ) : null}
       {rightSlot ? (
-        <div className="flex grow shrink-0 basis-0 items-center justify-end gap-2">
-          {rightSlot}
-        </div>
+        <div className="flex items-center justify-end gap-2">{rightSlot}</div>
       ) : null}
     </nav>
   );
