@@ -27,6 +27,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [searchStatus, setSearchStatus] = useState<'idle' | 'searching' | 'found' | 'not-found'>('idle');
   
   const debounceRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -34,12 +35,13 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const lastSearchRef = useRef<string>("");
   const shouldMaintainFocusRef = useRef(false);
 
-  // Improved search function with better error handling
+  // Improved search function with better status tracking
   const searchLocations = useCallback(async (query: string) => {
     if (!query.trim() || query.length < 3 || isProcessingRef.current || lastSearchRef.current === query) {
       if (query.length < 3) {
         setSuggestions([]);
         setShowSuggestions(false);
+        setSearchStatus('idle');
       }
       return;
     }
@@ -47,6 +49,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     lastSearchRef.current = query;
     isProcessingRef.current = true;
     setIsLoading(true);
+    setSearchStatus('searching');
     
     try {
       const results = await locationService.getLocationSuggestions(query);
@@ -55,22 +58,25 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       if (lastSearchRef.current === query) {
         setSuggestions(results);
         setShowSuggestions(results.length > 0);
+        setSearchStatus(results.length > 0 ? 'found' : 'not-found');
         
         // If no suggestions found, try direct validation
         if (results.length === 0) {
           const directResult = await locationService.validateLocationInput(query);
           if (directResult) {
-            setSuggestions([{
+            const suggestion: LocationSuggestion = {
               place_id: 'direct_match',
               description: formatLocationDisplay(directResult),
               main_text: directResult.city || directResult.zipCode || query,
-              secondary_text: `${directResult.state || 'AR'}, USA`,
+              secondary_text: `${directResult.state || 'Unknown'}, USA`,
               coordinates: directResult.latitude && directResult.longitude ? {
                 lat: directResult.latitude,
                 lng: directResult.longitude
               } : undefined
-            }]);
+            };
+            setSuggestions([suggestion]);
             setShowSuggestions(true);
+            setSearchStatus('found');
           }
         }
       }
@@ -79,10 +85,14 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       if (lastSearchRef.current === query) {
         setSuggestions([]);
         setShowSuggestions(false);
+        setSearchStatus('not-found');
       }
     } finally {
-      setIsLoading(false);
-      isProcessingRef.current = false;
+      // Keep loading state visible for at least 500ms for better UX
+      setTimeout(() => {
+        setIsLoading(false);
+        isProcessingRef.current = false;
+      }, 500);
     }
   }, []);
 
@@ -96,6 +106,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     // Reset validation states
     setSelectedLocation(null);
     setValidationError(null);
+    setSearchStatus('idle');
     
     // Maintain focus flag
     shouldMaintainFocusRef.current = true;
@@ -109,11 +120,12 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     if (value.trim().length >= 3) {
       debounceRef.current = setTimeout(() => {
         searchLocations(value);
-      }, 300); // Reduced debounce for better responsiveness
+      }, 400); // Slightly longer debounce for better API usage
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
       lastSearchRef.current = "";
+      setSearchStatus('idle');
     }
   }, [searchLocations]);
 
@@ -128,6 +140,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     
     isProcessingRef.current = true;
     setIsLoading(true);
+    setSearchStatus('searching');
 
     try {
       let locationData: LocationData | null = null;
@@ -142,6 +155,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       
       if (locationData) {
         setSelectedLocation(locationData);
+        setSearchStatus('found');
         
         const errorMessage = getLocationErrorMessage(locationData);
         if (errorMessage) {
@@ -151,13 +165,19 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           setValidationError(null);
           onLocationSelect?.(locationData);
         }
+      } else {
+        setSearchStatus('not-found');
+        setValidationError('Unable to get location details. Please try again.');
       }
     } catch (error) {
       console.error('Error getting location details:', error);
       setValidationError('Unable to get location details. Please try again.');
+      setSearchStatus('not-found');
     } finally {
-      setIsLoading(false);
-      isProcessingRef.current = false;
+      setTimeout(() => {
+        setIsLoading(false);
+        isProcessingRef.current = false;
+      }, 300);
     }
   }, [onLocationSelect, onLocationError]);
 
@@ -166,6 +186,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     
     setIsGettingLocation(true);
     setValidationError(null);
+    setSearchStatus('searching');
     isProcessingRef.current = true;
     shouldMaintainFocusRef.current = false;
 
@@ -177,6 +198,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         setLocation(displayText);
         setSelectedLocation(locationData);
         lastSearchRef.current = displayText;
+        setSearchStatus('found');
         
         const errorMessage = getLocationErrorMessage(locationData);
         if (errorMessage) {
@@ -187,6 +209,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           onLocationSelect?.(locationData);
         }
       } else {
+        setSearchStatus('not-found');
         setValidationError('Unable to get your current location. Please enter your location manually.');
         onLocationError?.('Unable to get your current location. Please enter your location manually.');
       }
@@ -194,6 +217,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       console.error('Error getting current location:', error);
       setValidationError('Location access denied. Please enter your location manually.');
       onLocationError?.('Location access denied. Please enter your location manually.');
+      setSearchStatus('not-found');
     } finally {
       setIsGettingLocation(false);
       isProcessingRef.current = false;
@@ -259,6 +283,16 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       <FeatherAlertCircle className="w-4 h-4 text-error-600" />
     );
   }, [showValidation, selectedLocation]);
+
+  // Memoized loading message
+  const loadingMessage = useMemo(() => {
+    if (isGettingLocation) return 'Getting your location...';
+    if (isLoading) {
+      if (searchStatus === 'searching') return 'Searching locations...';
+      return 'Loading...';
+    }
+    return null;
+  }, [isLoading, isGettingLocation, searchStatus]);
 
   return (
     <div className={`relative ${className}`}>
@@ -336,14 +370,22 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         </div>
       )}
 
-      {/* Loading indicator */}
-      {(isLoading || isGettingLocation) && (
+      {/* Enhanced loading indicator with persistent status */}
+      {loadingMessage && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 p-3">
           <div className="flex items-center gap-2 text-subtext-color">
             <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-body font-body">
-              {isGettingLocation ? 'Getting your location...' : 'Searching...'}
-            </span>
+            <span className="text-body font-body">{loadingMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* No results message */}
+      {searchStatus === 'not-found' && !isLoading && location.length >= 3 && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 p-3">
+          <div className="flex items-center gap-2 text-subtext-color">
+            <FeatherAlertCircle className="w-4 h-4 text-warning-600" />
+            <span className="text-body font-body">No locations found. Try a different search term.</span>
           </div>
         </div>
       )}
