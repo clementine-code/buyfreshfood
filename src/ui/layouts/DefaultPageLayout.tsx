@@ -21,9 +21,11 @@ import { FeatherUser } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherLocateFixed } from "@subframe/core";
 import { FeatherMenu } from "@subframe/core";
+import { FeatherX } from "@subframe/core";
+import { FeatherEdit3 } from "@subframe/core";
 import MobileNavMenu from "../../components/MobileNavMenu";
 import LocationSearch from "../../components/LocationSearch";
-import { type LocationData } from "../../services/locationService";
+import { type LocationData, formatLocationDisplay } from "../../services/locationService";
 
 interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -38,16 +40,73 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
   const location = useLocation();
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
 
   const handleLocationSelect = (locationData: LocationData) => {
     setSelectedLocation(locationData);
+    setShowLocationDropdown(false);
     console.log('Selected location in navbar:', locationData);
-    // Here you could update global state, localStorage, or trigger a search
+    
+    // Store in localStorage for persistence
+    localStorage.setItem('userLocation', JSON.stringify(locationData));
+    
+    // Here you could also update global state, trigger analytics, etc.
   };
 
   const handleLocationError = (error: string) => {
     console.warn('Location error in navbar:', error);
-    // Handle location errors (show toast, etc.)
+    // Could show a toast notification here
+  };
+
+  const handleRemoveLocation = () => {
+    setSelectedLocation(null);
+    localStorage.removeItem('userLocation');
+    setShowLocationDropdown(false);
+  };
+
+  const handleEditLocation = () => {
+    // Keep dropdown open for editing
+    setShowLocationDropdown(true);
+  };
+
+  // Load saved location on mount
+  React.useEffect(() => {
+    const savedLocation = localStorage.getItem('userLocation');
+    if (savedLocation) {
+      try {
+        const locationData = JSON.parse(savedLocation);
+        setSelectedLocation(locationData);
+      } catch (error) {
+        console.error('Error loading saved location:', error);
+        localStorage.removeItem('userLocation');
+      }
+    }
+  }, []);
+
+  // Determine location button variant and icon color
+  const getLocationButtonVariant = () => {
+    if (selectedLocation?.isNWA) {
+      return "destructive-primary"; // Fully red for service area
+    }
+    return "destructive-secondary"; // Light red for no location or outside service area
+  };
+
+  const getLocationButtonIcon = () => {
+    return <FeatherMapPin className={selectedLocation?.isNWA ? "text-white" : "text-error-700"} />;
+  };
+
+  const getLocationDisplayText = () => {
+    if (!selectedLocation) return null;
+    
+    if (selectedLocation.city && selectedLocation.state) {
+      return `${selectedLocation.city}, ${selectedLocation.state}`;
+    }
+    
+    if (selectedLocation.zipCode && selectedLocation.state) {
+      return `${selectedLocation.zipCode}, ${selectedLocation.state}`;
+    }
+    
+    return formatLocationDisplay(selectedLocation);
   };
 
   return (
@@ -107,14 +166,29 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
           }
           rightSlot={
             <div className="flex items-center justify-end gap-2">
-              <SubframeCore.DropdownMenu.Root>
+              {/* Location Button with Dropdown */}
+              <SubframeCore.DropdownMenu.Root 
+                open={showLocationDropdown} 
+                onOpenChange={setShowLocationDropdown}
+              >
                 <SubframeCore.DropdownMenu.Trigger asChild={true}>
                   <div className="flex-shrink-0">
                     <Button
-                      variant="destructive-secondary"
-                      icon={<FeatherMapPin />}
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    />
+                      variant={getLocationButtonVariant()}
+                      icon={getLocationButtonIcon()}
+                      onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                      className="relative"
+                    >
+                      {selectedLocation?.isNWA ? (
+                        <span className="hidden sm:inline ml-1 text-white font-medium">
+                          {getLocationDisplayText()}
+                        </span>
+                      ) : selectedLocation ? (
+                        <span className="hidden sm:inline ml-1 text-error-700 font-medium">
+                          Outside Area
+                        </span>
+                      ) : null}
+                    </Button>
                   </div>
                 </SubframeCore.DropdownMenu.Trigger>
                 <SubframeCore.DropdownMenu.Portal>
@@ -125,30 +199,70 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
                     className="z-[200]"
                     asChild={true}
                   >
-                    <DropdownMenu>
-                      <div className="p-2">
-                        <LocationSearch 
-                          className="w-80"
-                          onLocationSelect={handleLocationSelect}
-                          onLocationError={handleLocationError}
-                          placeholder="Enter location..."
-                          showValidation={false}
-                        />
+                    <DropdownMenu className="w-96">
+                      <div className="p-4">
+                        {/* Current Location Display */}
                         {selectedLocation && (
-                          <div className="mt-2 p-2 bg-brand-50 rounded text-sm">
-                            <div className="font-medium text-brand-700">
-                              {selectedLocation.isNWA ? '✓ Service Area' : '⚠ Outside Service Area'}
-                            </div>
-                            <div className="text-subtext-color">
-                              {selectedLocation.city}, {selectedLocation.state} {selectedLocation.zipCode}
+                          <div className="mb-4 p-3 bg-neutral-50 rounded-lg">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <FeatherMapPin className="w-4 h-4 text-subtext-color" />
+                                  <span className="text-body-bold font-body-bold text-default-font">
+                                    Current Location
+                                  </span>
+                                </div>
+                                <div className="text-body font-body text-default-font">
+                                  {formatLocationDisplay(selectedLocation)}
+                                </div>
+                                <div className={`text-caption font-caption mt-1 ${
+                                  selectedLocation.isNWA ? 'text-success-700' : 'text-error-700'
+                                }`}>
+                                  {selectedLocation.isNWA ? '✓ We deliver to this area' : '⚠ Outside our service area'}
+                                </div>
+                              </div>
+                              <div className="flex gap-1 ml-2">
+                                <IconButton
+                                  variant="neutral-tertiary"
+                                  size="small"
+                                  icon={<FeatherEdit3 />}
+                                  onClick={handleEditLocation}
+                                  title="Edit location"
+                                />
+                                <IconButton
+                                  variant="neutral-tertiary"
+                                  size="small"
+                                  icon={<FeatherX />}
+                                  onClick={handleRemoveLocation}
+                                  title="Remove location"
+                                />
+                              </div>
                             </div>
                           </div>
                         )}
+
+                        {/* Location Search */}
+                        <div className="space-y-3">
+                          <div className="text-body-bold font-body-bold text-default-font">
+                            {selectedLocation ? 'Change Location' : 'Set Your Location'}
+                          </div>
+                          <LocationSearch 
+                            className="w-full"
+                            onLocationSelect={handleLocationSelect}
+                            onLocationError={handleLocationError}
+                            placeholder="Enter your address or zip code..."
+                            showValidation={true}
+                          />
+                          <div className="text-caption font-caption text-subtext-color">
+                            We currently serve the Northwest Arkansas metro area including Fayetteville, Rogers, Bentonville, and Springdale.
+                          </div>
+                        </div>
                       </div>
                     </DropdownMenu>
                   </SubframeCore.DropdownMenu.Content>
                 </SubframeCore.DropdownMenu.Portal>
               </SubframeCore.DropdownMenu.Root>
+
               <div className="flex-shrink-0">
                 <Button
                   variant="brand-secondary"
@@ -201,13 +315,17 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
 
           {/* Right Actions */}
           <div className="flex items-center justify-end gap-2">
-            <SubframeCore.DropdownMenu.Root>
+            {/* Mobile Location Button */}
+            <SubframeCore.DropdownMenu.Root 
+              open={showLocationDropdown} 
+              onOpenChange={setShowLocationDropdown}
+            >
               <SubframeCore.DropdownMenu.Trigger asChild={true}>
                 <div className="flex-shrink-0">
-                  <Button
-                    variant="destructive-secondary"
-                    icon={<FeatherMapPin />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  <IconButton
+                    variant={getLocationButtonVariant()}
+                    icon={getLocationButtonIcon()}
+                    onClick={() => setShowLocationDropdown(!showLocationDropdown)}
                   />
                 </div>
               </SubframeCore.DropdownMenu.Trigger>
@@ -219,30 +337,69 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
                   className="z-[200]"
                   asChild={true}
                 >
-                  <DropdownMenu>
-                    <div className="p-2">
-                      <LocationSearch 
-                        className="w-72"
-                        onLocationSelect={handleLocationSelect}
-                        onLocationError={handleLocationError}
-                        placeholder="Enter location..."
-                        showValidation={false}
-                      />
+                  <DropdownMenu className="w-80">
+                    <div className="p-4">
+                      {/* Current Location Display */}
                       {selectedLocation && (
-                        <div className="mt-2 p-2 bg-brand-50 rounded text-sm">
-                          <div className="font-medium text-brand-700">
-                            {selectedLocation.isNWA ? '✓ Service Area' : '⚠ Outside Service Area'}
-                          </div>
-                          <div className="text-subtext-color">
-                            {selectedLocation.city}, {selectedLocation.state} {selectedLocation.zipCode}
+                        <div className="mb-4 p-3 bg-neutral-50 rounded-lg">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <FeatherMapPin className="w-4 h-4 text-subtext-color" />
+                                <span className="text-body-bold font-body-bold text-default-font">
+                                  Current Location
+                                </span>
+                              </div>
+                              <div className="text-body font-body text-default-font">
+                                {formatLocationDisplay(selectedLocation)}
+                              </div>
+                              <div className={`text-caption font-caption mt-1 ${
+                                selectedLocation.isNWA ? 'text-success-700' : 'text-error-700'
+                              }`}>
+                                {selectedLocation.isNWA ? '✓ We deliver to this area' : '⚠ Outside our service area'}
+                              </div>
+                            </div>
+                            <div className="flex gap-1 ml-2">
+                              <IconButton
+                                variant="neutral-tertiary"
+                                size="small"
+                                icon={<FeatherEdit3 />}
+                                onClick={handleEditLocation}
+                                title="Edit location"
+                              />
+                              <IconButton
+                                variant="neutral-tertiary"
+                                size="small"
+                                icon={<FeatherX />}
+                                onClick={handleRemoveLocation}
+                                title="Remove location"
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
+
+                      {/* Location Search */}
+                      <div className="space-y-3">
+                        <div className="text-body-bold font-body-bold text-default-font">
+                          {selectedLocation ? 'Change Location' : 'Set Your Location'}
+                        </div>
+                        <LocationSearch 
+                          className="w-full"
+                          onLocationSelect={handleLocationSelect}
+                          onLocationError={handleLocationError}
+                          placeholder="Enter your address or zip code..."
+                          showValidation={true}
+                        />
+                        <div className="text-caption font-caption text-subtext-color">
+                          We currently serve the Northwest Arkansas metro area.
+                        </div>
+                      </div>
                     </div>
                   </DropdownMenu>
-                </SubframeCore.DropdownMenu.Content>
-              </SubframeCore.DropdownMenu.Portal>
-            </SubframeCore.DropdownMenu.Root>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
+
             <div className="flex-shrink-0">
               <IconButton
                 variant="brand-secondary"
@@ -254,7 +411,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
               <IconButton
                 variant="brand-primary"
                 icon={<FeatherShoppingCart />}
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                onClick={(event: React.MouseEvent<HTMLButtonButton>) => {}}
               />
             </div>
           </div>
