@@ -11,16 +11,40 @@ import { FeatherHome } from "@subframe/core";
 import { FeatherClock } from "@subframe/core";
 import { FeatherHeart } from "@subframe/core";
 import { FeatherLeaf } from "@subframe/core";
+import { Alert } from "@/ui/components/Alert";
 import LocationSearch from "../components/LocationSearch";
 import Footer from "../components/Footer";
+import { type LocationData } from "../services/locationService";
 
 function Home() {
-  const [location, setLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
-  const handleLocationSelect = (selectedLocation: string) => {
-    setLocation(selectedLocation);
-    console.log('Selected location:', selectedLocation);
-    // Here you could redirect to shop page with location filter
+  const handleLocationSelect = (location: LocationData) => {
+    setSelectedLocation(location);
+    setLocationError(null);
+    console.log('Selected valid NWA location:', location);
+    
+    // Here you could:
+    // - Store location in global state/context
+    // - Save to localStorage
+    // - Redirect to shop page with location filter
+    // - Update URL with location parameters
+  };
+
+  const handleLocationError = (error: string) => {
+    setLocationError(error);
+    setSelectedLocation(null);
+  };
+
+  const handleShopClick = () => {
+    if (selectedLocation && selectedLocation.isNWA) {
+      // Redirect to shop with location
+      window.location.href = '/shop';
+    } else {
+      // Show error or prompt for location
+      setLocationError('Please enter a valid Northwest Arkansas location to start shopping.');
+    }
   };
 
   return (
@@ -38,11 +62,32 @@ function Home() {
               }
             </span>
           </div>
-          <div className="w-full max-w-[384px]">
+          
+          <div className="w-full max-w-[384px] flex flex-col gap-3">
             <LocationSearch 
               className="w-full"
               onLocationSelect={handleLocationSelect}
+              onLocationError={handleLocationError}
+              placeholder="Enter your zip code to find fresh local food near you..."
+              showValidation={true}
             />
+            
+            {/* Location validation feedback */}
+            {selectedLocation && selectedLocation.isNWA && (
+              <Alert
+                variant="success"
+                title="Great! We serve your area"
+                description={`Fresh local food is available in ${selectedLocation.city || 'your area'}.`}
+              />
+            )}
+            
+            {locationError && (
+              <Alert
+                variant="error"
+                title="Location not supported"
+                description={locationError}
+              />
+            )}
           </div>
         </div>
         {/* Background Image - Full Coverage */}
@@ -73,7 +118,7 @@ function Home() {
             <Button
               className="h-8 w-full flex-none mobile:h-12 mobile:w-full mobile:flex-none mt-auto"
               icon={<FeatherArrowRight />}
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+              onClick={handleShopClick}
             >
               Start Shopping
             </Button>

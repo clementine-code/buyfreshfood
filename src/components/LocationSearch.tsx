@@ -1,42 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { TextField } from "@/ui/components/TextField";
-import { FeatherMapPin, FeatherLocate } from "@subframe/core";
+import { FeatherMapPin, FeatherLocate, FeatherAlertCircle, FeatherCheck } from "@subframe/core";
+import { locationService, type LocationData, type LocationSuggestion, formatLocationDisplay, getLocationErrorMessage } from "../services/locationService";
 
 interface LocationSearchProps {
   className?: string;
-  onLocationSelect?: (location: string) => void;
-}
-
-interface LocationSuggestion {
-  place_name: string;
-  center: [number, number];
+  onLocationSelect?: (location: LocationData) => void;
+  onLocationError?: (error: string) => void;
+  placeholder?: string;
+  showValidation?: boolean;
 }
 
 const LocationSearch: React.FC<LocationSearchProps> = ({ 
   className, 
-  onLocationSelect 
+  onLocationSelect,
+  onLocationError,
+  placeholder = "Enter your zip code to find fresh local food near you...",
+  showValidation = true
 }) => {
   const [location, setLocation] = useState("");
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  
+  const debounceRef = useRef<NodeJS.Timeout>();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce function for API calls
-  const debounce = (func: Function, wait: number) => {
-    let timeout: NodeJS.Timeout;
-    return function executedFunction(...args: any[]) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  };
-
-  // Search for locations using Mapbox Geocoding API
+  // Debounced search for location suggestions
   const searchLocations = async (query: string) => {
     if (!query.trim() || query.length < 3) {
       setSuggestions([]);
@@ -46,85 +41,159 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
 
     setIsLoading(true);
     try {
-      // Using Mapbox Geocoding API (you'll need to add your token)
-      // For demo purposes, we'll simulate the API response
-      const mockSuggestions: LocationSuggestion[] = [
-        {
-          place_name: `${query}, Arkansas, United States`,
-          center: [-94.1574, 36.1627]
-        },
-        {
-          place_name: `${query}, United States`,
-          center: [-94.1574, 36.1627]
-        },
-        {
-          place_name: `Near ${query}`,
-          center: [-94.1574, 36.1627]
-        }
-      ];
-
-      setSuggestions(mockSuggestions);
-      setShowSuggestions(true);
+      const results = await locationService.getLocationSuggestions(query);
+      setSuggestions(results);
+      setShowSuggestions(results.length > 0);
     } catch (error) {
       console.error('Error searching locations:', error);
       setSuggestions([]);
+      setShowSuggestions(false);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Debounced search function
-  const debouncedSearch = debounce(searchLocations, 300);
-
   const handleLocationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setLocation(value);
-    debouncedSearch(value);
-  };
+    setSelectedLocation(null);
+    setValidationError(null);
 
-  const handleSuggestionClick = (suggestion: LocationSuggestion) => {
-    setLocation(suggestion.place_name);
-    setSuggestions([]);
-    setShowSuggestions(false);
-    onLocationSelect?.(suggestion.place_name);
-  };
-
-  const handleLocateClick = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by this browser.');
-      return;
+    // Clear existing debounce
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
 
+    // Debounce search
+    debounceRef.current = setTimeout(() => {
+      searchLocations(value);
+    }, 300);
+  };
+
+  const handleSuggestionClick = async (suggestion: LocationSuggestion) => {
+    setLocation(suggestion.description);
+    setSuggestions([]);
+    setShowSuggestions(false);
     setIsLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
+
+    try {
+      const locationData = await locationService.getLocationDetails(suggestion.place_id, suggestion.coordinates);
+      
+      if (locationData) {
+        setSelectedLocation(locationData);
         
+        const errorMessage = getLocationErrorMessage(locationData);
+        if (errorMessage) {
+          setValidationError(errorMessage);
+          onLocationError?.(errorMessage);
+        } else {
+          setValidationError(null);
+          onLocationSelect?.(locationData);
+        }
+      }
+    } catch (error) {
+      console.error('Error getting location details:', error);
+      setValidationError('Unable to get location details. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCurrentLocationClick = async () => {
+    setIsGettingLocation(true);
+    setValidationError(null);
+
+    try {
+      const locationData = await locationService.getCurrentLocation();
+      
+      if (locationData) {
+        const displayText = formatLocationDisplay(locationData);
+        setLocation(displayText);
+        setSelectedLocation(locationData);
+        
+        const errorMessage = getLocationErrorMessage(locationData);
+        if (errorMessage) {
+          setValidationError(errorMessage);
+          onLocationError?.(errorMessage);
+        } else {
+          setValidationError(null);
+          onLocationSelect?.(locationData);
+        }
+      } else {
+        setValidationError('Unable to get your current location. Please enter your location manually.');
+        onLocationError?.('Unable to get your current location. Please enter your location manually.');
+      }
+    } catch (error) {
+      console.error('Error getting current location:', error);
+      setValidationError('Location access denied. Please enter your location manually.');
+      onLocationError?.('Location access denied. Please enter your location manually.');
+    } finally {
+      setIsGettingLocation(false);
+    }
+  };
+
+  const handleInputBlur = async () => {
+    // Small delay to allow suggestion clicks to register
+    setTimeout(async () => {
+      setShowSuggestions(false);
+      
+      // If user typed something but didn't select a suggestion, try to validate it
+      if (location && !selectedLocation) {
+        setIsLoading(true);
         try {
-          // In a real app, you'd reverse geocode these coordinates
-          // For demo, we'll use a mock location
-          const mockLocation = "Your Current Location, Fayetteville, AR";
-          setLocation(mockLocation);
-          onLocationSelect?.(mockLocation);
+          const locationData = await locationService.validateLocationInput(location);
+          
+          if (locationData) {
+            setSelectedLocation(locationData);
+            setLocation(formatLocationDisplay(locationData));
+            
+            const errorMessage = getLocationErrorMessage(locationData);
+            if (errorMessage) {
+              setValidationError(errorMessage);
+              onLocationError?.(errorMessage);
+            } else {
+              setValidationError(null);
+              onLocationSelect?.(locationData);
+            }
+          } else {
+            setValidationError('Unable to find this location. Please try a different address or zip code.');
+            onLocationError?.('Unable to find this location. Please try a different address or zip code.');
+          }
         } catch (error) {
-          console.error('Error getting location name:', error);
-          setLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          console.error('Error validating location:', error);
+          setValidationError('Unable to validate location. Please try again.');
         } finally {
           setIsLoading(false);
         }
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-        alert('Unable to get your location. Please enter it manually.');
-        setIsLoading(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
       }
-    );
+    }, 200);
   };
+
+  const handleInputFocus = () => {
+    if (suggestions.length > 0) {
+      setShowSuggestions(true);
+    }
+  };
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  // Determine validation state
+  const getValidationState = () => {
+    if (!showValidation) return null;
+    
+    if (validationError) return 'error';
+    if (selectedLocation && selectedLocation.isNWA) return 'success';
+    return null;
+  };
+
+  const validationState = getValidationState();
 
   return (
     <div className={`relative ${className}`}>
@@ -132,28 +201,43 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         className="h-auto w-full flex-none"
         variant="filled"
         label=""
-        helpText=""
+        helpText={validationError || ""}
+        error={validationState === 'error'}
         icon={<FeatherMapPin />}
         iconRight={
-          <button
-            onClick={handleLocateClick}
-            disabled={isLoading}
-            className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50"
-            title="Use my current location"
-          >
-            <FeatherLocate className={`w-4 h-4 ${isLoading ? 'animate-pulse' : ''}`} />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Validation indicator */}
+            {showValidation && selectedLocation && (
+              <>
+                {selectedLocation.isNWA ? (
+                  <FeatherCheck className="w-4 h-4 text-success-600" />
+                ) : (
+                  <FeatherAlertCircle className="w-4 h-4 text-error-600" />
+                )}
+              </>
+            )}
+            
+            {/* Current location button */}
+            <button
+              onClick={handleCurrentLocationClick}
+              disabled={isGettingLocation || isLoading}
+              className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50"
+              title="Use my current location"
+              type="button"
+            >
+              <FeatherLocate className={`w-4 h-4 ${isGettingLocation ? 'animate-pulse' : ''}`} />
+            </button>
+          </div>
         }
       >
         <TextField.Input
-          placeholder="Enter location to find fresh local food..."
+          ref={inputRef}
+          placeholder={placeholder}
           value={location}
           onChange={handleLocationChange}
-          onFocus={() => {
-            if (suggestions.length > 0) {
-              setShowSuggestions(true);
-            }
-          }}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
+          disabled={isLoading || isGettingLocation}
         />
       </TextField>
 
@@ -162,13 +246,19 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
             <button
-              key={index}
+              key={suggestion.place_id}
               className="w-full text-left px-3 py-2 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 text-body font-body text-default-font"
               onClick={() => handleSuggestionClick(suggestion)}
+              type="button"
             >
               <div className="flex items-center gap-2">
                 <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
-                <span className="truncate">{suggestion.place_name}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{suggestion.main_text}</div>
+                  {suggestion.secondary_text && (
+                    <div className="text-sm text-subtext-color truncate">{suggestion.secondary_text}</div>
+                  )}
+                </div>
               </div>
             </button>
           ))}
@@ -176,11 +266,13 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       )}
 
       {/* Loading indicator */}
-      {isLoading && (
+      {(isLoading || isGettingLocation) && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 p-3">
           <div className="flex items-center gap-2 text-subtext-color">
             <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-body font-body">Searching...</span>
+            <span className="text-body font-body">
+              {isGettingLocation ? 'Getting your location...' : 'Searching...'}
+            </span>
           </div>
         </div>
       )}

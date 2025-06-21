@@ -23,6 +23,7 @@ import { FeatherLocateFixed } from "@subframe/core";
 import { FeatherMenu } from "@subframe/core";
 import MobileNavMenu from "../../components/MobileNavMenu";
 import LocationSearch from "../../components/LocationSearch";
+import { type LocationData } from "../../services/locationService";
 
 interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -39,10 +40,17 @@ const DefaultPageLayoutRoot = React.forwardRef<
 ) {
   const location = useLocation();
   const [showMobileNav, setShowMobileNav] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
 
-  const handleLocationSelect = (selectedLocation: string) => {
-    console.log('Selected location:', selectedLocation);
+  const handleLocationSelect = (locationData: LocationData) => {
+    setSelectedLocation(locationData);
+    console.log('Selected location in navbar:', locationData);
     // Here you could update global state, localStorage, or trigger a search
+  };
+
+  const handleLocationError = (error: string) => {
+    console.warn('Location error in navbar:', error);
+    // Handle location errors (show toast, etc.)
   };
 
   return (
@@ -121,10 +129,25 @@ const DefaultPageLayoutRoot = React.forwardRef<
                     asChild={true}
                   >
                     <DropdownMenu>
-                      <LocationSearch 
-                        className="w-80"
-                        onLocationSelect={handleLocationSelect}
-                      />
+                      <div className="p-2">
+                        <LocationSearch 
+                          className="w-80"
+                          onLocationSelect={handleLocationSelect}
+                          onLocationError={handleLocationError}
+                          placeholder="Enter location..."
+                          showValidation={false}
+                        />
+                        {selectedLocation && (
+                          <div className="mt-2 p-2 bg-brand-50 rounded text-sm">
+                            <div className="font-medium text-brand-700">
+                              {selectedLocation.isNWA ? '✓ Service Area' : '⚠ Outside Service Area'}
+                            </div>
+                            <div className="text-subtext-color">
+                              {selectedLocation.city}, {selectedLocation.state} {selectedLocation.zipCode}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </DropdownMenu>
                   </SubframeCore.DropdownMenu.Content>
                 </SubframeCore.DropdownMenu.Portal>
@@ -200,12 +223,27 @@ const DefaultPageLayoutRoot = React.forwardRef<
                   asChild={true}
                 >
                   <DropdownMenu>
-                    <LocationSearch 
-                      className="w-72"
-                      onLocationSelect={handleLocationSelect}
-                    />
+                    <div className="p-2">
+                      <LocationSearch 
+                        className="w-72"
+                        onLocationSelect={handleLocationSelect}
+                        onLocationError={handleLocationError}
+                        placeholder="Enter location..."
+                        showValidation={false}
+                      />
+                      {selectedLocation && (
+                        <div className="mt-2 p-2 bg-brand-50 rounded text-sm">
+                          <div className="font-medium text-brand-700">
+                            {selectedLocation.isNWA ? '✓ Service Area' : '⚠ Outside Service Area'}
+                          </div>
+                          <div className="text-subtext-color">
+                            {selectedLocation.city}, {selectedLocation.state} {selectedLocation.zipCode}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </DropdownMenu>
-                </SubframeCore.DropdownMenu.Content>
+                </SubframeCore.DropdownMenu.Portal>
                 </SubframeCore.DropdownMenu.Portal>
               </SubframeCore.DropdownMenu.Root>
             <div className="flex-shrink-0">
