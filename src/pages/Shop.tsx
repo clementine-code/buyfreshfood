@@ -14,6 +14,8 @@ import { FeatherStar } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherDollarSign } from "@subframe/core";
 import { FeatherMapPin } from "@subframe/core";
+import { FeatherChevronLeft } from "@subframe/core";
+import { FeatherChevronRight } from "@subframe/core";
 import * as SubframeCore from "@subframe/core";
 import { FeatherChevronDown } from "@subframe/core";
 import { Badge } from "@/ui/components/Badge";
@@ -51,6 +53,10 @@ function Shop() {
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState("");
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
 
   // Load data from Supabase and handle URL search params
   useEffect(() => {
@@ -152,6 +158,7 @@ function Shop() {
       quality: [],
       sellers: []
     });
+    setCurrentPage(1);
     // Update URL to remove search params
     window.history.replaceState({}, '', '/shop');
   };
@@ -163,8 +170,19 @@ function Shop() {
   const isMainProductView = !showMobileFilters && !showMobileMap;
 
   // Get current products to display (search results or regular products)
-  const currentProducts = isSearchMode ? searchResults : products;
-  const currentProductCount = currentProducts.length;
+  const allCurrentProducts = isSearchMode ? searchResults : products;
+  const totalProducts = allCurrentProducts.length;
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
+  
+  // Get paginated products
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = allCurrentProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search/filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [isSearchMode, appliedFilters]);
 
   const getBadgeVariant = (tag: string) => {
     if (tag.includes('organic') || tag.includes('pesticide-free')) return 'success';
@@ -323,6 +341,83 @@ function Shop() {
     );
   };
 
+  // Pagination component
+  const PaginationControls = () => {
+    if (totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+      const pages = [];
+      const maxVisiblePages = 5;
+      
+      if (totalPages <= maxVisiblePages) {
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (currentPage <= 3) {
+          pages.push(1, 2, 3, 4, '...', totalPages);
+        } else if (currentPage >= totalPages - 2) {
+          pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        } else {
+          pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+        }
+      }
+      
+      return pages;
+    };
+
+    return (
+      <div className="flex items-center justify-between px-6 py-4 border-t border-neutral-200 bg-white">
+        <div className="flex items-center gap-2 text-body font-body text-subtext-color">
+          <span>
+            Showing {startIndex + 1}-{Math.min(endIndex, totalProducts)} of {totalProducts} products
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="neutral-secondary"
+            size="small"
+            icon={<FeatherChevronLeft />}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          
+          <div className="flex items-center gap-1">
+            {getPageNumbers().map((page, index) => (
+              <React.Fragment key={index}>
+                {page === '...' ? (
+                  <span className="px-2 py-1 text-subtext-color">...</span>
+                ) : (
+                  <Button
+                    variant={currentPage === page ? "brand-primary" : "neutral-tertiary"}
+                    size="small"
+                    onClick={() => setCurrentPage(page as number)}
+                    className="min-w-[2rem]"
+                  >
+                    {page}
+                  </Button>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+          
+          <Button
+            variant="neutral-secondary"
+            size="small"
+            iconRight={<FeatherChevronRight />}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-default-background">
@@ -353,11 +448,11 @@ function Shop() {
   return (
     <div className="flex w-full flex-col bg-default-background min-h-screen">
       {/* Desktop Layout - Only show on extra large screens (1280px+) */}
-      <div className="hidden xl:flex w-full h-screen">
+      <div className="hidden xl:flex w-full h-screen overflow-hidden">
         {/* Left Side - Products */}
-        <div className="flex-1 flex flex-col h-full bg-default-background">
+        <div className="flex-1 flex flex-col h-full bg-default-background overflow-hidden">
           {/* Controls Bar - Sticky to top, accounting for navbar */}
-          <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+          <div className="sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm flex-shrink-0">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -370,7 +465,7 @@ function Shop() {
               
               <div className="flex flex-col gap-1">
                 <span className="text-heading-3 font-heading-3 text-default-font">
-                  {currentProductCount} {isSearchMode ? 'search results' : 'local products'}
+                  {totalProducts} {isSearchMode ? 'search results' : 'local products'}
                   {isSearchMode && currentSearchQuery && (
                     <span className="text-body font-body text-subtext-color ml-2">
                       for "{currentSearchQuery}"
@@ -436,46 +531,53 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Grid/List - Scrollable content area */}
-          <div className="flex-1 overflow-y-auto p-6 bg-default-background">
-            {currentProductCount === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
-                <span className="text-heading-2 font-heading-2 text-default-font mb-2">
-                  {isSearchMode ? 'No products found' : 'No products available'}
-                </span>
-                <span className="text-body font-body text-subtext-color">
-                  {isSearchMode 
-                    ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
-                    : 'Check back later for fresh local products'
-                  }
-                </span>
-                {isSearchMode && (
-                  <Button onClick={clearSearch} className="mt-4">
-                    Browse All Products
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className={`w-full ${
-                viewMode === "grid" 
-                  ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
-                  : "flex flex-col gap-4"
-              }`}>
-                {currentProducts.map((product) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    isListView={viewMode === "list"} 
-                  />
-                ))}
-              </div>
-            )}
+          {/* Products Grid/List - Scrollable content area with flex layout */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 bg-default-background">
+              {currentProducts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
+                  <span className="text-heading-2 font-heading-2 text-default-font mb-2">
+                    {isSearchMode ? 'No products found' : 'No products available'}
+                  </span>
+                  <span className="text-body font-body text-subtext-color">
+                    {isSearchMode 
+                      ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
+                      : 'Check back later for fresh local products'
+                    }
+                  </span>
+                  {isSearchMode && (
+                    <Button onClick={clearSearch} className="mt-4">
+                      Browse All Products
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className={`w-full ${
+                  viewMode === "grid" 
+                    ? "grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
+                    : "flex flex-col gap-4"
+                }`}>
+                  {currentProducts.map((product) => (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product} 
+                      isListView={viewMode === "list"} 
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Pagination - Fixed at bottom */}
+            <div className="flex-shrink-0">
+              <PaginationControls />
+            </div>
           </div>
         </div>
 
-        {/* Right Side - Static Map with full height and bottom padding for legend */}
-        <div className="w-1/2 h-screen border-l border-neutral-200 z-10 pb-20">
+        {/* Right Side - Static Map with full height */}
+        <div className="w-1/2 h-screen border-l border-neutral-200 z-10 overflow-hidden">
           <Map className="h-full w-full" />
         </div>
       </div>
@@ -489,7 +591,7 @@ function Shop() {
             <div className="flex w-full items-center justify-between">
               <div className="flex flex-col gap-1">
                 <span className="text-body-bold font-body-bold text-default-font">
-                  {currentProductCount} {isSearchMode ? 'results' : 'products'}
+                  {totalProducts} {isSearchMode ? 'results' : 'products'}
                   {isSearchMode && currentSearchQuery && (
                     <span className="text-caption font-caption text-subtext-color block">
                       for "{currentSearchQuery}"
@@ -556,7 +658,7 @@ function Shop() {
 
         {/* Products Grid/List - Proper spacing to avoid overlap */}
         <div className="w-full px-4 py-4 pb-24 flex-1">
-          {currentProductCount === 0 ? (
+          {currentProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
               <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
               <span className="text-heading-2 font-heading-2 text-default-font mb-2">
@@ -575,19 +677,26 @@ function Shop() {
               )}
             </div>
           ) : (
-            <div className={`w-full ${
-              viewMode === "grid" 
-                ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 
-                : "flex flex-col gap-4"
-            }`}>
-              {currentProducts.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  isListView={viewMode === "list"} 
-                />
-              ))}
-            </div>
+            <>
+              <div className={`w-full ${
+                viewMode === "grid" 
+                  ? "grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3" 
+                  : "flex flex-col gap-4"
+              }`}>
+                {currentProducts.map((product) => (
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    isListView={viewMode === "list"} 
+                  />
+                ))}
+              </div>
+              
+              {/* Mobile Pagination */}
+              <div className="mt-8">
+                <PaginationControls />
+              </div>
+            </>
           )}
         </div>
       </div>
