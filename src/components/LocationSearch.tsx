@@ -32,21 +32,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const isProcessingRef = useRef(false);
   const lastSearchRef = useRef<string>("");
-  const cursorPositionRef = useRef<number>(0);
-
-  // Preserve cursor position during updates
-  const preserveCursorPosition = useCallback(() => {
-    if (inputRef.current) {
-      cursorPositionRef.current = inputRef.current.selectionStart || 0;
-    }
-  }, []);
-
-  const restoreCursorPosition = useCallback(() => {
-    if (inputRef.current && document.activeElement === inputRef.current) {
-      const position = Math.min(cursorPositionRef.current, inputRef.current.value.length);
-      inputRef.current.setSelectionRange(position, position);
-    }
-  }, []);
+  const shouldMaintainFocusRef = useRef(false);
 
   // Improved search function with better error handling
   const searchLocations = useCallback(async (query: string) => {
@@ -69,6 +55,24 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       if (lastSearchRef.current === query) {
         setSuggestions(results);
         setShowSuggestions(results.length > 0);
+        
+        // If no suggestions found, try direct validation
+        if (results.length === 0) {
+          const directResult = await locationService.validateLocationInput(query);
+          if (directResult) {
+            setSuggestions([{
+              place_id: 'direct_match',
+              description: formatLocationDisplay(directResult),
+              main_text: directResult.city || directResult.zipCode || query,
+              secondary_text: `${directResult.state || 'AR'}, USA`,
+              coordinates: directResult.latitude && directResult.longitude ? {
+                lat: directResult.latitude,
+                lng: directResult.longitude
+              } : undefined
+            }]);
+            setShowSuggestions(true);
+          }
+        }
       }
     } catch (error) {
       console.error('Error searching locations:', error);
@@ -82,19 +86,19 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, []);
 
-  // Optimized input handler that preserves cursor position
+  // Optimized input handler that maintains focus
   const handleLocationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     
-    // Preserve cursor position before any state updates
-    preserveCursorPosition();
-    
-    // Update input value immediately
+    // Update input value immediately without losing focus
     setLocation(value);
     
-    // Reset validation states immediately
+    // Reset validation states
     setSelectedLocation(null);
     setValidationError(null);
+    
+    // Maintain focus flag
+    shouldMaintainFocusRef.current = true;
 
     // Clear existing debounce
     if (debounceRef.current) {
@@ -105,16 +109,13 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     if (value.trim().length >= 3) {
       debounceRef.current = setTimeout(() => {
         searchLocations(value);
-      }, 400); // Reduced debounce for better responsiveness
+      }, 300); // Reduced debounce for better responsiveness
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
       lastSearchRef.current = "";
     }
-
-    // Restore cursor position after React updates
-    setTimeout(restoreCursorPosition, 0);
-  }, [searchLocations, preserveCursorPosition, restoreCursorPosition]);
+  }, [searchLocations]);
 
   const handleSuggestionClick = useCallback(async (suggestion: LocationSuggestion) => {
     if (isProcessingRef.current) return;
@@ -123,12 +124,21 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     setSuggestions([]);
     setShowSuggestions(false);
     lastSearchRef.current = suggestion.description;
+    shouldMaintainFocusRef.current = false; // Don't maintain focus after selection
     
     isProcessingRef.current = true;
     setIsLoading(true);
 
     try {
-      const locationData = await locationService.getLocationDetails(suggestion.place_id, suggestion.coordinates);
+      let locationData: LocationData | null = null;
+      
+      if (suggestion.place_id === 'direct_match') {
+        // This is a direct validation result
+        locationData = await locationService.validateLocationInput(suggestion.main_text);
+      } else {
+        // This is from the API
+        locationData = await locationService.getLocationDetails(suggestion.place_id, suggestion.coordinates);
+      }
       
       if (locationData) {
         setSelectedLocation(locationData);
@@ -157,6 +167,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     setIsGettingLocation(true);
     setValidationError(null);
     isProcessingRef.current = true;
+    shouldMaintainFocusRef.current = false;
 
     try {
       const locationData = await locationService.getCurrentLocation();
@@ -189,18 +200,34 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, [onLocationSelect, onLocationError]);
 
-  const handleInputBlur = useCallback(() => {
-    // Delay hiding suggestions to allow clicks
-    setTimeout(() => {
-      setShowSuggestions(false);
-    }, 200);
+  const handleInputBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
+    // Only hide suggestions if we're not maintaining focus
+    if (!shouldMaintainFocusRef.current) {
+      setTimeout(() => {
+        setShowSuggestions(false);
+      }, 150);
+    }
   }, []);
 
   const handleInputFocus = useCallback(() => {
+    shouldMaintainFocusRef.current = true;
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
   }, [suggestions.length]);
+
+  // Maintain focus after state updates
+  useEffect(() => {
+    if (shouldMaintainFocusRef.current && inputRef.current && document.activeElement !== inputRef.current) {
+      const timeoutId = setTimeout(() => {
+        if (inputRef.current && shouldMaintainFocusRef.current) {
+          inputRef.current.focus();
+        }
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [location, isLoading]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -209,6 +236,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         clearTimeout(debounceRef.current);
       }
       isProcessingRef.current = false;
+      shouldMaintainFocusRef.current = false;
     };
   }, []);
 
@@ -253,6 +281,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
                 disabled={isGettingLocation || isLoading}
                 className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50"
                 type="button"
+                title="Find exact location"
               >
                 <FeatherLocate className={`w-4 h-4 ${isGettingLocation ? 'animate-pulse' : ''}`} />
               </button>
@@ -282,13 +311,16 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       {/* Location Suggestions Dropdown */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
-          {suggestions.map((suggestion) => (
+          {suggestions.map((suggestion, index) => (
             <button
-              key={suggestion.place_id}
+              key={suggestion.place_id || index}
               className="w-full text-left px-3 py-2 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 text-body font-body text-default-font transition-colors"
               onClick={() => handleSuggestionClick(suggestion)}
               type="button"
-              onMouseDown={(e) => e.preventDefault()} // Prevent input blur
+              onMouseDown={(e) => {
+                e.preventDefault(); // Prevent input blur
+                shouldMaintainFocusRef.current = false; // Allow blur after click
+              }}
             >
               <div className="flex items-center gap-2">
                 <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />

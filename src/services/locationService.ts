@@ -114,50 +114,82 @@ class LocationService {
   }
 
   /**
-   * Get location suggestions using Google Places Autocomplete
+   * Get location suggestions - enhanced for better address support
    */
   async getLocationSuggestions(input: string): Promise<LocationSuggestion[]> {
-    if (!this.googleApiKey || input.length < 3) {
-      return this.getFallbackSuggestions(input);
+    if (input.length < 3) {
+      return [];
     }
 
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?` +
-        `input=${encodeURIComponent(input)}&` +
-        `types=(cities)&` +
-        `components=country:us|administrative_area:ar&` +
-        `location=36.1627,-94.1574&` +
-        `radius=50000&` +
-        `key=${this.googleApiKey}`
-      );
+    // Try multiple approaches for better results
+    const suggestions: LocationSuggestion[] = [];
 
-      if (!response.ok) {
-        throw new Error('Google Places API error');
+    // 1. Try Google Places API if available
+    if (this.googleApiKey) {
+      try {
+        const googleResults = await this.getGooglePlacesSuggestions(input);
+        suggestions.push(...googleResults);
+      } catch (error) {
+        console.warn('Google Places API error:', error);
       }
-
-      const data = await response.json();
-      
-      return data.predictions?.map((prediction: any) => ({
-        place_id: prediction.place_id,
-        description: prediction.description,
-        main_text: prediction.structured_formatting?.main_text || prediction.description,
-        secondary_text: prediction.structured_formatting?.secondary_text || '',
-      })) || [];
-    } catch (error) {
-      console.warn('Google Places API unavailable, using fallback:', error);
-      return this.getFallbackSuggestions(input);
     }
+
+    // 2. If no results or API unavailable, use fallback
+    if (suggestions.length === 0) {
+      const fallbackResults = this.getFallbackSuggestions(input);
+      suggestions.push(...fallbackResults);
+    }
+
+    // 3. Remove duplicates and limit results
+    const uniqueSuggestions = suggestions.filter((suggestion, index, self) => 
+      index === self.findIndex(s => s.description === suggestion.description)
+    );
+
+    return uniqueSuggestions.slice(0, 8);
   }
 
   /**
-   * Fallback suggestions when API is unavailable
+   * Get suggestions from Google Places API with improved parameters
+   */
+  private async getGooglePlacesSuggestions(input: string): Promise<LocationSuggestion[]> {
+    const baseUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+    const params = new URLSearchParams({
+      input: input,
+      types: 'address',
+      components: 'country:us|administrative_area:ar',
+      location: '36.1627,-94.1574',
+      radius: '80000', // Increased radius for better coverage
+      key: this.googleApiKey
+    });
+
+    const response = await fetch(`${baseUrl}?${params}`);
+    
+    if (!response.ok) {
+      throw new Error(`Google Places API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      throw new Error(`Google Places API status: ${data.status}`);
+    }
+
+    return data.predictions?.map((prediction: any) => ({
+      place_id: prediction.place_id,
+      description: prediction.description,
+      main_text: prediction.structured_formatting?.main_text || prediction.description,
+      secondary_text: prediction.structured_formatting?.secondary_text || '',
+    })) || [];
+  }
+
+  /**
+   * Enhanced fallback suggestions
    */
   private getFallbackSuggestions(input: string): LocationSuggestion[] {
-    const query = input.toLowerCase();
+    const query = input.toLowerCase().trim();
     const suggestions: LocationSuggestion[] = [];
 
-    // Check zip codes
+    // Check zip codes first
     if (/^\d{1,5}$/.test(input)) {
       NWA_ZIP_CODES.forEach(zip => {
         if (zip.startsWith(input)) {
@@ -171,9 +203,9 @@ class LocationService {
       });
     }
 
-    // Check cities
+    // Check cities with partial matching
     const matchingCities = Array.from(NWA_CITIES).filter(city => 
-      city.includes(query)
+      city.includes(query) || query.includes(city)
     ).slice(0, 5);
 
     matchingCities.forEach(city => {
@@ -189,18 +221,78 @@ class LocationService {
       });
     });
 
-    return suggestions.slice(0, 8);
+    // Add common address patterns for NWA
+    if (query.includes('street') || query.includes('st') || query.includes('avenue') || query.includes('ave') || 
+        query.includes('road') || query.includes('rd') || query.includes('drive') || query.includes('dr')) {
+      
+      // Try to extract potential city names from the address
+      const words = query.split(/\s+/);
+      for (const word of words) {
+        if (this.isNWACity(word)) {
+          const formattedCity = word.charAt(0).toUpperCase() + word.slice(1);
+          suggestions.push({
+            place_id: `address_${word}`,
+            description: `${input}, ${formattedCity}, AR, USA`,
+            main_text: input,
+            secondary_text: `${formattedCity}, AR, USA`
+          });
+          break;
+        }
+      }
+    }
+
+    return suggestions;
   }
 
   /**
-   * Get detailed location data from place ID or coordinates
+   * Enhanced location details with better error handling
    */
   async getLocationDetails(placeId?: string, coordinates?: { lat: number; lng: number }): Promise<LocationData | null> {
     try {
       let locationData: any = null;
 
+      // Handle fallback place IDs
+      if (placeId?.startsWith('zip_')) {
+        const zipCode = placeId.replace('zip_', '');
+        return {
+          isNWA: this.isNWAZipCode(zipCode),
+          city: '',
+          state: 'AR',
+          zipCode,
+          formattedAddress: `${zipCode}, AR, USA`
+        };
+      }
+
+      if (placeId?.startsWith('city_')) {
+        const city = placeId.replace('city_', '');
+        const formattedCity = city.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        
+        return {
+          isNWA: this.isNWACity(city),
+          city: formattedCity,
+          state: 'AR',
+          zipCode: '',
+          formattedAddress: `${formattedCity}, AR, USA`
+        };
+      }
+
+      if (placeId?.startsWith('address_')) {
+        const city = placeId.replace('address_', '');
+        const formattedCity = city.charAt(0).toUpperCase() + city.slice(1);
+        
+        return {
+          isNWA: this.isNWACity(city),
+          city: formattedCity,
+          state: 'AR',
+          zipCode: '',
+          formattedAddress: `Address in ${formattedCity}, AR, USA`
+        };
+      }
+
+      // Try Google Places Details API
       if (placeId && this.googleApiKey) {
-        // Get details from Google Places
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/place/details/json?` +
           `place_id=${placeId}&` +
@@ -210,10 +302,14 @@ class LocationService {
 
         if (response.ok) {
           const data = await response.json();
-          locationData = data.result;
+          if (data.status === 'OK') {
+            locationData = data.result;
+          }
         }
-      } else if (coordinates && this.googleApiKey) {
-        // Reverse geocode coordinates
+      }
+
+      // Try reverse geocoding if we have coordinates
+      if (!locationData && coordinates && this.googleApiKey) {
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?` +
           `latlng=${coordinates.lat},${coordinates.lng}&` +
@@ -222,7 +318,9 @@ class LocationService {
 
         if (response.ok) {
           const data = await response.json();
-          locationData = data.results?.[0];
+          if (data.status === 'OK') {
+            locationData = data.results?.[0];
+          }
         }
       }
 
@@ -230,7 +328,7 @@ class LocationService {
         return this.parseLocationData(locationData);
       }
 
-      // Fallback for offline/API unavailable scenarios
+      // Fallback for coordinates
       if (coordinates) {
         return this.createFallbackLocationData(coordinates);
       }
@@ -262,7 +360,7 @@ class LocationService {
     components.forEach((component: any) => {
       const types = component.types;
       
-      if (types.includes('locality')) {
+      if (types.includes('locality') || types.includes('sublocality')) {
         city = component.long_name;
       } else if (types.includes('administrative_area_level_1')) {
         state = component.short_name;
@@ -334,7 +432,7 @@ class LocationService {
         },
         {
           enableHighAccuracy: true,
-          timeout: 10000,
+          timeout: 15000, // Increased timeout
           maximumAge: 300000 // 5 minutes
         }
       );
@@ -342,7 +440,7 @@ class LocationService {
   }
 
   /**
-   * Validate and parse location input (zip code, city, or address)
+   * Enhanced validation for location input
    */
   async validateLocationInput(input: string): Promise<LocationData | null> {
     const trimmedInput = input.trim();
@@ -376,10 +474,26 @@ class LocationService {
       };
     }
 
-    // Try to get suggestions and use the first match
-    const suggestions = await this.getLocationSuggestions(trimmedInput);
-    if (suggestions.length > 0) {
-      return await this.getLocationDetails(suggestions[0].place_id);
+    // Try to parse as an address
+    const addressPattern = /^(.+?),?\s*([a-zA-Z\s]+),?\s*([A-Z]{2})?\s*(\d{5})?/;
+    const addressMatch = trimmedInput.match(addressPattern);
+    
+    if (addressMatch) {
+      const [, street, city, state, zip] = addressMatch;
+      
+      if (city && this.isNWACity(city.trim())) {
+        const formattedCity = city.trim().split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        
+        return {
+          isNWA: true,
+          city: formattedCity,
+          state: state || 'AR',
+          zipCode: zip || '',
+          formattedAddress: `${street.trim()}, ${formattedCity}, ${state || 'AR'} ${zip || ''}`.trim()
+        };
+      }
     }
 
     return null;
