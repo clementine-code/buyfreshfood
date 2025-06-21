@@ -31,10 +31,7 @@ interface DefaultPageLayoutRootProps
   className?: string;
 }
 
-const DefaultPageLayoutRoot = React.forwardRef<
-  HTMLElement,
-  DefaultPageLayoutRootProps
->(function DefaultPageLayoutRoot(
+const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRootProps>(function DefaultPageLayoutRoot(
   { children, className, ...otherProps }: DefaultPageLayoutRootProps,
   ref
 ) {
@@ -243,9 +240,9 @@ const DefaultPageLayoutRoot = React.forwardRef<
                       )}
                     </div>
                   </DropdownMenu>
-                </SubframeCore.DropdownMenu.Portal>
-                </SubframeCore.DropdownMenu.Portal>
-              </SubframeCore.DropdownMenu.Root>
+                </SubframeCore.DropdownMenu.Content>
+              </SubframeCore.DropdownMenu.Portal>
+            </SubframeCore.DropdownMenu.Root>
             <div className="flex-shrink-0">
               <IconButton
                 variant="brand-secondary"
