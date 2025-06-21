@@ -54,58 +54,89 @@ const NWA_CITIES = new Set([
   'huntsville', 'garfield', 'gateway'
 ]);
 
-// US State zip code ranges for better state detection
+// US State zip code ranges for accurate state detection
 const STATE_ZIP_RANGES: { [key: string]: { min: number; max: number; state: string } } = {
-  'OH': { min: 43000, max: 45999, state: 'OH' },
-  'AR': { min: 71600, max: 72999, state: 'AR' },
-  'TX': { min: 73000, max: 79999, state: 'TX' },
-  'OK': { min: 73000, max: 74999, state: 'OK' },
-  'MO': { min: 63000, max: 65999, state: 'MO' },
-  'TN': { min: 37000, max: 38599, state: 'TN' },
-  'MS': { min: 38600, max: 39799, state: 'MS' },
-  'LA': { min: 70000, max: 71599, state: 'LA' },
-  'KS': { min: 66000, max: 67999, state: 'KS' },
   'AL': { min: 35000, max: 36999, state: 'AL' },
-  'GA': { min: 30000, max: 31999, state: 'GA' },
-  'FL': { min: 32000, max: 34999, state: 'FL' },
-  'SC': { min: 29000, max: 29999, state: 'SC' },
-  'NC': { min: 27000, max: 28999, state: 'NC' },
-  'VA': { min: 20100, max: 26999, state: 'VA' },
-  'WV': { min: 24700, max: 26999, state: 'WV' },
-  'KY': { min: 40000, max: 42799, state: 'KY' },
-  'IN': { min: 46000, max: 47999, state: 'IN' },
-  'IL': { min: 60000, max: 62999, state: 'IL' },
-  'WI': { min: 53000, max: 54999, state: 'WI' },
-  'MI': { min: 48000, max: 49999, state: 'MI' },
-  'IA': { min: 50000, max: 52999, state: 'IA' },
-  'MN': { min: 55000, max: 56799, state: 'MN' },
-  'SD': { min: 57000, max: 57799, state: 'SD' },
-  'ND': { min: 58000, max: 58899, state: 'ND' },
-  'MT': { min: 59000, max: 59999, state: 'MT' },
-  'WY': { min: 82000, max: 83199, state: 'WY' },
-  'CO': { min: 80000, max: 81699, state: 'CO' },
-  'NM': { min: 87000, max: 88499, state: 'NM' },
-  'AZ': { min: 85000, max: 86599, state: 'AZ' },
-  'UT': { min: 84000, max: 84799, state: 'UT' },
-  'NV': { min: 89000, max: 89899, state: 'NV' },
-  'ID': { min: 83200, max: 83899, state: 'ID' },
-  'WA': { min: 98000, max: 99499, state: 'WA' },
-  'OR': { min: 97000, max: 97999, state: 'OR' },
-  'CA': { min: 90000, max: 96199, state: 'CA' },
   'AK': { min: 99500, max: 99999, state: 'AK' },
-  'HI': { min: 96700, max: 96899, state: 'HI' },
-  'NY': { min: 10000, max: 14999, state: 'NY' },
-  'PA': { min: 15000, max: 19699, state: 'PA' },
-  'NJ': { min: 7000, max: 8999, state: 'NJ' },
+  'AZ': { min: 85000, max: 86599, state: 'AZ' },
+  'AR': { min: 71600, max: 72999, state: 'AR' },
+  'CA': { min: 90000, max: 96199, state: 'CA' },
+  'CO': { min: 80000, max: 81699, state: 'CO' },
   'CT': { min: 6000, max: 6999, state: 'CT' },
-  'MA': { min: 1000, max: 2799, state: 'MA' },
-  'RI': { min: 2800, max: 2999, state: 'RI' },
-  'VT': { min: 5000, max: 5999, state: 'VT' },
-  'NH': { min: 3000, max: 3899, state: 'NH' },
-  'ME': { min: 3900, max: 4999, state: 'ME' },
   'DE': { min: 19700, max: 19999, state: 'DE' },
+  'DC': { min: 20000, max: 20599, state: 'DC' },
+  'FL': { min: 32000, max: 34999, state: 'FL' },
+  'GA': { min: 30000, max: 31999, state: 'GA' },
+  'HI': { min: 96700, max: 96899, state: 'HI' },
+  'ID': { min: 83200, max: 83899, state: 'ID' },
+  'IL': { min: 60000, max: 62999, state: 'IL' },
+  'IN': { min: 46000, max: 47999, state: 'IN' },
+  'IA': { min: 50000, max: 52999, state: 'IA' },
+  'KS': { min: 66000, max: 67999, state: 'KS' },
+  'KY': { min: 40000, max: 42799, state: 'KY' },
+  'LA': { min: 70000, max: 71599, state: 'LA' },
+  'ME': { min: 3900, max: 4999, state: 'ME' },
   'MD': { min: 20000, max: 21999, state: 'MD' },
-  'DC': { min: 20000, max: 20599, state: 'DC' }
+  'MA': { min: 1000, max: 2799, state: 'MA' },
+  'MI': { min: 48000, max: 49999, state: 'MI' },
+  'MN': { min: 55000, max: 56799, state: 'MN' },
+  'MS': { min: 38600, max: 39799, state: 'MS' },
+  'MO': { min: 63000, max: 65999, state: 'MO' },
+  'MT': { min: 59000, max: 59999, state: 'MT' },
+  'NE': { min: 68000, max: 69399, state: 'NE' },
+  'NV': { min: 89000, max: 89899, state: 'NV' },
+  'NH': { min: 3000, max: 3899, state: 'NH' },
+  'NJ': { min: 7000, max: 8999, state: 'NJ' },
+  'NM': { min: 87000, max: 88499, state: 'NM' },
+  'NY': { min: 10000, max: 14999, state: 'NY' },
+  'NC': { min: 27000, max: 28999, state: 'NC' },
+  'ND': { min: 58000, max: 58899, state: 'ND' },
+  'OH': { min: 43000, max: 45999, state: 'OH' },
+  'OK': { min: 73000, max: 74999, state: 'OK' },
+  'OR': { min: 97000, max: 97999, state: 'OR' },
+  'PA': { min: 15000, max: 19699, state: 'PA' },
+  'RI': { min: 2800, max: 2999, state: 'RI' },
+  'SC': { min: 29000, max: 29999, state: 'SC' },
+  'SD': { min: 57000, max: 57799, state: 'SD' },
+  'TN': { min: 37000, max: 38599, state: 'TN' },
+  'TX': { min: 73000, max: 79999, state: 'TX' },
+  'UT': { min: 84000, max: 84799, state: 'UT' },
+  'VT': { min: 5000, max: 5999, state: 'VT' },
+  'VA': { min: 20100, max: 26999, state: 'VA' },
+  'WA': { min: 98000, max: 99499, state: 'WA' },
+  'WV': { min: 24700, max: 26999, state: 'WV' },
+  'WI': { min: 53000, max: 54999, state: 'WI' },
+  'WY': { min: 82000, max: 83199, state: 'WY' }
+};
+
+// Major US cities database for better address suggestions
+const MAJOR_CITIES: { [key: string]: { state: string; zip?: string } } = {
+  // Ohio cities
+  'columbus': { state: 'OH', zip: '43215' },
+  'cleveland': { state: 'OH', zip: '44113' },
+  'cincinnati': { state: 'OH', zip: '45202' },
+  'toledo': { state: 'OH', zip: '43604' },
+  'akron': { state: 'OH', zip: '44308' },
+  'dayton': { state: 'OH', zip: '45402' },
+  // Arkansas cities
+  'little rock': { state: 'AR', zip: '72201' },
+  'fort smith': { state: 'AR', zip: '72901' },
+  'fayetteville': { state: 'AR', zip: '72701' },
+  'springdale': { state: 'AR', zip: '72762' },
+  'jonesboro': { state: 'AR', zip: '72401' },
+  'north little rock': { state: 'AR', zip: '72114' },
+  'conway': { state: 'AR', zip: '72032' },
+  'rogers': { state: 'AR', zip: '72756' },
+  'bentonville': { state: 'AR', zip: '72712' },
+  'pine bluff': { state: 'AR', zip: '71601' },
+  // Texas cities
+  'houston': { state: 'TX', zip: '77002' },
+  'dallas': { state: 'TX', zip: '75201' },
+  'san antonio': { state: 'TX', zip: '78205' },
+  'austin': { state: 'TX', zip: '78701' },
+  'fort worth': { state: 'TX', zip: '76102' },
+  'el paso': { state: 'TX', zip: '79901' },
+  // Add more major cities as needed
 };
 
 class LocationService {
@@ -118,7 +149,7 @@ class LocationService {
   }
 
   /**
-   * Get state from zip code using zip code ranges
+   * Get state from zip code using accurate zip code ranges
    */
   getStateFromZipCode(zipCode: string): string {
     const zip = parseInt(zipCode.replace(/\D/g, '').substring(0, 5));
@@ -160,7 +191,7 @@ class LocationService {
   }
 
   /**
-   * Get location suggestions - enhanced for better address support
+   * Enhanced location suggestions with better address and city support
    */
   async getLocationSuggestions(input: string): Promise<LocationSuggestion[]> {
     if (input.length < 3) {
@@ -168,26 +199,25 @@ class LocationService {
     }
 
     const suggestions: LocationSuggestion[] = [];
+    const query = input.toLowerCase().trim();
 
-    // 1. Always start with fallback suggestions for immediate response
-    const fallbackResults = this.getFallbackSuggestions(input);
-    suggestions.push(...fallbackResults);
-
-    // 2. Try external APIs if available (but don't block on them)
-    try {
-      if (this.googleApiKey && this.googleApiKey !== 'your_google_places_api_key_here') {
-        const googleResults = await this.getGooglePlacesSuggestions(input);
-        suggestions.push(...googleResults);
-      } else {
-        // If no API key, enhance fallback suggestions
-        const enhancedFallback = this.getEnhancedFallbackSuggestions(input);
-        suggestions.push(...enhancedFallback);
-      }
-    } catch (error) {
-      console.warn('External API error, using fallback suggestions:', error);
+    // 1. Zip code suggestions (highest priority)
+    if (/^\d{1,5}$/.test(input)) {
+      const zipSuggestions = this.getZipCodeSuggestions(input);
+      suggestions.push(...zipSuggestions);
     }
 
-    // 3. Remove duplicates and limit results
+    // 2. City name suggestions
+    const citySuggestions = this.getCitySuggestions(query);
+    suggestions.push(...citySuggestions);
+
+    // 3. Address suggestions (improved)
+    if (this.looksLikeAddress(input)) {
+      const addressSuggestions = this.getAddressSuggestions(input);
+      suggestions.push(...addressSuggestions);
+    }
+
+    // 4. Remove duplicates and limit results
     const uniqueSuggestions = suggestions.filter((suggestion, index, self) => 
       index === self.findIndex(s => s.description.toLowerCase() === suggestion.description.toLowerCase())
     );
@@ -196,132 +226,60 @@ class LocationService {
   }
 
   /**
-   * Enhanced fallback suggestions when APIs aren't available
+   * Get zip code suggestions with accurate state mapping
    */
-  private getEnhancedFallbackSuggestions(input: string): LocationSuggestion[] {
+  private getZipCodeSuggestions(input: string): LocationSuggestion[] {
     const suggestions: LocationSuggestion[] = [];
-    const query = input.toLowerCase().trim();
+    const zipNum = parseInt(input);
 
-    // Enhanced address pattern matching
-    if (this.looksLikeAddress(input)) {
-      // Try common address patterns for NWA
-      const commonStreets = ['main', 'college', 'university', 'center', 'north', 'south', 'east', 'west'];
-      const addressParts = input.toLowerCase().split(/[\s,]+/);
-      
-      for (const street of commonStreets) {
-        if (addressParts.some(part => part.includes(street))) {
-          // Suggest completions for NWA cities
-          ['Fayetteville', 'Rogers', 'Bentonville', 'Springdale'].forEach(city => {
+    // Check NWA zip codes first
+    NWA_ZIP_CODES.forEach(zip => {
+      if (zip.startsWith(input)) {
+        suggestions.push({
+          place_id: `zip_${zip}`,
+          description: `${zip}, Arkansas, USA`,
+          main_text: zip,
+          secondary_text: 'Arkansas, USA'
+        });
+      }
+    });
+
+    // Add suggestions for other states based on zip code ranges
+    for (const [, range] of Object.entries(STATE_ZIP_RANGES)) {
+      if (zipNum >= range.min && zipNum <= range.max) {
+        // Generate realistic zip codes in this range
+        const baseZip = Math.floor(zipNum / 1000) * 1000;
+        for (let i = 0; i < 5; i++) {
+          const suggestedZip = (baseZip + i * 100).toString().padStart(5, '0');
+          if (suggestedZip.startsWith(input) && suggestedZip !== input && suggestions.length < 6) {
             suggestions.push({
-              place_id: `enhanced_address_${city.toLowerCase()}`,
-              description: `${input}, ${city}, AR, USA`,
-              main_text: input,
-              secondary_text: `${city}, AR, USA`
+              place_id: `zip_${suggestedZip}`,
+              description: `${suggestedZip}, ${range.state}, USA`,
+              main_text: suggestedZip,
+              secondary_text: `${range.state}, USA`
             });
-          });
-          break;
+          }
         }
+        break;
       }
     }
-
-    // Enhanced city matching with partial matches
-    const partialCityMatches = Array.from(NWA_CITIES).filter(city => 
-      city.includes(query) || query.includes(city) || this.fuzzyMatch(city, query)
-    ).slice(0, 6);
-
-    partialCityMatches.forEach(city => {
-      const formattedCity = city.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
-      suggestions.push({
-        place_id: `enhanced_city_${city}`,
-        description: `${formattedCity}, Arkansas, USA`,
-        main_text: formattedCity,
-        secondary_text: 'Arkansas, USA'
-      });
-    });
 
     return suggestions;
   }
 
   /**
-   * Simple fuzzy matching for city names
+   * Get city suggestions with better nationwide coverage
    */
-  private fuzzyMatch(target: string, query: string): boolean {
-    if (query.length < 3) return false;
-    
-    // Check if query is a substring or if target starts with query
-    return target.startsWith(query) || 
-           target.includes(query) ||
-           query.split('').every((char, i) => target.indexOf(char, i) !== -1);
-  }
-
-  /**
-   * Get suggestions from Google Places API with improved parameters for addresses
-   */
-  private async getGooglePlacesSuggestions(input: string): Promise<LocationSuggestion[]> {
-    // Note: This is a mock implementation since we don't have a real API key
-    // In production, you would implement the actual Google Places API call here
-    
-    // For now, return enhanced fallback suggestions
-    return this.getEnhancedFallbackSuggestions(input);
-  }
-
-  /**
-   * Enhanced fallback suggestions with better address and zip code support
-   */
-  private getFallbackSuggestions(input: string): LocationSuggestion[] {
-    const query = input.toLowerCase().trim();
+  private getCitySuggestions(query: string): LocationSuggestion[] {
     const suggestions: LocationSuggestion[] = [];
 
-    // Enhanced zip code matching
-    if (/^\d{1,5}$/.test(input)) {
-      const zipNum = parseInt(input);
-      
-      // Check NWA zip codes first
-      NWA_ZIP_CODES.forEach(zip => {
-        if (zip.startsWith(input)) {
-          suggestions.push({
-            place_id: `zip_${zip}`,
-            description: `${zip}, Arkansas, USA`,
-            main_text: zip,
-            secondary_text: 'Arkansas, USA'
-          });
-        }
-      });
-
-      // Add suggestions for other states based on zip code ranges
-      for (const [, range] of Object.entries(STATE_ZIP_RANGES)) {
-        if (zipNum >= range.min && zipNum <= range.max) {
-          // Generate some example zip codes in this range
-          const baseZip = Math.floor(zipNum / 100) * 100;
-          for (let i = 0; i < 3; i++) {
-            const suggestedZip = (baseZip + i).toString().padStart(5, '0');
-            if (suggestedZip.startsWith(input) && suggestedZip !== input) {
-              suggestions.push({
-                place_id: `zip_${suggestedZip}`,
-                description: `${suggestedZip}, ${range.state}, USA`,
-                main_text: suggestedZip,
-                secondary_text: `${range.state}, USA`
-              });
-            }
-          }
-          break;
-        }
-      }
-    }
-
-    // Enhanced city matching for NWA
-    const matchingCities = Array.from(NWA_CITIES).filter(city => 
+    // Check NWA cities first
+    const nwaCities = Array.from(NWA_CITIES).filter(city => 
       city.includes(query) || query.includes(city)
-    ).slice(0, 5);
+    ).slice(0, 3);
 
-    matchingCities.forEach(city => {
-      const formattedCity = city.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
+    nwaCities.forEach(city => {
+      const formattedCity = this.formatCityName(city);
       suggestions.push({
         place_id: `city_${city}`,
         description: `${formattedCity}, Arkansas, USA`,
@@ -330,46 +288,97 @@ class LocationService {
       });
     });
 
-    // Enhanced address pattern matching
-    if (this.looksLikeAddress(input)) {
-      // Try to extract city from address
-      const addressParts = input.split(',').map(part => part.trim());
-      let detectedCity = '';
-      
-      // Look for NWA cities in the address
-      for (const part of addressParts) {
-        const words = part.toLowerCase().split(/\s+/);
-        for (const word of words) {
-          if (this.isNWACity(word)) {
-            detectedCity = word;
-            break;
-          }
-        }
-        if (detectedCity) break;
-      }
+    // Check major US cities
+    const majorCityMatches = Object.entries(MAJOR_CITIES).filter(([city, data]) => 
+      city.includes(query) || query.includes(city)
+    ).slice(0, 5);
 
-      if (detectedCity) {
-        const formattedCity = detectedCity.charAt(0).toUpperCase() + detectedCity.slice(1);
-        suggestions.push({
-          place_id: `address_${detectedCity}`,
-          description: `${input}, ${formattedCity}, AR, USA`,
-          main_text: input,
-          secondary_text: `${formattedCity}, AR, USA`
-        });
-      } else {
-        // Generic address suggestion for major NWA cities
-        ['Fayetteville', 'Rogers', 'Bentonville', 'Springdale'].forEach(city => {
-          suggestions.push({
-            place_id: `address_${city.toLowerCase()}`,
-            description: `${input}, ${city}, AR, USA`,
-            main_text: input,
-            secondary_text: `${city}, AR, USA`
-          });
-        });
+    majorCityMatches.forEach(([city, data]) => {
+      const formattedCity = this.formatCityName(city);
+      suggestions.push({
+        place_id: `major_city_${city}`,
+        description: `${formattedCity}, ${data.state}, USA`,
+        main_text: formattedCity,
+        secondary_text: `${data.state}, USA`
+      });
+    });
+
+    return suggestions;
+  }
+
+  /**
+   * Get address suggestions with better city detection
+   */
+  private getAddressSuggestions(input: string): LocationSuggestion[] {
+    const suggestions: LocationSuggestion[] = [];
+    const addressParts = input.toLowerCase().split(/[\s,]+/);
+    
+    // Try to detect city in the address
+    let detectedCity = '';
+    let detectedState = '';
+
+    // Check for NWA cities in address
+    for (const part of addressParts) {
+      if (this.isNWACity(part)) {
+        detectedCity = part;
+        detectedState = 'AR';
+        break;
       }
     }
 
+    // Check for major cities in address
+    if (!detectedCity) {
+      for (const part of addressParts) {
+        const cityData = MAJOR_CITIES[part];
+        if (cityData) {
+          detectedCity = part;
+          detectedState = cityData.state;
+          break;
+        }
+      }
+    }
+
+    if (detectedCity) {
+      const formattedCity = this.formatCityName(detectedCity);
+      suggestions.push({
+        place_id: `address_${detectedCity}`,
+        description: `${input}, ${formattedCity}, ${detectedState}, USA`,
+        main_text: input,
+        secondary_text: `${formattedCity}, ${detectedState}, USA`
+      });
+    } else {
+      // Generic address suggestions for major NWA cities
+      ['Fayetteville', 'Rogers', 'Bentonville', 'Springdale'].forEach(city => {
+        suggestions.push({
+          place_id: `address_${city.toLowerCase()}`,
+          description: `${input}, ${city}, AR, USA`,
+          main_text: input,
+          secondary_text: `${city}, AR, USA`
+        });
+      });
+
+      // Add suggestions for major cities in nearby states
+      ['Little Rock, AR', 'Tulsa, OK', 'Kansas City, MO'].forEach(cityState => {
+        const [city, state] = cityState.split(', ');
+        suggestions.push({
+          place_id: `address_${city.toLowerCase().replace(' ', '_')}`,
+          description: `${input}, ${cityState}, USA`,
+          main_text: input,
+          secondary_text: `${cityState}, USA`
+        });
+      });
+    }
+
     return suggestions;
+  }
+
+  /**
+   * Format city name properly
+   */
+  private formatCityName(city: string): string {
+    return city.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   }
 
   /**
@@ -386,13 +395,11 @@ class LocationService {
   }
 
   /**
-   * Enhanced location details with better error handling and state detection
+   * Enhanced location details with better handling of all suggestion types
    */
   async getLocationDetails(placeId?: string, coordinates?: { lat: number; lng: number }): Promise<LocationData | null> {
     try {
-      let locationData: any = null;
-
-      // Handle fallback place IDs with improved state detection
+      // Handle zip code suggestions
       if (placeId?.startsWith('zip_')) {
         const zipCode = placeId.replace('zip_', '');
         const state = this.getStateFromZipCode(zipCode);
@@ -405,37 +412,70 @@ class LocationService {
         };
       }
 
-      if (placeId?.startsWith('city_') || placeId?.startsWith('enhanced_city_')) {
-        const city = placeId.replace(/^(city_|enhanced_city_)/, '');
-        const formattedCity = city.split(' ').map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
+      // Handle city suggestions
+      if (placeId?.startsWith('city_') || placeId?.startsWith('major_city_')) {
+        const city = placeId.replace(/^(city_|major_city_)/, '');
+        const formattedCity = this.formatCityName(city);
         
-        return {
-          isNWA: this.isNWACity(city),
-          city: formattedCity,
-          state: 'AR',
-          zipCode: '',
-          formattedAddress: `${formattedCity}, AR, USA`
-        };
+        // Check if it's an NWA city
+        if (this.isNWACity(city)) {
+          return {
+            isNWA: true,
+            city: formattedCity,
+            state: 'AR',
+            zipCode: '',
+            formattedAddress: `${formattedCity}, AR, USA`
+          };
+        }
+
+        // Check if it's a major city
+        const cityData = MAJOR_CITIES[city];
+        if (cityData) {
+          return {
+            isNWA: false,
+            city: formattedCity,
+            state: cityData.state,
+            zipCode: cityData.zip || '',
+            formattedAddress: `${formattedCity}, ${cityData.state}, USA`
+          };
+        }
       }
 
-      if (placeId?.startsWith('address_') || placeId?.startsWith('enhanced_address_')) {
-        const city = placeId.replace(/^(address_|enhanced_address_)/, '');
-        if (city !== 'generic') {
-          const formattedCity = city.charAt(0).toUpperCase() + city.slice(1);
+      // Handle address suggestions
+      if (placeId?.startsWith('address_')) {
+        const cityKey = placeId.replace('address_', '');
+        
+        if (this.isNWACity(cityKey)) {
+          const formattedCity = this.formatCityName(cityKey);
           return {
-            isNWA: this.isNWACity(city),
+            isNWA: true,
             city: formattedCity,
             state: 'AR',
             zipCode: '',
             formattedAddress: `Address in ${formattedCity}, AR, USA`
           };
         }
+
+        // Handle major city addresses
+        const cityData = MAJOR_CITIES[cityKey.replace('_', ' ')];
+        if (cityData) {
+          const formattedCity = this.formatCityName(cityKey.replace('_', ' '));
+          return {
+            isNWA: false,
+            city: formattedCity,
+            state: cityData.state,
+            zipCode: cityData.zip || '',
+            formattedAddress: `Address in ${formattedCity}, ${cityData.state}, USA`
+          };
+        }
       }
 
-      // For real API integration, you would implement Google Places Details API here
-      // For now, fallback to coordinate-based location
+      // Handle direct match
+      if (placeId === 'direct_match' && coordinates) {
+        return this.createFallbackLocationData(coordinates);
+      }
+
+      // Fallback for coordinates
       if (coordinates) {
         return this.createFallbackLocationData(coordinates);
       }
@@ -444,55 +484,12 @@ class LocationService {
     } catch (error) {
       console.error('Error getting location details:', error);
       
-      // Fallback for coordinates
       if (coordinates) {
         return this.createFallbackLocationData(coordinates);
       }
       
       return null;
     }
-  }
-
-  /**
-   * Parse Google Places/Geocoding API response with better state detection
-   */
-  private parseLocationData(locationData: any): LocationData {
-    const components = locationData.address_components || [];
-    const geometry = locationData.geometry?.location;
-    
-    let city = '';
-    let state = '';
-    let zipCode = '';
-
-    components.forEach((component: any) => {
-      const types = component.types;
-      
-      if (types.includes('locality') || types.includes('sublocality')) {
-        city = component.long_name;
-      } else if (types.includes('administrative_area_level_1')) {
-        state = component.short_name; // This should give us the correct state abbreviation
-      } else if (types.includes('postal_code')) {
-        zipCode = component.long_name;
-      }
-    });
-
-    // Fallback state detection from zip code if not found in components
-    if (!state && zipCode) {
-      state = this.getStateFromZipCode(zipCode);
-    }
-
-    const latitude = geometry?.lat || 0;
-    const longitude = geometry?.lng || 0;
-
-    return {
-      isNWA: this.isInNWABounds(latitude, longitude) || this.isNWAZipCode(zipCode) || this.isNWACity(city),
-      city,
-      state,
-      zipCode,
-      latitude,
-      longitude,
-      formattedAddress: locationData.formatted_address
-    };
   }
 
   /**
@@ -552,7 +549,7 @@ class LocationService {
   }
 
   /**
-   * Enhanced validation for location input with better state detection
+   * Enhanced validation for location input with better address and city support
    */
   async validateLocationInput(input: string): Promise<LocationData | null> {
     const trimmedInput = input.trim();
@@ -571,13 +568,10 @@ class LocationService {
       };
     }
 
-    // Check if it's a known NWA city
+    // Check if it's a known city (NWA or major city)
     const cityMatch = trimmedInput.toLowerCase();
     if (this.isNWACity(cityMatch)) {
-      const formattedCity = trimmedInput.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
+      const formattedCity = this.formatCityName(cityMatch);
       return {
         isNWA: true,
         city: formattedCity,
@@ -587,23 +581,35 @@ class LocationService {
       };
     }
 
-    // Try to parse as an address with better state detection
+    // Check major cities
+    const majorCityData = MAJOR_CITIES[cityMatch];
+    if (majorCityData) {
+      const formattedCity = this.formatCityName(cityMatch);
+      return {
+        isNWA: false,
+        city: formattedCity,
+        state: majorCityData.state,
+        zipCode: majorCityData.zip || '',
+        formattedAddress: `${formattedCity}, ${majorCityData.state}, USA`
+      };
+    }
+
+    // Try to parse as an address with better city and state detection
     const addressPattern = /^(.+?),?\s*([a-zA-Z\s]+),?\s*([A-Z]{2})?\s*(\d{5})?/;
     const addressMatch = trimmedInput.match(addressPattern);
     
     if (addressMatch) {
       const [, street, city, state, zip] = addressMatch;
+      const cityLower = city?.trim().toLowerCase();
       
       let detectedState = state;
       if (!detectedState && zip) {
         detectedState = this.getStateFromZipCode(zip);
       }
       
-      if (city && this.isNWACity(city.trim())) {
-        const formattedCity = city.trim().split(' ').map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
-        
+      // Check if it's an NWA city
+      if (cityLower && this.isNWACity(cityLower)) {
+        const formattedCity = this.formatCityName(cityLower);
         return {
           isNWA: true,
           city: formattedCity,
@@ -611,6 +617,21 @@ class LocationService {
           zipCode: zip || '',
           formattedAddress: `${street.trim()}, ${formattedCity}, ${detectedState || 'AR'} ${zip || ''}`.trim()
         };
+      }
+
+      // Check if it's a major city
+      if (cityLower) {
+        const majorCityData = MAJOR_CITIES[cityLower];
+        if (majorCityData) {
+          const formattedCity = this.formatCityName(cityLower);
+          return {
+            isNWA: false,
+            city: formattedCity,
+            state: detectedState || majorCityData.state,
+            zipCode: zip || majorCityData.zip || '',
+            formattedAddress: `${street.trim()}, ${formattedCity}, ${detectedState || majorCityData.state} ${zip || ''}`.trim()
+          };
+        }
       }
     }
 

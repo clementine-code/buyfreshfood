@@ -34,10 +34,11 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const isProcessingRef = useRef(false);
   const lastSearchRef = useRef<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
-  const isUserInteractingRef = useRef(false);
+  const preventBlurRef = useRef(false);
 
-  // Improved search function with better error handling
+  // Much more conservative search function - only trigger on pause in typing
   const searchLocations = useCallback(async (query: string) => {
+    // Don't search if already processing, too short, or same as last search
     if (!query.trim() || query.length < 3 || isProcessingRef.current || lastSearchRef.current === query) {
       if (query.length < 3) {
         setSuggestions([]);
@@ -47,6 +48,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       return;
     }
 
+    // Only proceed if user has stopped typing for a bit
     lastSearchRef.current = query;
     isProcessingRef.current = true;
     setIsLoading(true);
@@ -55,8 +57,8 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     try {
       const results = await locationService.getLocationSuggestions(query);
       
-      // Only update if this is still the current search
-      if (lastSearchRef.current === query) {
+      // Only update if this is still the current search and input is focused
+      if (lastSearchRef.current === query && document.activeElement === inputRef.current) {
         setSuggestions(results);
         setShowSuggestions(results.length > 0);
         setSearchStatus(results.length > 0 ? 'found' : 'not-found');
@@ -89,21 +91,21 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         setSearchStatus('not-found');
       }
     } finally {
-      // Keep loading state visible for better UX but don't lose focus
+      // Keep loading state visible briefly but don't interfere with input
       setTimeout(() => {
         if (lastSearchRef.current === query) {
           setIsLoading(false);
           isProcessingRef.current = false;
         }
-      }, 300);
+      }, 200);
     }
   }, []);
 
-  // Improved input handler that maintains focus better
+  // Much more conservative input handler - longer debounce, no focus loss
   const handleLocationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     
-    // Update input value immediately
+    // Update input value immediately - never lose this
     setLocation(value);
     
     // Reset validation states
@@ -116,11 +118,14 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       clearTimeout(debounceRef.current);
     }
 
-    // Only search if we have enough characters
+    // Much longer debounce - wait for user to stop typing
     if (value.trim().length >= 3) {
       debounceRef.current = setTimeout(() => {
-        searchLocations(value);
-      }, 300);
+        // Only search if input is still focused (user hasn't moved away)
+        if (document.activeElement === inputRef.current) {
+          searchLocations(value);
+        }
+      }, 800); // Increased from 300ms to 800ms
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -129,39 +134,28 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, [searchLocations]);
 
-  // Handle key events to prevent unwanted behavior
+  // Prevent any key from causing focus loss
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    isUserInteractingRef.current = true;
-    
-    // Don't prevent space key - let it work normally
-    if (event.key === ' ') {
-      // Just mark that user is actively typing
+    // Don't interfere with normal typing at all
+    if (event.key === 'Escape') {
+      setShowSuggestions(false);
       return;
     }
     
-    // Handle escape to close suggestions
-    if (event.key === 'Escape') {
-      setShowSuggestions(false);
-      inputRef.current?.blur();
-    }
-    
-    // Handle enter to select first suggestion
     if (event.key === 'Enter' && suggestions.length > 0) {
       event.preventDefault();
       handleSuggestionClick(suggestions[0]);
+      return;
     }
+    
+    // For all other keys, just let them work normally
   }, [suggestions]);
-
-  // Handle key up to reset interaction flag
-  const handleKeyUp = useCallback(() => {
-    // Reset interaction flag after a short delay
-    setTimeout(() => {
-      isUserInteractingRef.current = false;
-    }, 100);
-  }, []);
 
   const handleSuggestionClick = useCallback(async (suggestion: LocationSuggestion) => {
     if (isProcessingRef.current) return;
+    
+    // Prevent input blur during suggestion click
+    preventBlurRef.current = true;
     
     setLocation(suggestion.description);
     setSuggestions([]);
@@ -176,10 +170,8 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       let locationData: LocationData | null = null;
       
       if (suggestion.place_id === 'direct_match') {
-        // This is a direct validation result
         locationData = await locationService.validateLocationInput(suggestion.main_text);
       } else {
-        // This is from the API
         locationData = await locationService.getLocationDetails(suggestion.place_id, suggestion.coordinates);
       }
       
@@ -207,6 +199,9 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
       setTimeout(() => {
         setIsLoading(false);
         isProcessingRef.current = false;
+        preventBlurRef.current = false;
+        // Return focus to input
+        inputRef.current?.focus();
       }, 200);
     }
   }, [onLocationSelect, onLocationError]);
@@ -253,31 +248,32 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, [onLocationSelect, onLocationError]);
 
-  // Improved focus management - only show suggestions when user focuses
+  // Only show suggestions when input is focused and we have results
   const handleInputFocus = useCallback(() => {
-    isUserInteractingRef.current = true;
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
   }, [suggestions.length]);
 
-  // Much more conservative blur handling
+  // Much more conservative blur handling - only hide if really moving away
   const handleInputBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
-    // Don't hide suggestions if user is actively interacting
-    if (isUserInteractingRef.current) {
+    // Don't blur if we're preventing it (during suggestion click)
+    if (preventBlurRef.current) {
+      event.preventDefault();
+      inputRef.current?.focus();
       return;
     }
     
-    // Only hide suggestions if clicking completely outside the container
+    // Only hide suggestions after a delay and if focus really moved away
     setTimeout(() => {
       const activeElement = document.activeElement;
       const container = containerRef.current;
       
-      // Check if the new focus is outside our container
+      // Only hide if focus moved completely outside our container
       if (container && !container.contains(activeElement)) {
         setShowSuggestions(false);
       }
-    }, 150);
+    }, 200);
   }, []);
 
   // Handle clicks outside the component
@@ -285,7 +281,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
-        isUserInteractingRef.current = false;
       }
     };
 
@@ -335,8 +330,11 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     return null;
   }, [isLoading, isGettingLocation, searchStatus]);
 
-  // Show status message when not showing suggestions
-  const showStatusMessage = (loadingMessage || searchStatus === 'not-found') && !showSuggestions && location.length >= 3;
+  // Only show status message when appropriate and not interfering with input
+  const showStatusMessage = (loadingMessage || searchStatus === 'not-found') && 
+                           !showSuggestions && 
+                           location.length >= 3 && 
+                           document.activeElement !== inputRef.current;
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
@@ -381,7 +379,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           onKeyDown={handleKeyDown}
-          onKeyUp={handleKeyUp}
           disabled={isLoading || isGettingLocation}
           autoComplete="off"
           spellCheck={false}
@@ -399,12 +396,12 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
               type="button"
               onMouseDown={(e) => {
                 e.preventDefault(); // Prevent input blur
-                isUserInteractingRef.current = true;
+                preventBlurRef.current = true;
               }}
               onMouseUp={() => {
-                // Reset interaction flag after click
+                // Reset prevention after click
                 setTimeout(() => {
-                  isUserInteractingRef.current = false;
+                  preventBlurRef.current = false;
                 }, 100);
               }}
             >
@@ -422,7 +419,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
         </div>
       )}
 
-      {/* Status messages - Only show when not showing suggestions, lower z-index */}
+      {/* Status messages - Only show when not interfering with input */}
       {showStatusMessage && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[55] p-3">
           {loadingMessage && (
