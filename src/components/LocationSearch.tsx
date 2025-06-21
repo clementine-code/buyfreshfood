@@ -34,6 +34,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
   const isProcessingRef = useRef(false);
   const lastSearchRef = useRef<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const isUserInteractingRef = useRef(false);
 
   // Improved search function with better error handling
   const searchLocations = useCallback(async (query: string) => {
@@ -128,6 +129,37 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, [searchLocations]);
 
+  // Handle key events to prevent unwanted behavior
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    isUserInteractingRef.current = true;
+    
+    // Don't prevent space key - let it work normally
+    if (event.key === ' ') {
+      // Just mark that user is actively typing
+      return;
+    }
+    
+    // Handle escape to close suggestions
+    if (event.key === 'Escape') {
+      setShowSuggestions(false);
+      inputRef.current?.blur();
+    }
+    
+    // Handle enter to select first suggestion
+    if (event.key === 'Enter' && suggestions.length > 0) {
+      event.preventDefault();
+      handleSuggestionClick(suggestions[0]);
+    }
+  }, [suggestions]);
+
+  // Handle key up to reset interaction flag
+  const handleKeyUp = useCallback(() => {
+    // Reset interaction flag after a short delay
+    setTimeout(() => {
+      isUserInteractingRef.current = false;
+    }, 100);
+  }, []);
+
   const handleSuggestionClick = useCallback(async (suggestion: LocationSuggestion) => {
     if (isProcessingRef.current) return;
     
@@ -221,20 +253,46 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   }, [onLocationSelect, onLocationError]);
 
-  // Improved focus management
+  // Improved focus management - only show suggestions when user focuses
   const handleInputFocus = useCallback(() => {
+    isUserInteractingRef.current = true;
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
   }, [suggestions.length]);
 
+  // Much more conservative blur handling
   const handleInputBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
-    // Only hide suggestions if clicking outside the container
+    // Don't hide suggestions if user is actively interacting
+    if (isUserInteractingRef.current) {
+      return;
+    }
+    
+    // Only hide suggestions if clicking completely outside the container
     setTimeout(() => {
-      if (containerRef.current && !containerRef.current.contains(document.activeElement)) {
+      const activeElement = document.activeElement;
+      const container = containerRef.current;
+      
+      // Check if the new focus is outside our container
+      if (container && !container.contains(activeElement)) {
         setShowSuggestions(false);
       }
     }, 150);
+  }, []);
+
+  // Handle clicks outside the component
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+        isUserInteractingRef.current = false;
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // Cleanup on unmount
@@ -322,6 +380,8 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
           onChange={handleLocationChange}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
+          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
           disabled={isLoading || isGettingLocation}
           autoComplete="off"
           spellCheck={false}
@@ -339,6 +399,13 @@ const LocationSearch: React.FC<LocationSearchProps> = ({
               type="button"
               onMouseDown={(e) => {
                 e.preventDefault(); // Prevent input blur
+                isUserInteractingRef.current = true;
+              }}
+              onMouseUp={() => {
+                // Reset interaction flag after click
+                setTimeout(() => {
+                  isUserInteractingRef.current = false;
+                }, 100);
               }}
             >
               <div className="flex items-center gap-2">
