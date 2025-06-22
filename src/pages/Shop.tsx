@@ -588,7 +588,7 @@ function Shop() {
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
       <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto">
         {/* Mobile/Tablet Page Controls - Sticky at top */}
-       <div className="sticky top-0 left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full -mt-1">
+       <div className="sticky top-0 left-0 right-0 z-[100] bg-white border-b border-neutral-200 shadow-sm w-full -mt-2 pt-2">
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
