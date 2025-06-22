@@ -587,7 +587,7 @@ function Shop() {
         </div>
 
         {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
-        <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
+        <div className="xl:hidden flex w-full flex-col items-start min-h-screen bg-default-background relative">
           {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
           <div className="sticky top-0 left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full">
             <div className="flex w-full flex-col gap-3 px-4 py-4">
