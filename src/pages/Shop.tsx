@@ -586,9 +586,9 @@ function Shop() {
       </div>
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
-      <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto pt-20 relative">
-       {/* Mobile/Tablet Page Controls - Absolute positioned */}
-<div className="absolute top-0 left-0 right-0 z-[100] bg-white border-b border-neutral-200 shadow-sm w-full">
+     <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative">
+{/* Mobile/Tablet Page Controls - Sticky positioned */}
+<div className="sticky top-0 left-0 right-0 z-[100] bg-white w-full" style={{marginTop: '-1px', borderBottom: '1px solid rgb(229 231 235)', boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'}}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
@@ -659,8 +659,8 @@ function Shop() {
           </div>
         </div>
 
-{/* Products Grid/List - Full width, scrollable content */}
-<div className="w-full px-4 py-4 flex-1">
+        {/* Products Grid/List - Full width, scrollable content */}
+        <div className="w-full px-4 py-4 flex-1">
           {currentProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
               <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
