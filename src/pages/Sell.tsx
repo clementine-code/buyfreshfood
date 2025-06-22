@@ -20,7 +20,6 @@ function Sell() {
   };
 
   return (
-    <DefaultPageLayout>
       <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden">
         {/* Hero Section */}
         <div className="flex w-full flex-wrap items-center justify-center gap-4 bg-neutral-800 px-4 py-14">
@@ -128,7 +127,6 @@ function Sell() {
         {/* Footer */}
         <Footer />
       </div>
-    </DefaultPageLayout>
   );
 }
 
