@@ -166,7 +166,7 @@ function Shop() {
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
-  // Check if we're currently viewing the main product list (not in modal views)
+  // Check if we're currently viewing the main product view (not in modal views)
   const isMainProductView = !showMobileFilters && !showMobileMap;
 
   // Get current products to display (search results or regular products)
@@ -258,6 +258,7 @@ function Shop() {
                   </div>
                 )}
               </div>
+              
               <div className="flex flex-row md:flex-col items-center md:items-end gap-2 justify-between md:justify-start">
                 <span className="text-heading-3 font-heading-3 text-default-font whitespace-nowrap">
                   {formatPrice(displayProduct.price, displayProduct.unit)}
@@ -420,7 +421,7 @@ function Shop() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-default-background">
+      <div className="flex h-full w-full items-center justify-center bg-default-background">
         <div className="flex flex-col items-center gap-4">
           <Loader size="large" />
           <span className="text-body font-body text-subtext-color">
@@ -433,7 +434,7 @@ function Shop() {
 
   if (error) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-default-background">
+      <div className="flex h-full w-full items-center justify-center bg-default-background">
         <div className="flex flex-col items-center gap-4 text-center max-w-md">
           <span className="text-heading-2 font-heading-2 text-error-700">Unable to load products</span>
           <span className="text-body font-body text-subtext-color">{error}</span>
@@ -446,13 +447,13 @@ function Shop() {
   }
 
   return (
-    <div className="flex w-full flex-col bg-default-background min-h-screen">
+    <div className="flex w-full h-full bg-default-background">
       {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-      <div className="hidden xl:flex w-full h-screen overflow-hidden">
+      <div className="hidden xl:flex w-full h-full">
         {/* Left Side - Products (50% width, scrollable content) */}
-        <div className="w-1/2 h-full flex flex-col bg-default-background overflow-hidden">
+        <div className="w-1/2 h-full flex flex-col bg-default-background">
           {/* Controls Bar - Fixed at top */}
-          <div className="flex-shrink-0 sticky top-[73px] z-30 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+          <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -579,7 +580,7 @@ function Shop() {
         </div>
 
         {/* Right Side - Map (50% width, COMPLETELY FROZEN) */}
-        <div className="w-1/2 h-full overflow-hidden">
+        <div className="w-1/2 h-full">
           <Map className="h-full w-full" />
         </div>
       </div>
@@ -587,7 +588,7 @@ function Shop() {
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
       <div className="xl:hidden flex w-full flex-col items-start flex-1 bg-default-background relative">
         {/* Mobile/Tablet Page Controls - Fixed positioning with higher z-index */}
-        <div className="sticky top-[73px] left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full">
+        <div className="sticky top-0 left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full">
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">

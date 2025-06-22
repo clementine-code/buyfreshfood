@@ -83,7 +83,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
   return (
     <div
       className={SubframeUtils.twClassNames(
-        "flex min-h-screen w-full flex-col items-center bg-default-background",
+        "flex h-screen w-full flex-col bg-default-background",
         className
       )}
       ref={ref as any}
@@ -285,9 +285,9 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
         onClose={() => setShowMobileNav(false)}
       />
 
-      {/* Main Content - Use main-content class for proper spacing */}
+      {/* Main Content - Fixed height container */}
       {children ? (
-        <div className="main-content flex w-full flex-col items-start bg-default-background">
+        <div className="flex-1 w-full bg-default-background overflow-hidden">
           {children}
         </div>
       ) : null}
