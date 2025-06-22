@@ -28,10 +28,11 @@ interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   className?: string;
+  enableMarketplaceMode?: boolean; // Add marketplace mode prop
 }
 
 const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRootProps>(function DefaultPageLayoutRoot(
-  { children, className, ...otherProps }: DefaultPageLayoutRootProps,
+  { children, className, enableMarketplaceMode = false, ...otherProps }: DefaultPageLayoutRootProps,
   ref
 ) {
   const location = useLocation();
@@ -83,14 +84,16 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
   return (
     <div
       className={SubframeUtils.twClassNames(
-        "flex h-screen w-full flex-col bg-default-background",
+        enableMarketplaceMode 
+          ? "flex h-screen w-full flex-col bg-default-background"
+          : "flex min-h-screen w-full flex-col bg-default-background",
         className
       )}
       ref={ref as any}
       {...otherProps}
     >
       {/* Desktop Topbar - Only show on large screens (1280px+) */}
-      <div className="hidden xl:block fixed-navbar w-full bg-default-background border-b border-neutral-border">
+      <div className="hidden xl:block flex-none w-full z-50 relative bg-default-background border-b border-neutral-border">
         <TopbarWithCenterSearch3
           className="py-3 h-full"
           leftSlot={
@@ -196,7 +199,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
       </div>
 
       {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-      <div className="xl:hidden fixed-navbar w-full bg-default-background border-b border-neutral-border z-[100]">
+      <div className="xl:hidden flex-none w-full z-50 relative bg-default-background border-b border-neutral-border">
         <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
           {/* Hamburger Menu Button */}
           <button
@@ -285,9 +288,13 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
         onClose={() => setShowMobileNav(false)}
       />
 
-      {/* Main Content - Fixed height container */}
+      {/* Main Content - Conditional overflow based on marketplace mode */}
       {children ? (
-        <div className="flex-1 w-full bg-default-background overflow-hidden">
+        <div className={
+          enableMarketplaceMode 
+            ? "flex-1 w-full bg-default-background overflow-hidden" 
+            : "flex-1 w-full bg-default-background overflow-y-auto"
+        }>
           {children}
         </div>
       ) : null}
