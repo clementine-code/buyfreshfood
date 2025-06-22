@@ -43,7 +43,6 @@ function Waitlist() {
 
   if (isSubmitted) {
     return (
-      <DefaultPageLayout>
         <div className="flex w-full flex-col items-center justify-center gap-8 bg-default-background min-h-screen px-4 py-16">
           <div className="w-full max-w-2xl text-center">
             <div className="flex justify-center mb-6">
@@ -96,12 +95,10 @@ function Waitlist() {
             </Button>
           </div>
         </div>
-      </DefaultPageLayout>
     );
   }
 
   return (
-    <DefaultPageLayout>
       <div className="flex w-full flex-col items-center justify-center gap-8 bg-default-background min-h-screen">
         {/* Hero Section */}
         <div className="flex w-full flex-col items-center justify-center gap-12 px-4 py-16 max-w-4xl">
@@ -288,7 +285,6 @@ function Waitlist() {
 
         <Footer />
       </div>
-    </DefaultPageLayout>
   );
 }
 
