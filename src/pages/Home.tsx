@@ -49,7 +49,6 @@ function Home() {
   };
 
   return (
-    <DefaultPageLayout>
       <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden min-h-screen">
         {/* Hero Section */}
         <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 py-24 max-w-full relative mobile:px-4 mobile:py-16 mobile:min-h-[500px]">
@@ -209,7 +208,6 @@ function Home() {
         {/* Footer */}
         <Footer />
       </div>
-    </DefaultPageLayout>
   );
 }
 
