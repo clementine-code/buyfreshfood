@@ -93,7 +93,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
       {...otherProps}
     >
       {/* Desktop Topbar - Only show on large screens (1280px+) */}
-      <div className="hidden xl:block flex-none w-full z-50 relative bg-default-background">
+      <div className="hidden xl:block flex-none w-full z-50 relative bg-default-background border-b border-neutral-border">
         <TopbarWithCenterSearch3
           className="py-3 h-full"
           leftSlot={
@@ -199,7 +199,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
       </div>
 
       {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-      <div className="xl:hidden flex-none w-full z-50 relative bg-default-background">
+      <div className="xl:hidden flex-none w-full z-50 relative bg-default-background border-b border-neutral-border">
         <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
           {/* Hamburger Menu Button */}
           <button
