@@ -422,7 +422,6 @@ function Shop() {
 
   if (loading) {
     return (
-      <DefaultPageLayout enableMarketplaceMode={true}>
         <div className="flex h-full w-full items-center justify-center bg-default-background">
           <div className="flex flex-col items-center gap-4">
             <Loader size="large" />
@@ -431,13 +430,11 @@ function Shop() {
             </span>
           </div>
         </div>
-      </DefaultPageLayout>
     );
   }
 
   if (error) {
     return (
-      <DefaultPageLayout enableMarketplaceMode={true}>
         <div className="flex h-full w-full items-center justify-center bg-default-background">
           <div className="flex flex-col items-center gap-4 text-center max-w-md">
             <span className="text-heading-2 font-heading-2 text-error-700">Unable to load products</span>
@@ -447,12 +444,10 @@ function Shop() {
             </Button>
           </div>
         </div>
-      </DefaultPageLayout>
     );
   }
 
   return (
-    <DefaultPageLayout enableMarketplaceMode={true}>
       <div className="flex w-full h-full bg-default-background">
         {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
         <div className="hidden xl:flex w-full h-full">
@@ -764,7 +759,6 @@ function Shop() {
           <Footer />
         </div>
       </div>
-    </DefaultPageLayout>
   );
 }
 
