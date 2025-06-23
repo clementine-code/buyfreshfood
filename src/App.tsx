@@ -2,6 +2,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
+import { LocationProvider } from "./contexts/LocationContext";
 import PasswordProtection from "./components/PasswordProtection";
 import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
@@ -30,10 +31,12 @@ function AppContent() {
 function App() {
   return (
     <PasswordProtection>
-      <Router>
-        <ScrollToTop />
-        <AppContent />
-      </Router>
+      <LocationProvider>
+        <Router>
+          <ScrollToTop />
+          <AppContent />
+        </Router>
+      </LocationProvider>
     </PasswordProtection>
   );
 }

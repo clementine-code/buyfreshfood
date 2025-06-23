@@ -1,43 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { TextField } from "@/ui/components/TextField";
-import { FeatherMapPin } from "@subframe/core";
-import { FeatherLocate } from "@subframe/core";
 import { FeatherShoppingBag } from "@subframe/core";
-import { Button } from "@/ui/components/Button";
 import { FeatherArrowRight } from "@subframe/core";
 import { FeatherHome } from "@subframe/core";
 import { FeatherClock } from "@subframe/core";
 import { FeatherHeart } from "@subframe/core";
 import { FeatherLeaf } from "@subframe/core";
-import { Alert } from "@/ui/components/Alert";
-import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
-import LocationSearch from "../components/LocationSearch";
+import { Button } from "@/ui/components/Button";
+import LocationSearchField from "../components/LocationSearchField";
 import Footer from "../components/Footer";
-import { type LocationData } from "../services/locationService";
 
 function Home() {
   const navigate = useNavigate();
-  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
-
-  const handleLocationSelect = (location: LocationData) => {
-    setSelectedLocation(location);
-    setLocationError(null);
-    console.log('Selected valid NWA location:', location);
-    
-    // Here you could:
-    // - Store location in global state/context
-    // - Save to localStorage
-    // - Update URL with location parameters
-  };
-
-  const handleLocationError = (error: string) => {
-    setLocationError(error);
-    setSelectedLocation(null);
-  };
 
   const handleShopClick = () => {
     // Always navigate to shop - let users browse regardless of location
@@ -65,38 +41,12 @@ function Home() {
             </div>
             
             <div className="w-full max-w-[384px] flex flex-col gap-3">
-              <LocationSearch 
+              <LocationSearchField 
                 className="w-full"
-                onLocationSelect={handleLocationSelect}
-                onLocationError={handleLocationError}
                 placeholder="Enter your location to find fresh local food near you..."
                 showValidation={true}
+                autoFocus={false}
               />
-              
-              {/* Location validation feedback */}
-              {selectedLocation && selectedLocation.isNWA && (
-                <Alert
-                  variant="success"
-                  title="Great! We serve your area"
-                  description={`Fresh local food is available in ${selectedLocation.city || 'your area'}.`}
-                />
-              )}
-              
-              {selectedLocation && !selectedLocation.isNWA && (
-                <Alert
-                  variant="warning"
-                  title="Coming soon to your area"
-                  description="We're expanding! Join our waitlist to be notified when we launch in your location."
-                />
-              )}
-              
-              {locationError && (
-                <Alert
-                  variant="error"
-                  title="Location not found"
-                  description={locationError}
-                />
-              )}
             </div>
           </div>
           {/* Background Image - Full Coverage */}

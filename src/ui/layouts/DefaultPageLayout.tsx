@@ -12,16 +12,12 @@ import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
 import { Button } from "../components/Button";
 import { IconButton } from "../components/IconButton";
-import { DropdownMenu } from "../components/DropdownMenu";
-import * as SubframeCore from "@subframe/core";
-import { FeatherMapPin } from "@subframe/core";
 import { FeatherUser } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherMenu } from "@subframe/core";
 import MobileNavMenu from "../../components/MobileNavMenu";
-import LocationSearch from "../../components/LocationSearch";
 import FoodSearchField from "../../components/FoodSearchField";
-import { type LocationData } from "../../services/locationService";
+import LocationButton from "../../components/LocationButton";
 import { type FoodSearchSuggestion } from "../../services/foodSearchService";
 
 interface DefaultPageLayoutRootProps
@@ -38,18 +34,6 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
   const location = useLocation();
   const navigate = useNavigate();
   const [showMobileNav, setShowMobileNav] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
-
-  const handleLocationSelect = (locationData: LocationData) => {
-    setSelectedLocation(locationData);
-    console.log('Selected location in navbar:', locationData);
-    // Here you could update global state, localStorage, or trigger a search
-  };
-
-  const handleLocationError = (error: string) => {
-    console.warn('Location error in navbar:', error);
-    // Handle location errors (show toast, etc.)
-  };
 
   const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
     console.log('Selected food item:', suggestion);
@@ -134,48 +118,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
           }
           rightSlot={
             <div className="flex items-center justify-end gap-2">
-              <SubframeCore.DropdownMenu.Root>
-                <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                  <div className="flex-shrink-0">
-                    <Button
-                      variant="destructive-secondary"
-                      icon={<FeatherMapPin />}
-                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                    />
-                  </div>
-                </SubframeCore.DropdownMenu.Trigger>
-                <SubframeCore.DropdownMenu.Portal>
-                  <SubframeCore.DropdownMenu.Content
-                    side="bottom"
-                    align="end"
-                    sideOffset={8}
-                    className="z-[200]"
-                    asChild={true}
-                  >
-                    <DropdownMenu>
-                      <div className="p-2">
-                        <LocationSearch 
-                          className="w-80"
-                          onLocationSelect={handleLocationSelect}
-                          onLocationError={handleLocationError}
-                          placeholder="Enter location..."
-                          showValidation={false}
-                        />
-                        {selectedLocation && (
-                          <div className="mt-2 p-2 bg-brand-50 rounded text-sm">
-                            <div className="font-medium text-brand-700">
-                              {selectedLocation.isNWA ? '✓ Service Area' : '⚠ Outside Service Area'}
-                            </div>
-                            <div className="text-subtext-color">
-                              {selectedLocation.city}, {selectedLocation.state} {selectedLocation.zipCode}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </DropdownMenu>
-                  </SubframeCore.DropdownMenu.Content>
-                </SubframeCore.DropdownMenu.Portal>
-              </SubframeCore.DropdownMenu.Root>
+              <LocationButton className="flex-shrink-0" />
               <div className="flex-shrink-0">
                 <Button
                   variant="brand-secondary"
@@ -223,48 +166,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
 
           {/* Right Actions */}
           <div className="flex items-center justify-end gap-2">
-            <SubframeCore.DropdownMenu.Root>
-              <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                <div className="flex-shrink-0">
-                  <Button
-                    variant="destructive-secondary"
-                    icon={<FeatherMapPin />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  />
-                </div>
-              </SubframeCore.DropdownMenu.Trigger>
-              <SubframeCore.DropdownMenu.Portal>
-                <SubframeCore.DropdownMenu.Content
-                  side="bottom"
-                  align="end"
-                  sideOffset={8}
-                  className="z-[200]"
-                  asChild={true}
-                >
-                  <DropdownMenu>
-                    <div className="p-2">
-                      <LocationSearch 
-                        className="w-72"
-                        onLocationSelect={handleLocationSelect}
-                        onLocationError={handleLocationError}
-                        placeholder="Enter location..."
-                        showValidation={false}
-                      />
-                      {selectedLocation && (
-                        <div className="mt-2 p-2 bg-brand-50 rounded text-sm">
-                          <div className="font-medium text-brand-700">
-                            {selectedLocation.isNWA ? '✓ Service Area' : '⚠ Outside Service Area'}
-                          </div>
-                          <div className="text-subtext-color">
-                            {selectedLocation.city}, {selectedLocation.state} {selectedLocation.zipCode}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </DropdownMenu>
-                </SubframeCore.DropdownMenu.Content>
-              </SubframeCore.DropdownMenu.Portal>
-            </SubframeCore.DropdownMenu.Root>
+            <LocationButton className="flex-shrink-0" />
             <div className="flex-shrink-0">
               <IconButton
                 variant="brand-secondary"
