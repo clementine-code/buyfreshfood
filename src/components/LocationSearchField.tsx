@@ -100,28 +100,6 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
     }
   }, [showValidation]);
 
-    // Check if there's enough space below
-    const spaceBelow = viewportHeight - containerRect.bottom;
-    const spaceAbove = containerRect.top;
-
-    if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
-      // Position below
-      position.top = containerRect.bottom + 4;
-    } else {
-      // Position above
-      position.bottom = viewportHeight - containerRect.top + 4;
-    }
-
-    // Ensure it doesn't go off screen horizontally
-    if (containerRect.left + containerRect.width > viewportWidth) {
-      position.right = 16;
-      position.left = 'auto';
-      position.width = Math.min(containerRect.width, viewportWidth - 32);
-    }
-
-    return position;
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || state.isLoading) return;
@@ -439,19 +417,12 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
         />
       </form>
 
-     {/* Suggestions Dropdown - Simplified positioning */}
-{showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
-  <div 
-    ref={suggestionsRef}
-    className="absolute left-0 right-0 bg-white border border-neutral-200 rounded-md shadow-lg"
-    style={{ 
-      top: '100%',
-      marginTop: '4px',
-      zIndex: 9999,
-      maxHeight: '200px',
-      overflowY: 'auto'
-    }}
-  >
+      {/* Suggestions Dropdown - Fixed positioning */}
+      {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
+        <div 
+          ref={suggestionsRef}
+          className="absolute left-0 right-0 top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-[200px] overflow-y-auto"
+        >
           {isLoadingSuggestions ? (
             <div className="p-3">
               <div className="flex items-center gap-2 text-subtext-color">
