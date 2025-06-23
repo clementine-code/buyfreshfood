@@ -171,7 +171,7 @@ const LocationDialog: React.FC<LocationDialogProps> = ({ isOpen, onClose }) => {
                   </div>
                   <div className="text-caption font-caption mt-1">
                     {state.isNWA ? (
-                      <span className="text-success-700">✓ We deliver to your area</span>
+                      <span className="text-success-700">✓ We are live in your area</span>
                     ) : (
                       <span className="text-warning-700">⚠ Coming soon to your area</span>
                     )}
