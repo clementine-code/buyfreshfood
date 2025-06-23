@@ -16,6 +16,7 @@ const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Determine button variant and tooltip based on location state
   const getButtonVariant = () => {
@@ -47,17 +48,9 @@ const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
 
     let position: React.CSSProperties = {};
 
-    // Check if tooltip would be cut off at the top
-    if (buttonRect.top - tooltipRect.height - 8 < 0) {
-      // Position below button instead
-      position.top = buttonRect.bottom + 8;
-      position.transform = 'translateX(-50%)';
-    } else {
-      // Position above button (default)
-      position.bottom = viewportHeight - buttonRect.top + 8;
-      position.transform = 'translateX(-50%)';
-    }
-
+    // Always position below the button for better UX
+    position.top = buttonRect.bottom + 8;
+    
     // Center horizontally, but adjust if it would overflow
     let leftPosition = buttonRect.left + buttonRect.width / 2;
     
@@ -70,17 +63,45 @@ const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
     }
 
     position.left = leftPosition;
+    position.transform = 'translateX(-50%)';
+
+    // If tooltip would go below viewport, position above button
+    if (position.top + tooltipRect.height > viewportHeight - 8) {
+      position.top = buttonRect.top - tooltipRect.height - 8;
+    }
 
     return position;
   };
 
   // Update tooltip position when shown
   useEffect(() => {
-    if (showTooltip && tooltipRef.current) {
+    if (showTooltip && tooltipRef.current && buttonRef.current) {
       const position = calculateTooltipPosition();
       Object.assign(tooltipRef.current.style, position);
     }
   }, [showTooltip]);
+
+  const handleMouseEnter = () => {
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+    setShowTooltip(true);
+  };
+
+  const handleMouseLeave = () => {
+    tooltipTimeoutRef.current = setTimeout(() => {
+      setShowTooltip(false);
+    }, 100);
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -90,8 +111,8 @@ const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
           variant={getButtonVariant()}
           icon={<FeatherMapPin className={getIconColor()} />}
           onClick={() => setShowDialog(true)}
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className="relative"
         />
 
@@ -102,7 +123,7 @@ const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
           }`} />
         )}
 
-        {/* Improved Tooltip */}
+        {/* Improved Tooltip with proper arrow positioning */}
         {showTooltip && (
           <div
             ref={tooltipRef}
@@ -113,15 +134,14 @@ const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
             }}
           >
             {getTooltipText()}
-            {/* Tooltip arrow */}
+            {/* Tooltip arrow pointing up towards button */}
             <div 
-              className="absolute w-0 h-0 border-l-2 border-r-2 border-transparent"
+              className="absolute w-0 h-0 border-l-2 border-r-2 border-transparent border-b-4"
               style={{
                 left: '50%',
                 transform: 'translateX(-50%)',
-                borderTopColor: '#374151',
-                borderTopWidth: '4px',
-                top: '100%',
+                borderBottomColor: '#374151',
+                top: '-4px',
               }}
             />
           </div>

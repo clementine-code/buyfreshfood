@@ -5,7 +5,7 @@ import { TextField } from "@/ui/components/TextField";
 import { Button } from "@/ui/components/Button";
 import { Alert } from "@/ui/components/Alert";
 import { Toast } from "@/ui/components/Toast";
-import { FeatherMapPin, FeatherLocate, FeatherX } from "@subframe/core";
+import { FeatherMapPin, FeatherLocate, FeatherX, FeatherEdit3 } from "@subframe/core";
 import { useLocationContext } from "../contexts/LocationContext";
 import { locationService, type LocationSuggestion } from "../services/locationService";
 
@@ -14,7 +14,7 @@ interface LocationSearchFieldProps {
   placeholder?: string;
   showValidation?: boolean;
   autoFocus?: boolean;
-  enableInlineEditing?: boolean; // New prop for hero section
+  enableInlineEditing?: boolean;
 }
 
 const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
@@ -22,7 +22,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   placeholder = "Enter your location to find fresh local food near you...",
   showValidation = true,
   autoFocus = false,
-  enableInlineEditing = false, // Enable for hero section
+  enableInlineEditing = false,
 }) => {
   const { state, setLocation, detectCurrentLocation, clearError, clearLocation } = useLocationContext();
   const [inputValue, setInputValue] = useState("");
@@ -38,6 +38,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   const debounceRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   // Sync input value with context state
   useEffect(() => {
@@ -56,22 +57,35 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
     }
   }, [state.error, showValidation, clearError]);
 
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
   // Search for location suggestions with improved error handling
   const searchSuggestions = useCallback(async (query: string) => {
-    if (query.length < 2) { // Reduced threshold for better UX
+    if (query.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
+    console.log('🔍 Searching suggestions for:', query);
     setIsLoadingSuggestions(true);
+    
     try {
       const results = await locationService.getLocationSuggestions(query);
+      console.log('✅ Got suggestions:', results.length);
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
       setSelectedIndex(-1);
     } catch (error) {
-      console.error('Error fetching location suggestions:', error);
+      console.error('❌ Error fetching location suggestions:', error);
       setSuggestions([]);
       setShowSuggestions(false);
       
@@ -86,10 +100,59 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
     }
   }, [showValidation]);
 
+  // Calculate suggestions dropdown position
+  const calculateSuggestionsPosition = useCallback(() => {
+    if (!containerRef.current || !suggestionsRef.current) return {};
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const suggestionsRect = suggestionsRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    let position: React.CSSProperties = {
+      position: 'fixed',
+      left: containerRect.left,
+      width: containerRect.width,
+      zIndex: 9999,
+      maxHeight: '200px',
+      overflowY: 'auto'
+    };
+
+    // Check if there's enough space below
+    const spaceBelow = viewportHeight - containerRect.bottom;
+    const spaceAbove = containerRect.top;
+
+    if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
+      // Position below
+      position.top = containerRect.bottom + 4;
+    } else {
+      // Position above
+      position.bottom = viewportHeight - containerRect.top + 4;
+    }
+
+    // Ensure it doesn't go off screen horizontally
+    if (containerRect.left + containerRect.width > viewportWidth) {
+      position.right = 16;
+      position.left = 'auto';
+      position.width = Math.min(containerRect.width, viewportWidth - 32);
+    }
+
+    return position;
+  }, []);
+
+  // Update suggestions position when shown
+  useEffect(() => {
+    if (showSuggestions && suggestionsRef.current) {
+      const position = calculateSuggestionsPosition();
+      Object.assign(suggestionsRef.current.style, position);
+    }
+  }, [showSuggestions, calculateSuggestionsPosition]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || state.isLoading) return;
 
+    console.log('📝 Submitting location:', inputValue.trim());
     setShowSuggestions(false);
     setIsEditing(false);
     
@@ -103,7 +166,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
         setShowToast(true);
       }
     } catch (error) {
-      console.error('Error setting location:', error);
+      console.error('❌ Error setting location:', error);
       if (!showValidation) {
         setToastMessage("Failed to update location. Please try again.");
         setToastType("error");
@@ -114,6 +177,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log('✏️ Input changed:', value);
     setInputValue(value);
     setIsEditing(true);
     
@@ -122,7 +186,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
       clearError();
     }
 
-    // Debounce search with shorter delay
+    // Debounce search
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
@@ -130,7 +194,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
     if (value.trim().length >= 2) {
       debounceRef.current = setTimeout(() => {
         searchSuggestions(value.trim());
-      }, 200); // Reduced from 300ms for better responsiveness
+      }, 200);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -138,6 +202,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   };
 
   const handleSuggestionClick = async (suggestion: LocationSuggestion) => {
+    console.log('👆 Suggestion clicked:', suggestion);
     setInputValue(suggestion.description);
     setShowSuggestions(false);
     setSuggestions([]);
@@ -149,7 +214,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
         await setLocation(suggestion.description);
       }
     } catch (error) {
-      console.error('Error selecting suggestion:', error);
+      console.error('❌ Error selecting suggestion:', error);
       await setLocation(suggestion.description);
     }
   };
@@ -198,6 +263,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
 
   const handleDetectLocation = async () => {
     if (state.isLoading) return;
+    console.log('📍 Detecting current location...');
     setShowSuggestions(false);
     setIsEditing(false);
     
@@ -210,7 +276,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
         setShowToast(true);
       }
     } catch (error) {
-      console.error('Error detecting location:', error);
+      console.error('❌ Error detecting location:', error);
       if (!showValidation) {
         setToastMessage("Unable to detect location. Please enter manually.");
         setToastType("error");
@@ -220,6 +286,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   };
 
   const handleInputFocus = () => {
+    console.log('🎯 Input focused');
     setIsEditing(true);
     if (suggestions.length > 0 && inputValue.length >= 2) {
       setShowSuggestions(true);
@@ -229,7 +296,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     // Don't blur if clicking on a suggestion
     const relatedTarget = e.relatedTarget as HTMLElement;
-    if (relatedTarget && containerRef.current?.contains(relatedTarget)) {
+    if (relatedTarget && (containerRef.current?.contains(relatedTarget) || suggestionsRef.current?.contains(relatedTarget))) {
       return;
     }
     
@@ -246,6 +313,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   };
 
   const handleEditClick = () => {
+    console.log('✏️ Edit clicked');
     setIsEditing(true);
     setTimeout(() => {
       inputRef.current?.focus();
@@ -254,6 +322,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   };
 
   const handleClearLocation = () => {
+    console.log('🗑️ Clear location clicked');
     clearLocation();
     setInputValue("");
     setIsEditing(true);
@@ -261,6 +330,29 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
       inputRef.current?.focus();
     }, 0);
   };
+
+  // Handle clicks outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current && 
+        !containerRef.current.contains(event.target as Node) &&
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+      }
+    };
+
+    if (showSuggestions) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSuggestions]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -277,23 +369,35 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
       <div className={`space-y-3 ${className}`}>
         <div className="flex gap-2">
           <div 
-            className="flex-1 flex items-center gap-2 px-3 py-2 bg-white border border-neutral-200 rounded-md cursor-pointer hover:border-brand-300 transition-colors"
+            className="flex-1 flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-md cursor-pointer hover:border-brand-300 hover:shadow-sm transition-all duration-200"
             onClick={handleEditClick}
           >
-            <FeatherMapPin className="w-4 h-4 text-brand-600" />
-            <span className="text-body font-body text-default-font flex-1">
+            <FeatherMapPin className="w-5 h-5 text-brand-600 flex-shrink-0" />
+            <span className="text-body font-body text-default-font flex-1 truncate">
               {state.location}
             </span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClearLocation();
-              }}
-              className="p-1 hover:bg-neutral-100 rounded transition-colors"
-              title="Clear location"
-            >
-              <FeatherX className="w-4 h-4 text-subtext-color" />
-            </button>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditClick();
+                }}
+                className="p-1.5 hover:bg-neutral-100 rounded transition-colors"
+                title="Edit location"
+              >
+                <FeatherEdit3 className="w-4 h-4 text-subtext-color" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClearLocation();
+                }}
+                className="p-1.5 hover:bg-neutral-100 rounded transition-colors"
+                title="Clear location"
+              >
+                <FeatherX className="w-4 h-4 text-subtext-color" />
+              </button>
+            </div>
           </div>
           
           <Button
@@ -320,25 +424,6 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
             }
           />
         )}
-
-        {/* Toast notifications */}
-        {showToast && (
-          <div className="fixed top-4 right-4 z-[300]">
-            <Toast
-              variant={toastType}
-              title={toastType === "success" ? "Success" : toastType === "error" ? "Error" : "Warning"}
-              description={toastMessage}
-              actions={
-                <button
-                  onClick={() => setShowToast(false)}
-                  className="p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
-                >
-                  <FeatherX className="w-4 h-4" />
-                </button>
-              }
-            />
-          </div>
-        )}
       </div>
     );
   }
@@ -363,64 +448,9 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
               onBlur={handleInputBlur}
               autoFocus={autoFocus}
               autoComplete="off"
+              spellCheck={false}
             />
           </TextField>
-
-          {/* Suggestions Dropdown - Extended beyond hero image */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div 
-              className="absolute left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg max-h-48 overflow-y-auto"
-              style={{ 
-                top: '100%',
-                zIndex: 9999, // Very high z-index to extend beyond hero
-                position: 'fixed',
-                width: containerRef.current?.getBoundingClientRect().width || 'auto',
-                left: containerRef.current?.getBoundingClientRect().left || 0,
-              }}
-            >
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={suggestion.place_id || index}
-                  type="button"
-                  className={`w-full text-left px-3 py-2 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
-                    index === selectedIndex ? 'bg-brand-50' : ''
-                  }`}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                >
-                  <div className="flex items-center gap-2">
-                    <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{suggestion.main_text}</div>
-                      {suggestion.secondary_text && (
-                        <div className="text-sm text-subtext-color truncate">{suggestion.secondary_text}</div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Loading indicator */}
-          {isLoadingSuggestions && (
-            <div 
-              className="absolute left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg p-3"
-              style={{ 
-                top: '100%',
-                zIndex: 9999,
-                position: 'fixed',
-                width: containerRef.current?.getBoundingClientRect().width || 'auto',
-                left: containerRef.current?.getBoundingClientRect().left || 0,
-              }}
-            >
-              <div className="flex items-center gap-2 text-subtext-color">
-                <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-body font-body">Searching locations...</span>
-              </div>
-            </div>
-          )}
         </div>
         
         <Button
@@ -434,6 +464,52 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
           title="Use current location"
         />
       </form>
+
+      {/* Suggestions Dropdown - Portal-style positioning */}
+      {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
+        <div 
+          ref={suggestionsRef}
+          className="bg-white border border-neutral-200 rounded-md shadow-lg"
+          style={{ 
+            position: 'fixed',
+            zIndex: 9999,
+            maxHeight: '200px',
+            overflowY: 'auto'
+          }}
+        >
+          {isLoadingSuggestions ? (
+            <div className="p-3">
+              <div className="flex items-center gap-2 text-subtext-color">
+                <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-body font-body">Searching locations...</span>
+              </div>
+            </div>
+          ) : (
+            suggestions.map((suggestion, index) => (
+              <button
+                key={suggestion.place_id || index}
+                type="button"
+                className={`w-full text-left px-3 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
+                  index === selectedIndex ? 'bg-brand-50' : ''
+                }`}
+                onClick={() => handleSuggestionClick(suggestion)}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setSelectedIndex(index)}
+              >
+                <div className="flex items-center gap-3">
+                  <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate text-default-font">{suggestion.main_text}</div>
+                    {suggestion.secondary_text && (
+                      <div className="text-sm text-subtext-color truncate">{suggestion.secondary_text}</div>
+                    )}
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Validation feedback */}
       {showValidation && state.isSet && !state.error && (
@@ -457,8 +533,8 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
         />
       )}
 
-      {/* Toast notifications for non-validation mode */}
-      {!showValidation && showToast && (
+      {/* Toast notifications */}
+      {showToast && (
         <div className="fixed top-4 right-4 z-[300]">
           <Toast
             variant={toastType}
