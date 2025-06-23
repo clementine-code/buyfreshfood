@@ -31,7 +31,7 @@ interface DefaultPageLayoutRootProps
   enableMarketplaceMode?: boolean; // Add marketplace mode prop
 }
 
-const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRootProps>(function DefaultPageLayoutRoot(
+const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayoutRootProps>(function DefaultPageLayoutRoot(
   { children, className, enableMarketplaceMode = false, ...otherProps }: DefaultPageLayoutRootProps,
   ref
 ) {
@@ -83,16 +83,15 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
 
   return (
     <div
-      <div
-  className={SubframeUtils.twClassNames(
-    enableMarketplaceMode 
-      ? "flex h-screen w-full flex-col bg-default-background"
-      : "flex min-h-screen w-full flex-col bg-default-background",
-    className
-  )}
-  ref={ref as any}
-  {...otherProps}
->
+      className={SubframeUtils.twClassNames(
+        enableMarketplaceMode 
+          ? "flex h-screen w-full flex-col bg-default-background"
+          : "flex min-h-screen w-full flex-col bg-default-background",
+        className
+      )}
+      ref={ref}
+      {...otherProps}
+    >
       {/* Desktop Topbar - Only show on large screens (1280px+) */}
       <div className="hidden xl:block flex-none w-full z-50 bg-default-background border-b border-neutral-border" style={{position: 'sticky', top: '0'}}>
         <TopbarWithCenterSearch3
