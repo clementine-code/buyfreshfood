@@ -90,10 +90,9 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
       : "flex min-h-screen w-full flex-col bg-default-background",
     className
   )}
-  style={{overflow: 'visible'}}
   ref={ref as any}
-      {...otherProps}
-    >
+  {...otherProps}
+>
       {/* Desktop Topbar - Only show on large screens (1280px+) */}
       <div className="hidden xl:block flex-none w-full z-50 bg-default-background border-b border-neutral-border" style={{position: 'sticky', top: '0'}}>
         <TopbarWithCenterSearch3
