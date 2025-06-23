@@ -448,8 +448,8 @@ function Shop() {
 
   return (
     <div className="flex w-full h-full bg-default-background">
-      {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-      <div className="hidden xl:flex w-full h-full">
+     {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
+<div className="hidden xl:flex w-full h-full" style={{paddingTop: '80px'}}>
         {/* Left Side - Products (50% width, scrollable content) */}
         <div className="w-1/2 h-full flex flex-col bg-default-background">
           {/* Controls Bar - Fixed at top */}
