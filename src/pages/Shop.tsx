@@ -733,7 +733,18 @@ function Shop() {
       </div>
 
       {/* Modals */}
-      <MobileFilterModal
+      {/* Mobile Filter Modal with Backdrop */}
+{showMobileFilters && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-[250] xl:hidden" />
+)}
+
+{/* Mobile Map Modal with Backdrop */}
+{showMobileMap && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-[250] xl:hidden" />
+)}
+
+{/* Modals */}
+<MobileFilterModal
   isOpen={showMobileFilters}
   onClose={() => setShowMobileFilters(false)}
   appliedFilters={appliedFilters}
@@ -749,7 +760,7 @@ function Shop() {
   className="z-[300]"
 />
 
-      <DesktopFilterModal
+<DesktopFilterModal
   isOpen={showDesktopFilters}
   onClose={() => setShowDesktopFilters(false)}
   appliedFilters={appliedFilters}
