@@ -83,13 +83,15 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLElement, DefaultPageLayoutRoo
 
   return (
     <div
-      className={SubframeUtils.twClassNames(
-        enableMarketplaceMode 
-          ? "flex h-screen w-full flex-col bg-default-background"
-          : "flex min-h-screen w-full flex-col bg-default-background",
-        className
-      )}
-      ref={ref as any}
+      <div
+  className={SubframeUtils.twClassNames(
+    enableMarketplaceMode 
+      ? "flex h-screen w-full flex-col bg-default-background"
+      : "flex min-h-screen w-full flex-col bg-default-background",
+    className
+  )}
+  style={{overflow: 'visible'}}
+  ref={ref as any}
       {...otherProps}
     >
       {/* Desktop Topbar - Only show on large screens (1280px+) */}
