@@ -291,14 +291,14 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
 
       {/* Main Content - Conditional overflow based on marketplace mode */}
       {children ? (
-        <div className={
-          enableMarketplaceMode 
-            ? "flex-1 w-full bg-default-background overflow-hidden" 
-            : "flex-1 w-full bg-default-background overflow-y-auto"
-        }>
-          {children}
-        </div>
-      ) : null}
+  <div className={
+    enableMarketplaceMode 
+      ? "flex-1 w-full bg-default-background overflow-hidden" 
+      : "flex-1 w-full bg-default-background overflow-y-auto pt-20"
+  }>
+    {children}
+  </div>
+) : null}
     </div>
   );
 });
