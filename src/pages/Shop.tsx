@@ -587,8 +587,8 @@ function Shop() {
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
      <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative">
-{/* Mobile/Tablet Page Controls - Sticky positioned */}
-<div className="sticky top-0 left-0 right-0 z-[100] bg-white w-full" style={{marginTop: '-1px', borderBottom: '1px solid rgb(229 231 235)', boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'}}>
+{/* Mobile/Tablet Page Controls - Positioned below fixed navbar */}
+<div className="sticky left-0 right-0 z-[90] bg-white border-b border-neutral-200 shadow-sm w-full" style={{top: '80px'}}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
