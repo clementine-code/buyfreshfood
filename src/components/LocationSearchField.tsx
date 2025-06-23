@@ -429,7 +429,7 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
   }
 
   return (
-    <div className={`space-y-3 ${className}`} ref={containerRef}>
+    <div className={`space-y-3 relative ${className}`} ref={containerRef}>
       <form onSubmit={handleSubmit} className="flex gap-2 relative">
         <div className="flex-1 relative">
           <TextField
@@ -465,18 +465,19 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
         />
       </form>
 
-      {/* Suggestions Dropdown - Portal-style positioning */}
-      {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
-        <div 
-          ref={suggestionsRef}
-          className="bg-white border border-neutral-200 rounded-md shadow-lg"
-          style={{ 
-            position: 'fixed',
-            zIndex: 9999,
-            maxHeight: '200px',
-            overflowY: 'auto'
-          }}
-        >
+     {/* Suggestions Dropdown - Simplified positioning */}
+{showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
+  <div 
+    ref={suggestionsRef}
+    className="absolute left-0 right-0 bg-white border border-neutral-200 rounded-md shadow-lg"
+    style={{ 
+      top: '100%',
+      marginTop: '4px',
+      zIndex: 9999,
+      maxHeight: '200px',
+      overflowY: 'auto'
+    }}
+  >
           {isLoadingSuggestions ? (
             <div className="p-3">
               <div className="flex items-center gap-2 text-subtext-color">
