@@ -748,13 +748,14 @@ function Shop() {
       />
 
       <DesktopFilterModal
-        isOpen={showDesktopFilters}
-        onClose={() => setShowDesktopFilters(false)}
-        appliedFilters={appliedFilters}
-        onFiltersChange={setAppliedFilters}
-        categories={categories}
-        sellers={sellers}
-      />
+  isOpen={showDesktopFilters}
+  onClose={() => setShowDesktopFilters(false)}
+  appliedFilters={appliedFilters}
+  onFiltersChange={setAppliedFilters}
+  categories={categories}
+  sellers={sellers}
+  className="z-[200]"
+/>
     </div>
   );
 }
