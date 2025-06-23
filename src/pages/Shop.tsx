@@ -734,13 +734,15 @@ function Shop() {
 
       {/* Modals */}
       <MobileFilterModal
-        isOpen={showMobileFilters}
-        onClose={() => setShowMobileFilters(false)}
-        appliedFilters={appliedFilters}
-        onFiltersChange={setAppliedFilters}
-        categories={categories}
-        sellers={sellers}
-      />
+  isOpen={showMobileFilters}
+  onClose={() => setShowMobileFilters(false)}
+  appliedFilters={appliedFilters}
+  onFiltersChange={setAppliedFilters}
+  categories={categories}
+  sellers={sellers}
+  className="z-[300]"
+  style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}
+/>
 
       <MobileMapModal
         isOpen={showMobileMap}
