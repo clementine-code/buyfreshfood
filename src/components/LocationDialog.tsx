@@ -71,9 +71,11 @@ const LocationDialog: React.FC<LocationDialogProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <Dialog.Content className="w-full max-w-md mx-4">
+    <div className="fixed inset-0 z-[200] bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md rounded-lg shadow-xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-200">
           <h2 className="text-heading-2 font-heading-2 text-default-font">
@@ -187,8 +189,8 @@ const LocationDialog: React.FC<LocationDialogProps> = ({ isOpen, onClose }) => {
             </Button>
           </div>
         </div>
-      </Dialog.Content>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
