@@ -100,24 +100,6 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
     }
   }, [showValidation]);
 
-  // Calculate suggestions dropdown position
-  const calculateSuggestionsPosition = useCallback(() => {
-    if (!containerRef.current || !suggestionsRef.current) return {};
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const suggestionsRect = suggestionsRef.current.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-
-    let position: React.CSSProperties = {
-      position: 'fixed',
-      left: containerRect.left,
-      width: containerRect.width,
-      zIndex: 9999,
-      maxHeight: '200px',
-      overflowY: 'auto'
-    };
-
     // Check if there's enough space below
     const spaceBelow = viewportHeight - containerRect.bottom;
     const spaceAbove = containerRect.top;
@@ -139,14 +121,6 @@ const LocationSearchField: React.FC<LocationSearchFieldProps> = ({
 
     return position;
   }, []);
-
-  // Update suggestions position when shown
-  useEffect(() => {
-    if (showSuggestions && suggestionsRef.current) {
-      const position = calculateSuggestionsPosition();
-      Object.assign(suggestionsRef.current.style, position);
-    }
-  }, [showSuggestions, calculateSuggestionsPosition]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
