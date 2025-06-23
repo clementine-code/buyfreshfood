@@ -46,6 +46,7 @@ function Home() {
                 placeholder="Enter your location to find fresh local food near you..."
                 showValidation={true}
                 autoFocus={false}
+                enableInlineEditing={true} // Enable inline editing for hero section
               />
             </div>
           </div>
