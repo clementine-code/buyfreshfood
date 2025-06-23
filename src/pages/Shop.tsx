@@ -587,8 +587,8 @@ function Shop() {
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
      <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative">
-{/* Mobile/Tablet Page Controls - Positioned below fixed navbar on mobile, normal on desktop */}
-<div className="xl:hidden sticky left-0 right-0 z-[70] bg-white border-b border-neutral-200 shadow-sm w-full" style={{top: '80px'}}>
+{/* Mobile/Tablet Page Controls - Hide when modals are open */}
+<div className={`xl:hidden sticky left-0 right-0 z-[70] bg-white border-b border-neutral-200 shadow-sm w-full ${(showMobileFilters || showMobileMap) ? 'hidden' : ''}`} style={{top: '80px'}}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
@@ -733,17 +733,6 @@ function Shop() {
       </div>
 
       {/* Modals */}
-      {/* Mobile Filter Modal with Backdrop */}
-{showMobileFilters && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 z-[250] xl:hidden" />
-)}
-
-{/* Mobile Map Modal with Backdrop */}
-{showMobileMap && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 z-[250] xl:hidden" />
-)}
-
-{/* Modals */}
 <MobileFilterModal
   isOpen={showMobileFilters}
   onClose={() => setShowMobileFilters(false)}
@@ -751,13 +740,11 @@ function Shop() {
   onFiltersChange={setAppliedFilters}
   categories={categories}
   sellers={sellers}
-  className="z-[300]"
 />
 
 <MobileMapModal
   isOpen={showMobileMap}
   onClose={() => setShowMobileMap(false)}
-  className="z-[300]"
 />
 
 <DesktopFilterModal
