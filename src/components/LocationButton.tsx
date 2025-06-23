@@ -27,7 +27,7 @@ const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
 
   const getTooltipText = () => {
     if (!location.isSet) return "Set your location";
-    if (location.isNWA) return `${location.city || location.location} - We deliver here!`;
+    if (location.isNWA) return `${location.city || location.location} - We are live in this area. Shop now!`;
     return `${location.city || location.location} - Coming soon`;
   };
 
