@@ -19,7 +19,6 @@ import MobileNavMenu from "../../components/MobileNavMenu";
 import FoodSearchField from "../../components/FoodSearchField";
 import LocationButton from "../../components/LocationButton";
 import { type FoodSearchSuggestion } from "../../services/foodSearchService";
-import LocationButton from "../../components/LocationButton";
 
 interface DefaultPageLayoutRootProps
   extends React.HTMLAttributes<HTMLDivElement> {
