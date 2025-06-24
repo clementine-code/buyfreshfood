@@ -274,25 +274,23 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     // Limit suggestions to 3-4 items for better UX
     const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
 
-    // Different styling for mobile vs tablet vs desktop
-    const containerClasses = isMobile 
-      ? "fixed inset-x-4 top-20 bg-white border border-neutral-200 rounded-lg shadow-2xl z-[100] overflow-hidden max-h-80"
-      : isTablet
-      ? "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[100] max-h-96 overflow-y-auto"
-      : "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[100] max-h-96 overflow-y-auto";
-
     return (
       <>
         {/* Mobile overlay backdrop - only show when suggestions are visible */}
-        {isMobile && showSuggestions && suggestions.length > 0 && (
+        {isMobile && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-25 z-[99]"
             onClick={() => setShowSuggestions(false)}
           />
         )}
-        )}
         
-        <div className={containerClasses}>
+        <div className={
+          isMobile 
+            ? "fixed inset-x-4 top-20 bg-white border border-neutral-200 rounded-lg shadow-2xl z-[100] overflow-hidden max-h-80"
+            : isTablet
+            ? "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[100] max-h-96 overflow-y-auto"
+            : "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[100] max-h-96 overflow-y-auto"
+        }>
           {/* Mobile header */}
           {isMobile && (
             <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-neutral-50">
@@ -338,7 +336,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                 onMouseEnter={() => setSelectedIndex(index)}
               >
                 <div className={`flex items-start ${isMobile ? 'gap-4' : 'gap-3'}`}>
-                  {/* Content - Full width on mobile */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -354,7 +351,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                               Organic
                             </Badge>
                           )}
-                          {/* Highlight category suggestions */}
                           {suggestion.type === 'category' && (
                             <Badge variant="brand" className="text-xs">
                               Browse All
@@ -365,7 +361,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                           {suggestion.subtitle}
                         </p>
                         
-                        {/* Tags for products - Show fewer on mobile */}
                         {suggestion.tags && suggestion.tags.length > 0 && (
                           <div className="flex items-center gap-1 mt-2 flex-wrap">
                             {suggestion.tags.slice(0, isMobile ? 1 : 2).map((tag, tagIndex) => (
@@ -377,7 +372,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                         )}
                       </div>
                       
-                      {/* Price and location - Stack on mobile */}
                       <div className={`text-right flex-shrink-0 ${isMobile ? 'flex flex-col items-end gap-1' : ''}`}>
                         {suggestion.price && (
                           <div className={`font-medium text-default-font ${isMobile ? 'text-base' : 'text-sm'}`}>
@@ -437,7 +431,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile, isTablet]);
 
   return (
-    <div ref={containerRef} className={`relative ${className}`} style={{ zIndex: isMobile ? 99997 : 'auto' }}>
+    <div ref={containerRef} className={`relative ${className}`} style={{ zIndex: isMobile ? 98 : 75 }}>
       <TextField
         className="h-auto w-full flex-none"
         variant="filled"
