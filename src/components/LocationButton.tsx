@@ -213,3 +213,5 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
     </Dialog>
   );
 };
+
+export default LocationButton;
