@@ -1,159 +1,215 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { IconButton } from "@/ui/components/IconButton";
-import { FeatherMapPin } from "@subframe/core";
-import { useLocation } from "../contexts/LocationContext";
-import LocationDialog from "./LocationDialog";
+import React, { useState } from "react";
+import { Button } from "@/ui/components/Button";
+import { Dialog } from "@/ui/components/Dialog";
+import { FeatherMapPin, FeatherLocate, FeatherX } from "@subframe/core";
 
 interface LocationButtonProps {
+  currentLocation?: string;
+  onLocationSave?: (location: string) => void;
   className?: string;
 }
 
-const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
-  const location = useLocation();
-  const [showDialog, setShowDialog] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const tooltipTimeoutRef = useRef<NodeJS.Timeout>();
+export const LocationButton: React.FC<LocationButtonProps> = ({
+  currentLocation,
+  onLocationSave,
+  className
+}) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Determine button variant and tooltip based on location state
-  const getButtonVariant = () => {
-    if (!location.isSet) return "neutral-tertiary";
-    if (location.isNWA) return "brand-secondary";
-    return "destructive-secondary"; // Out of region
-  };
-
-  const getTooltipText = () => {
-    if (!location.isSet) return "Set your location";
-    if (location.isNWA) return `${location.city || location.location} - We are live in this area. Shop now!`;
-    return `${location.city || location.location} - Coming soon`;
-  };
-
-  const getIconColor = () => {
-    if (!location.isSet) return "text-neutral-600";
-    if (location.isNWA) return "text-brand-700";
-    return "text-warning-700";
-  };
-
-  // Calculate tooltip position to avoid being cut off
-  const calculateTooltipPosition = () => {
-    if (!buttonRef.current || !tooltipRef.current) return {};
-
-    const buttonRect = buttonRef.current.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-
-    let position: React.CSSProperties = {};
-
-    // Always position below the button for better UX
-    position.top = buttonRect.bottom + 8;
-    
-    // Center horizontally, but adjust if it would overflow
-    let leftPosition = buttonRect.left + buttonRect.width / 2;
-    
-    if (leftPosition - tooltipRect.width / 2 < 8) {
-      // Too far left
-      leftPosition = tooltipRect.width / 2 + 8;
-    } else if (leftPosition + tooltipRect.width / 2 > viewportWidth - 8) {
-      // Too far right
-      leftPosition = viewportWidth - tooltipRect.width / 2 - 8;
+  const handleLocationSave = (location: string) => {
+    if (onLocationSave) {
+      onLocationSave(location);
     }
-
-    position.left = leftPosition;
-    position.transform = 'translateX(-50%)';
-
-    // If tooltip would go below viewport, position above button
-    if (position.top + tooltipRect.height > viewportHeight - 8) {
-      position.top = buttonRect.top - tooltipRect.height - 8;
-    }
-
-    return position;
+    setIsDialogOpen(false);
   };
 
-  // Update tooltip position when shown
-  useEffect(() => {
-    if (showTooltip && tooltipRef.current && buttonRef.current) {
-      const position = calculateTooltipPosition();
-      Object.assign(tooltipRef.current.style, position);
-    }
-  }, [showTooltip]);
+  // If no location is set, show "Set Location" button
+  if (!currentLocation) {
+    return (
+      <>
+        <Button
+          variant="filled"
+          icon={<FeatherMapPin />}
+          onClick={() => setIsDialogOpen(true)}
+          className={className}
+        >
+          Set Your Location
+        </Button>
+        
+        <SimpleLocationDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          onSave={handleLocationSave}
+          initialValue=""
+        />
+      </>
+    );
+  }
 
-  const handleMouseEnter = () => {
-    if (tooltipTimeoutRef.current) {
-      clearTimeout(tooltipTimeoutRef.current);
-    }
-    setShowTooltip(true);
-  };
-
-  const handleMouseLeave = () => {
-    tooltipTimeoutRef.current = setTimeout(() => {
-      setShowTooltip(false);
-    }, 100);
-  };
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (tooltipTimeoutRef.current) {
-        clearTimeout(tooltipTimeoutRef.current);
-      }
-    };
-  }, []);
-
+  // If location is set, show current location with edit button
   return (
     <>
-      <div className={`relative ${className}`}>
-        <IconButton
-          ref={buttonRef}
-          variant={getButtonVariant()}
-          icon={<FeatherMapPin className={getIconColor()} />}
-          onClick={() => setShowDialog(true)}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          className="relative"
-        />
-
-        {/* Status indicator dot */}
-        {location.isSet && (
-          <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-            location.isNWA ? 'bg-success-500' : 'bg-warning-500'
-          }`} />
-        )}
-
-        {/* Improved Tooltip with proper arrow positioning */}
-        {showTooltip && (
-          <div
-            ref={tooltipRef}
-            className="fixed px-3 py-2 bg-neutral-800 text-white text-caption rounded-md shadow-lg pointer-events-none whitespace-nowrap transition-opacity duration-200"
-            style={{ 
-              zIndex: 9999,
-              opacity: showTooltip ? 1 : 0,
-            }}
-          >
-            {getTooltipText()}
-            {/* Tooltip arrow pointing up towards button */}
-            <div 
-              className="absolute w-0 h-0 border-l-2 border-r-2 border-transparent border-b-4"
-              style={{
-                left: '50%',
-                transform: 'translateX(-50%)',
-                borderBottomColor: '#374151',
-                top: '-4px',
-              }}
-            />
-          </div>
-        )}
+      <div className={`flex items-center gap-3 px-4 py-3 bg-white border border-brand-300 rounded-md ${className}`}>
+        <FeatherMapPin className="w-5 h-5 text-brand-600 flex-shrink-0" />
+        <span className="text-body font-body text-default-font flex-1 truncate">
+          {currentLocation}
+        </span>
+        <Button
+          variant="neutral-tertiary"
+          size="small"
+          onClick={() => setIsDialogOpen(true)}
+          className="flex-shrink-0"
+        >
+          Change
+        </Button>
       </div>
-
-      <LocationDialog
-        isOpen={showDialog}
-        onClose={() => setShowDialog(false)}
+      
+      <SimpleLocationDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSave={handleLocationSave}
+        initialValue={currentLocation}
       />
     </>
   );
 };
 
-export default LocationButton;
+// Simple Location Dialog Component - No complex state management
+interface SimpleLocationDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (location: string) => void;
+  initialValue?: string;
+}
+
+const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  initialValue = ""
+}) => {
+  // Simple local state - no external dependencies
+  const [inputValue, setInputValue] = useState(initialValue);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Reset when dialog opens/closes
+  React.useEffect(() => {
+    if (isOpen) {
+      setInputValue(initialValue);
+    }
+  }, [isOpen, initialValue]);
+
+  const handleSave = () => {
+    if (!inputValue.trim()) return;
+    onSave(inputValue.trim());
+  };
+
+  const handleDetectLocation = async () => {
+    setIsLoading(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      // Simple coordinate display - you can enhance this later
+      const locationString = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+      setInputValue(locationString);
+      
+    } catch (error) {
+      console.error('Error detecting location:', error);
+      alert('Unable to detect location. Please enter manually.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog.Content>
+        <div className="flex flex-col gap-6 p-6 w-full max-w-md">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-default-font">Set Your Location</h2>
+              <p className="text-sm text-subtext-color mt-1">Enter your location</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-neutral-100 rounded-md transition-colors"
+              disabled={isLoading}
+            >
+              <FeatherX className="w-5 h-5 text-subtext-color" />
+            </button>
+          </div>
+
+          {/* Simple Input - No complex TextField component */}
+          <div className="flex flex-col gap-3">
+            <div className="relative">
+              <div className="flex items-center gap-2 px-3 py-2 border border-neutral-200 rounded-md bg-neutral-50 focus-within:border-brand-500 focus-within:bg-white">
+                <FeatherMapPin className="w-5 h-5 text-neutral-400 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Enter your location to find fresh local food near you..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isLoading}
+                  autoFocus
+                  className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-neutral-400"
+                />
+              </div>
+            </div>
+
+            <Button
+              variant="neutral-secondary"
+              icon={<FeatherLocate />}
+              onClick={handleDetectLocation}
+              disabled={isLoading}
+              loading={isLoading}
+              className="w-full"
+            >
+              Use current location
+            </Button>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="neutral-tertiary"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={!inputValue.trim() || isLoading}
+              loading={isLoading}
+            >
+              Save Location
+            </Button>
+          </div>
+        </div>
+      </Dialog.Content>
+    </Dialog>
+  );
+};
