@@ -259,21 +259,13 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     if (!showSuggestions || suggestions.length === 0 || query.length < 2) return null;
 
     return (
-      <div 
-        className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto"
-        style={{ 
-          // Extend beyond text field on mobile
-          width: isMobile ? 'calc(100vw - 2rem)' : '100%',
-          left: isMobile ? 'calc(-50vw + 50%)' : '0',
-          marginLeft: isMobile ? '1rem' : '0'
-        }}
-      >
+      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[60] max-h-96 overflow-y-auto">
         {/* Loading state */}
         {isLoading && (
-          <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-6' : 'px-3 py-4'}`}>
-            <div className="flex items-center justify-center gap-2">
+          <div className="px-3 py-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-subtext-color">
               <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className={`font-body ${isMobile ? 'text-base' : 'text-sm'}`}>Searching fresh food...</span>
+              <span className="text-body font-body">Searching fresh food...</span>
             </div>
           </div>
         )}
