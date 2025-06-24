@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/ui/components/Button";
+import { IconButton } from "@/ui/components/IconButton";
 import { Dialog } from "@/ui/components/Dialog";
 import { FeatherMapPin, FeatherLocate, FeatherX } from "@subframe/core";
 
@@ -25,58 +25,28 @@ export const LocationButton: React.FC<LocationButtonProps> = ({
     setIsDialogOpen(false);
   };
 
-  // If no location is set, show "Set Location" button
-  if (!currentLocation) {
-    return (
-      <>
-        <Button
-          variant="filled"
-          icon={<FeatherMapPin />}
-          onClick={() => setIsDialogOpen(true)}
-          className={className}
-        >
-          Set Your Location
-        </Button>
-        
-        <SimpleLocationDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          onSave={handleLocationSave}
-          initialValue=""
-        />
-      </>
-    );
-  }
-
-  // If location is set, show current location with edit button
   return (
     <>
-      <div className={`flex items-center gap-3 px-4 py-3 bg-white border border-brand-300 rounded-md ${className}`}>
-        <FeatherMapPin className="w-5 h-5 text-brand-600 flex-shrink-0" />
-        <span className="text-body font-body text-default-font flex-1 truncate">
-          {currentLocation}
-        </span>
-        <Button
-          variant="neutral-tertiary"
-          size="small"
-          onClick={() => setIsDialogOpen(true)}
-          className="flex-shrink-0"
-        >
-          Change
-        </Button>
-      </div>
+      {/* Simple Map Pin Icon Button */}
+      <IconButton
+        icon={<FeatherMapPin />}
+        onClick={() => setIsDialogOpen(true)}
+        className={className}
+        variant={currentLocation ? "brand-primary" : "neutral-primary"}
+        title={currentLocation ? `Location: ${currentLocation}` : "Set your location"}
+      />
       
       <SimpleLocationDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSave={handleLocationSave}
-        initialValue={currentLocation}
+        initialValue={currentLocation || ""}
       />
     </>
   );
 };
 
-// Simple Location Dialog Component - No complex state management
+// Simple Location Dialog Component
 interface SimpleLocationDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -90,11 +60,10 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
   onSave,
   initialValue = ""
 }) => {
-  // Simple local state - no external dependencies
   const [inputValue, setInputValue] = useState(initialValue);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Reset when dialog opens/closes
+  // Reset when dialog opens
   React.useEffect(() => {
     if (isOpen) {
       setInputValue(initialValue);
@@ -118,9 +87,23 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
       });
 
       const { latitude, longitude } = position.coords;
-      // Simple coordinate display - you can enhance this later
-      const locationString = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-      setInputValue(locationString);
+      
+      // Try to get a readable address using reverse geocoding
+      try {
+        const response = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        );
+        const data = await response.json();
+        
+        if (data.city && data.principalSubdivision) {
+          setInputValue(`${data.city}, ${data.principalSubdivision}`);
+        } else {
+          setInputValue(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+        }
+      } catch (geocodeError) {
+        // Fallback to coordinates if geocoding fails
+        setInputValue(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+      }
       
     } catch (error) {
       console.error('Error detecting location:', error);
@@ -145,7 +128,7 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <Dialog.Content>
-        <div className="flex flex-col gap-6 p-6 w-full max-w-md">
+        <div className="flex flex-col gap-6 p-6 w-full max-w-md mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -156,15 +139,16 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
               onClick={onClose}
               className="p-2 hover:bg-neutral-100 rounded-md transition-colors"
               disabled={isLoading}
+              type="button"
             >
               <FeatherX className="w-5 h-5 text-subtext-color" />
             </button>
           </div>
 
-          {/* Simple Input - No complex TextField component */}
+          {/* Input */}
           <div className="flex flex-col gap-3">
             <div className="relative">
-              <div className="flex items-center gap-2 px-3 py-2 border border-neutral-200 rounded-md bg-neutral-50 focus-within:border-brand-500 focus-within:bg-white">
+              <div className="flex items-center gap-2 px-3 py-3 border border-neutral-200 rounded-md bg-neutral-50 focus-within:border-brand-500 focus-within:bg-white transition-colors">
                 <FeatherMapPin className="w-5 h-5 text-neutral-400 flex-shrink-0" />
                 <input
                   type="text"
@@ -174,39 +158,46 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
                   onKeyDown={handleKeyDown}
                   disabled={isLoading}
                   autoFocus
-                  className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-neutral-400"
+                  className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-neutral-400 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
 
-            <Button
-              variant="neutral-secondary"
-              icon={<FeatherLocate />}
+            <button
+              type="button"
               onClick={handleDetectLocation}
               disabled={isLoading}
-              loading={isLoading}
-              className="w-full"
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Use current location
-            </Button>
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <FeatherLocate className="w-4 h-4 text-neutral-600" />
+              )}
+              <span className="text-sm font-medium text-neutral-700">
+                {isLoading ? 'Detecting...' : 'Use current location'}
+              </span>
+            </button>
           </div>
 
           {/* Actions */}
           <div className="flex gap-3 justify-end">
-            <Button
-              variant="neutral-tertiary"
+            <button
+              type="button"
               onClick={onClose}
               disabled={isLoading}
+              className="px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
+              type="button"
               onClick={handleSave}
               disabled={!inputValue.trim() || isLoading}
-              loading={isLoading}
+              className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Location
-            </Button>
+              {isLoading ? 'Saving...' : 'Save Location'}
+            </button>
           </div>
         </div>
       </Dialog.Content>
@@ -214,4 +205,5 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
   );
 };
 
+// Default export
 export default LocationButton;
