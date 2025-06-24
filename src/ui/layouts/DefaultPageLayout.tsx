@@ -116,7 +116,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
             />
           }
           rightSlot={
-            <>
+  <>
     <LocationButton className="flex-shrink-0" />
     <Button variant="brand-secondary" icon={<FeatherUser />}>
       Sign In
@@ -126,7 +126,6 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     </Button>
   </>
 }
-          }
         />
       </div>
 
