@@ -270,11 +270,11 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           </div>
         )}
 
-        {/* Suggestions - Optimized for mobile */}
+        {/* Suggestions - Mobile optimized */}
         {!isLoading && suggestions.map((suggestion, index) => (
           <button
             key={`${suggestion.type}-${suggestion.id}`}
-            className={`w-full text-left px-3 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
+            className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
               index === selectedIndex ? 'bg-brand-50' : ''
             }`}
             onClick={() => handleSuggestionClick(suggestion)}
@@ -289,7 +289,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
             }}
             onMouseEnter={() => setSelectedIndex(index)}
           >
-            <div className="flex items-start gap-3">
+            <div className={`flex items-start ${isMobile ? 'gap-4' : 'gap-3'}`}>
               {/* Show image only on desktop */}
               {!isMobile && suggestion.image && (
                 <img
@@ -307,7 +307,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                       <div className="text-subtext-color">
                         {getSuggestionIcon(suggestion)}
                       </div>
-                      <h4 className="font-medium text-default-font truncate">
+                      <h4 className={`font-medium text-default-font truncate ${isMobile ? 'text-base' : 'text-sm'}`}>
                         {suggestion.title}
                       </h4>
                       {suggestion.isOrganic && (
@@ -322,13 +322,13 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-subtext-color truncate">
+                    <p className={`text-subtext-color truncate ${isMobile ? 'text-sm' : 'text-xs'}`}>
                       {suggestion.subtitle}
                     </p>
                     
                     {/* Tags for products - Show fewer on mobile */}
                     {suggestion.tags && suggestion.tags.length > 0 && (
-                      <div className="flex items-center gap-1 mt-1 flex-wrap">
+                      <div className="flex items-center gap-1 mt-2 flex-wrap">
                         {suggestion.tags.slice(0, isMobile ? 1 : 2).map((tag, tagIndex) => (
                           <Badge key={tagIndex} variant="neutral" className="text-xs">
                             {tag.replace('-', ' ')}
@@ -339,16 +339,16 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                   </div>
                   
                   {/* Price and location - Stack on mobile */}
-                  <div className={`text-right flex-shrink-0 ${isMobile ? 'flex flex-col items-end' : ''}`}>
+                  <div className={`text-right flex-shrink-0 ${isMobile ? 'flex flex-col items-end gap-1' : ''}`}>
                     {suggestion.price && (
-                      <div className="font-medium text-default-font text-sm">
+                      <div className={`font-medium text-default-font ${isMobile ? 'text-base' : 'text-sm'}`}>
                         {suggestion.price}
                       </div>
                     )}
                     {suggestion.location && (
-                      <div className="flex items-center gap-1 text-xs text-subtext-color mt-1">
-                        <FeatherMapPin className="w-3 h-3" />
-                        <span className={`truncate ${isMobile ? 'max-w-16' : 'max-w-20'}`}>
+                      <div className={`flex items-center gap-1 text-subtext-color ${isMobile ? 'text-sm mt-1' : 'text-xs mt-1'}`}>
+                        <FeatherMapPin className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'}`} />
+                        <span className={`truncate ${isMobile ? 'max-w-24' : 'max-w-20'}`}>
                           {suggestion.location.split(',')[0]}
                         </span>
                       </div>
@@ -362,14 +362,14 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
         {/* No results */}
         {!isLoading && suggestions.length === 0 && query.length >= 2 && (
-          <div className="px-3 py-4 text-center text-subtext-color">
+          <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-6' : 'px-3 py-4'}`}>
             <div className="flex flex-col items-center gap-2">
-              <FeatherSearch className="w-8 h-8 text-neutral-300" />
-              <span className="text-body font-body">No items found for "{query}"</span>
-              <span className="text-caption font-caption">Try searching for fruits, vegetables, or local sellers</span>
+              <FeatherSearch className={`text-neutral-300 ${isMobile ? 'w-10 h-10' : 'w-8 h-8'}`} />
+              <span className={`font-body ${isMobile ? 'text-base' : 'text-sm'}`}>No items found for "{query}"</span>
+              <span className={`font-caption text-neutral-400 ${isMobile ? 'text-sm' : 'text-xs'}`}>Try searching for fruits, vegetables, or local sellers</span>
               <button
                 onClick={handleSearchClick}
-                className="mt-2 px-3 py-1 bg-brand-600 text-white text-sm rounded hover:bg-brand-500 transition-colors"
+                className={`mt-3 px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-500 transition-colors ${isMobile ? 'text-base' : 'text-sm'}`}
               >
                 Search anyway
               </button>
