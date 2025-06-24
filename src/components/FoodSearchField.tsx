@@ -29,22 +29,94 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const [inputRect, setInputRect] = useState<DOMRect | null>(null);
 
   const debounceRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const preventBlurRef = useRef(false);
 
+  const isMobile = screenSize === 'mobile';
+  const isTablet = screenSize === 'tablet';
+
+  // Setup portal container
+  useEffect(() => {
+    let container = document.getElementById('search-suggestions-portal');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'search-suggestions-portal';
+      container.style.position = 'absolute';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.zIndex = '99999';
+      container.style.pointerEvents = 'none';
+      document.body.appendChild(container);
+    }
+    setPortalContainer(container);
+
+    return () => {
+      const portalEl = document.getElementById('search-suggestions-portal');
+      if (portalEl && portalEl.children.length === 0) {
+        document.body.removeChild(portalEl);
+      }
+    };
+  }, []);
+
+  // Screen size detection
+  useEffect(() => {
+    const updateScreenSize = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setScreenSize('mobile');
+      } else if (width < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
+
+  // Update input position when suggestions are shown
+  useEffect(() => {
+    if (showSuggestions && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setInputRect(rect);
+    }
+  }, [showSuggestions]);
+
+  // Update position on scroll/resize
+  useEffect(() => {
+    const updatePosition = () => {
+      if (showSuggestions && inputRef.current) {
+        const rect = inputRef.current.getBoundingClientRect();
+        setInputRect(rect);
+      }
+    };
+
+    if (showSuggestions) {
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [showSuggestions]);
+
   // Search function - only trigger when user types
   const searchFood = useCallback(async (searchQuery: string) => {
-    // Don't show suggestions for empty query
     if (searchQuery.length === 0) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
-    // Only search if query is at least 2 characters
     if (searchQuery.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -71,32 +143,25 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     const trimmedQuery = searchQuery.trim();
     if (!trimmedQuery) return;
 
-    // Handle different suggestion types
     if (suggestion) {
       switch (suggestion.type) {
         case 'category':
-          // Extract category name from "All [Category]" format
           const categoryName = suggestion.title.replace(/^All\s+/, '');
           navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
           break;
         case 'product':
-          // Navigate to shop with product search
           navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
           break;
         case 'seller':
-          // Navigate to shop with seller filter
           navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
           break;
         default:
-          // Default to search
           navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
       }
     } else {
-      // Direct search navigation
       navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
     }
 
-    // Clean up UI
     setShowSuggestions(false);
     setSelectedIndex(-1);
     inputRef.current?.blur();
@@ -115,12 +180,10 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     const value = event.target.value;
     setQuery(value);
 
-    // Clear existing debounce
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
-    // Debounce search - only for non-empty queries
     if (value.trim().length >= 2) {
       debounceRef.current = setTimeout(() => {
         searchFood(value);
@@ -178,11 +241,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     preventBlurRef.current = true;
     
     setQuery(suggestion.title);
-    
-    // Call the callback if provided
     onItemSelect?.(suggestion);
-    
-    // Navigate to Shop page
     navigateToShop(suggestion.title, suggestion);
     
     setTimeout(() => {
@@ -190,9 +249,8 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }, 100);
   }, [onItemSelect, navigateToShop]);
 
-  // Handle input focus - don't auto-show suggestions
+  // Handle input focus
   const handleInputFocus = useCallback(() => {
-    // Only show suggestions if we already have them and query is not empty
     if (suggestions.length > 0 && query.length >= 2) {
       setShowSuggestions(true);
     }
@@ -252,90 +310,13 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
-  // Check if we're on mobile/tablet
-  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
-  const [inputRect, setInputRect] = useState<DOMRect | null>(null);
-
-  useEffect(() => {
-    // Create or get portal container
-    let container = document.getElementById('search-suggestions-portal');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'search-suggestions-portal';
-      container.style.position = 'absolute';
-      container.style.top = '0';
-      container.style.left = '0';
-      container.style.zIndex = '99999';
-      container.style.pointerEvents = 'none';
-      document.body.appendChild(container);
-    }
-    setPortalContainer(container);
-
-    return () => {
-      // Clean up on unmount
-      const portalEl = document.getElementById('search-suggestions-portal');
-      if (portalEl && portalEl.children.length === 0) {
-        document.body.removeChild(portalEl);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const updateScreenSize = () => {
-      const width = window.innerWidth;
-      if (width < 768) {
-        setScreenSize('mobile');
-      } else if (width < 1024) {
-        setScreenSize('tablet');
-      } else {
-        setScreenSize('desktop');
-      }
-    };
-
-    updateScreenSize();
-    window.addEventListener('resize', updateScreenSize);
-    return () => window.removeEventListener('resize', updateScreenSize);
-  }, []);
-
-  // Update input position when suggestions are shown
-  useEffect(() => {
-    if (showSuggestions && inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      setInputRect(rect);
-    }
-  }, [showSuggestions]);
-
-  // Update position on scroll/resize
-  useEffect(() => {
-    const updatePosition = () => {
-      if (showSuggestions && inputRef.current) {
-        const rect = inputRef.current.getBoundingClientRect();
-        setInputRect(rect);
-      }
-    };
-
-    if (showSuggestions) {
-      window.addEventListener('scroll', updatePosition, true);
-      window.addEventListener('resize', updatePosition);
-      return () => {
-        window.removeEventListener('scroll', updatePosition, true);
-        window.removeEventListener('resize', updatePosition);
-      };
-    }
-  }, [showSuggestions]);
-
-  const isMobile = screenSize === 'mobile';
-  const isTablet = screenSize === 'tablet';
-
-  // Memoized suggestion list - only show when user has typed something
+  // Render suggestions portal
   const suggestionList = useMemo(() => {
-    if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) return null;
+    if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) {
+      return null;
+    }
 
-    // Limit suggestions to 3-4 items for better UX
     const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
-
-    // Calculate position
     const top = inputRect.bottom + window.scrollY + 4;
     const left = inputRect.left + window.scrollX;
     const width = inputRect.width;
@@ -355,20 +336,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           pointerEvents: 'auto'
         }}
       >
-        {/* Mobile header */}
-        {isMobile && (
-          <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-neutral-50">
-            <span className="font-medium text-default-font">Search Results</span>
-            <button
-              onClick={() => setShowSuggestions(false)}
-              className="text-subtext-color hover:text-default-font"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
-        {/* Loading state */}
         {isLoading && (
           <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
             <div className="flex items-center justify-center gap-2">
@@ -378,7 +345,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           </div>
         )}
 
-        {/* Suggestions - Mobile/Tablet optimized */}
         {!isLoading && limitedSuggestions.map((suggestion, index) => (
           <button
             key={`${suggestion.type}-${suggestion.id}`}
@@ -455,7 +421,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           </button>
         ))}
 
-        {/* Show "View all results" if there are more suggestions */}
         {!isLoading && suggestions.length > limitedSuggestions.length && (
           <button
             onClick={handleSearchClick}
@@ -470,7 +435,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           </button>
         )}
 
-        {/* No results */}
         {!isLoading && suggestions.length === 0 && query.length >= 2 && (
           <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
             <div className="flex flex-col items-center gap-2">
@@ -490,11 +454,10 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     );
 
     return createPortal(suggestionContent, portalContainer);
-    );
-  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile, isTablet]);
+  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile, portalContainer, inputRect]);
 
   return (
-    <div ref={containerRef} className={`relative ${className}`} style={{ zIndex: 9997 }}>
+    <div ref={containerRef} className={`relative ${className}`}>
       <TextField
         className="h-auto w-full flex-none"
         variant="filled"
@@ -525,7 +488,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         />
       </TextField>
 
-      {/* Suggestions dropdown */}
       {suggestionList}
     </div>
   );
