@@ -340,7 +340,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     const left = inputRect.left + window.scrollX;
     const width = inputRect.width;
 
-    return createPortal(
+    const suggestionContent = (
       <div 
         className="bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden"
         style={{ 
@@ -355,140 +355,141 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           pointerEvents: 'auto'
         }}
       >
-          {/* Mobile header */}
-          {isMobile && (
-            <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-neutral-50">
-              <span className="font-medium text-default-font">Search Results</span>
-              <button
-                onClick={() => setShowSuggestions(false)}
-                className="text-subtext-color hover:text-default-font"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-
-          {/* Loading state */}
-          {isLoading && (
-            <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className={`font-body ${isMobile ? 'text-base' : 'text-sm'}`}>Searching fresh food...</span>
-              </div>
-            </div>
-          )}
-
-          {/* Suggestions - Mobile/Tablet optimized */}
-          {!isLoading && limitedSuggestions.map((suggestion, index) => (
+        {/* Mobile header */}
+        {isMobile && (
+          <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-neutral-50">
+            <span className="font-medium text-default-font">Search Results</span>
             <button
-              key={`${suggestion.type}-${suggestion.id}`}
-              className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
-                index === selectedIndex ? 'bg-brand-50' : ''
-              }`}
-              onClick={() => handleSuggestionClick(suggestion)}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                preventBlurRef.current = true;
-              }}
-              onMouseUp={() => {
-                setTimeout(() => {
-                  preventBlurRef.current = false;
-                }, 100);
-              }}
-              onMouseEnter={() => setSelectedIndex(index)}
+              onClick={() => setShowSuggestions(false)}
+              className="text-subtext-color hover:text-default-font"
             >
-              <div className={`flex items-start ${isMobile ? 'gap-4' : 'gap-3'}`}>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="text-subtext-color">
-                          {getSuggestionIcon(suggestion)}
-                        </div>
-                        <h4 className={`font-medium text-default-font truncate ${isMobile ? 'text-base' : 'text-sm'}`}>
-                          {suggestion.title}
-                        </h4>
-                        {suggestion.isOrganic && (
-                          <Badge variant="success" className="text-xs">
-                            Organic
-                          </Badge>
-                        )}
-                        {suggestion.type === 'category' && (
-                          <Badge variant="brand" className="text-xs">
-                            Browse All
-                          </Badge>
-                        )}
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Loading state */}
+        {isLoading && (
+          <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+              <span className={`font-body ${isMobile ? 'text-base' : 'text-sm'}`}>Searching fresh food...</span>
+            </div>
+          </div>
+        )}
+
+        {/* Suggestions - Mobile/Tablet optimized */}
+        {!isLoading && limitedSuggestions.map((suggestion, index) => (
+          <button
+            key={`${suggestion.type}-${suggestion.id}`}
+            className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
+              index === selectedIndex ? 'bg-brand-50' : ''
+            }`}
+            onClick={() => handleSuggestionClick(suggestion)}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              preventBlurRef.current = true;
+            }}
+            onMouseUp={() => {
+              setTimeout(() => {
+                preventBlurRef.current = false;
+              }, 100);
+            }}
+            onMouseEnter={() => setSelectedIndex(index)}
+          >
+            <div className={`flex items-start ${isMobile ? 'gap-4' : 'gap-3'}`}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="text-subtext-color">
+                        {getSuggestionIcon(suggestion)}
                       </div>
-                      <p className={`text-subtext-color truncate ${isMobile ? 'text-sm' : 'text-xs'}`}>
-                        {suggestion.subtitle}
-                      </p>
-                      
-                      {suggestion.tags && suggestion.tags.length > 0 && (
-                        <div className="flex items-center gap-1 mt-2 flex-wrap">
-                          {suggestion.tags.slice(0, isMobile ? 1 : 2).map((tag, tagIndex) => (
-                            <Badge key={tagIndex} variant="neutral" className="text-xs">
-                              {tag.replace('-', ' ')}
-                            </Badge>
-                          ))}
-                        </div>
+                      <h4 className={`font-medium text-default-font truncate ${isMobile ? 'text-base' : 'text-sm'}`}>
+                        {suggestion.title}
+                      </h4>
+                      {suggestion.isOrganic && (
+                        <Badge variant="success" className="text-xs">
+                          Organic
+                        </Badge>
+                      )}
+                      {suggestion.type === 'category' && (
+                        <Badge variant="brand" className="text-xs">
+                          Browse All
+                        </Badge>
                       )}
                     </div>
+                    <p className={`text-subtext-color truncate ${isMobile ? 'text-sm' : 'text-xs'}`}>
+                      {suggestion.subtitle}
+                    </p>
                     
-                    <div className={`text-right flex-shrink-0 ${isMobile ? 'flex flex-col items-end gap-1' : ''}`}>
-                      {suggestion.price && (
-                        <div className={`font-medium text-default-font ${isMobile ? 'text-base' : 'text-sm'}`}>
-                          {suggestion.price}
-                        </div>
-                      )}
-                      {suggestion.location && (
-                        <div className={`flex items-center gap-1 text-subtext-color ${isMobile ? 'text-sm mt-1' : 'text-xs mt-1'}`}>
-                          <FeatherMapPin className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'}`} />
-                          <span className={`truncate ${isMobile ? 'max-w-24' : 'max-w-20'}`}>
-                            {suggestion.location.split(',')[0]}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    {suggestion.tags && suggestion.tags.length > 0 && (
+                      <div className="flex items-center gap-1 mt-2 flex-wrap">
+                        {suggestion.tags.slice(0, isMobile ? 1 : 2).map((tag, tagIndex) => (
+                          <Badge key={tagIndex} variant="neutral" className="text-xs">
+                            {tag.replace('-', ' ')}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className={`text-right flex-shrink-0 ${isMobile ? 'flex flex-col items-end gap-1' : ''}`}>
+                    {suggestion.price && (
+                      <div className={`font-medium text-default-font ${isMobile ? 'text-base' : 'text-sm'}`}>
+                        {suggestion.price}
+                      </div>
+                    )}
+                    {suggestion.location && (
+                      <div className={`flex items-center gap-1 text-subtext-color ${isMobile ? 'text-sm mt-1' : 'text-xs mt-1'}`}>
+                        <FeatherMapPin className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'}`} />
+                        <span className={`truncate ${isMobile ? 'max-w-24' : 'max-w-20'}`}>
+                          {suggestion.location.split(',')[0]}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </button>
-          ))}
-
-          {/* Show "View all results" if there are more suggestions */}
-          {!isLoading && suggestions.length > limitedSuggestions.length && (
-            <button
-              onClick={handleSearchClick}
-              className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-brand-50 border-t border-brand-200 bg-brand-25 transition-colors text-brand-700`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <FeatherSearch className="w-4 h-4" />
-                <span className={`font-medium ${isMobile ? 'text-base' : 'text-sm'}`}>
-                  View all {suggestions.length} results for "{query}"
-                </span>
-              </div>
-            </button>
-          )}
-
-          {/* No results */}
-          {!isLoading && suggestions.length === 0 && query.length >= 2 && (
-            <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
-              <div className="flex flex-col items-center gap-2">
-                <FeatherSearch className={`text-neutral-300 ${isMobile ? 'w-10 h-10' : 'w-8 h-8'}`} />
-                <span className={`font-body ${isMobile ? 'text-base' : 'text-sm'}`}>No items found for "{query}"</span>
-                <span className={`font-caption text-neutral-400 ${isMobile ? 'text-sm' : 'text-xs'}`}>Try searching for fruits, vegetables, or local sellers</span>
-                <button
-                  onClick={handleSearchClick}
-                  className={`mt-3 px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-500 transition-colors ${isMobile ? 'text-base' : 'text-sm'}`}
-                >
-                  Search anyway
-                </button>
-              </div>
             </div>
-          )}
-        </div>,
-        portalContainer
-      )
+          </button>
+        ))}
+
+        {/* Show "View all results" if there are more suggestions */}
+        {!isLoading && suggestions.length > limitedSuggestions.length && (
+          <button
+            onClick={handleSearchClick}
+            className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-brand-50 border-t border-brand-200 bg-brand-25 transition-colors text-brand-700`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <FeatherSearch className="w-4 h-4" />
+              <span className={`font-medium ${isMobile ? 'text-base' : 'text-sm'}`}>
+                View all {suggestions.length} results for "{query}"
+              </span>
+            </div>
+          </button>
+        )}
+
+        {/* No results */}
+        {!isLoading && suggestions.length === 0 && query.length >= 2 && (
+          <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
+            <div className="flex flex-col items-center gap-2">
+              <FeatherSearch className={`text-neutral-300 ${isMobile ? 'w-10 h-10' : 'w-8 h-8'}`} />
+              <span className={`font-body ${isMobile ? 'text-base' : 'text-sm'}`}>No items found for "{query}"</span>
+              <span className={`font-caption text-neutral-400 ${isMobile ? 'text-sm' : 'text-xs'}`}>Try searching for fruits, vegetables, or local sellers</span>
+              <button
+                onClick={handleSearchClick}
+                className={`mt-3 px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-500 transition-colors ${isMobile ? 'text-base' : 'text-sm'}`}
+              >
+                Search anyway
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+
+    return createPortal(suggestionContent, portalContainer);
     );
   }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile, isTablet]);
 
