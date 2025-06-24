@@ -251,6 +251,9 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
+  // Check if we're on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   // Memoized suggestion list - only show when user has typed something
   const suggestionList = useMemo(() => {
     if (!showSuggestions || suggestions.length === 0 || query.length < 2) return null;
@@ -267,7 +270,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
           </div>
         )}
 
-        {/* Suggestions - Categories first, then products */}
+        {/* Suggestions - Optimized for mobile */}
         {!isLoading && suggestions.map((suggestion, index) => (
           <button
             key={`${suggestion.type}-${suggestion.id}`}
@@ -287,8 +290,8 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
             onMouseEnter={() => setSelectedIndex(index)}
           >
             <div className="flex items-start gap-3">
-              {/* Image */}
-              {suggestion.image && (
+              {/* Show image only on desktop */}
+              {!isMobile && suggestion.image && (
                 <img
                   src={suggestion.image}
                   alt={suggestion.title}
@@ -296,7 +299,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                 />
               )}
               
-              {/* Content */}
+              {/* Content - Full width on mobile */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -323,10 +326,10 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                       {suggestion.subtitle}
                     </p>
                     
-                    {/* Tags for products */}
+                    {/* Tags for products - Show fewer on mobile */}
                     {suggestion.tags && suggestion.tags.length > 0 && (
                       <div className="flex items-center gap-1 mt-1 flex-wrap">
-                        {suggestion.tags.slice(0, 2).map((tag, tagIndex) => (
+                        {suggestion.tags.slice(0, isMobile ? 1 : 2).map((tag, tagIndex) => (
                           <Badge key={tagIndex} variant="neutral" className="text-xs">
                             {tag.replace('-', ' ')}
                           </Badge>
@@ -335,8 +338,8 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                     )}
                   </div>
                   
-                  {/* Price and location */}
-                  <div className="text-right flex-shrink-0">
+                  {/* Price and location - Stack on mobile */}
+                  <div className={`text-right flex-shrink-0 ${isMobile ? 'flex flex-col items-end' : ''}`}>
                     {suggestion.price && (
                       <div className="font-medium text-default-font text-sm">
                         {suggestion.price}
@@ -345,7 +348,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                     {suggestion.location && (
                       <div className="flex items-center gap-1 text-xs text-subtext-color mt-1">
                         <FeatherMapPin className="w-3 h-3" />
-                        <span className="truncate max-w-20">
+                        <span className={`truncate ${isMobile ? 'max-w-16' : 'max-w-20'}`}>
                           {suggestion.location.split(',')[0]}
                         </span>
                       </div>
@@ -375,7 +378,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         )}
       </div>
     );
-  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick]);
+  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile]);
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
