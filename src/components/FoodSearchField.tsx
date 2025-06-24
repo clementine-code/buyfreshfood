@@ -271,19 +271,22 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   const suggestionList = useMemo(() => {
     if (!showSuggestions || suggestions.length === 0 || query.length < 2) return null;
 
+    // Limit suggestions to 3-4 items for better UX
+    const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
+
     // Different styling for mobile vs tablet vs desktop
     const containerClasses = isMobile 
-      ? "fixed inset-x-4 top-20 bottom-4 bg-white border border-neutral-200 rounded-lg shadow-2xl z-[99999] overflow-hidden"
+      ? "fixed inset-x-4 top-20 bg-white border border-neutral-200 rounded-lg shadow-2xl z-[999999] overflow-hidden max-h-80"
       : isTablet
-      ? "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[99999] max-h-96 overflow-y-auto"
-      : "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[99999] max-h-96 overflow-y-auto";
+      ? "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[999999] max-h-96 overflow-y-auto"
+      : "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[999999] max-h-96 overflow-y-auto";
 
     return (
       <>
         {/* Mobile overlay backdrop */}
         {isMobile && (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-25 z-[99998]"
+            className="fixed inset-0 bg-black bg-opacity-25 z-[999998]"
             onClick={() => setShowSuggestions(false)}
           />
         )}
@@ -315,7 +318,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
             )}
 
             {/* Suggestions - Mobile/Tablet optimized */}
-            {!isLoading && suggestions.map((suggestion, index) => (
+            {!isLoading && limitedSuggestions.map((suggestion, index) => (
               <button
                 key={`${suggestion.type}-${suggestion.id}`}
                 className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
@@ -394,6 +397,21 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
                 </div>
               </button>
             ))}
+
+            {/* Show "View all results" if there are more suggestions */}
+            {!isLoading && suggestions.length > limitedSuggestions.length && (
+              <button
+                onClick={handleSearchClick}
+                className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-brand-50 border-t border-brand-200 bg-brand-25 transition-colors text-brand-700`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <FeatherSearch className="w-4 h-4" />
+                  <span className={`font-medium ${isMobile ? 'text-base' : 'text-sm'}`}>
+                    View all {suggestions.length} results for "{query}"
+                  </span>
+                </div>
+              </button>
+            )}
 
             {/* No results */}
             {!isLoading && suggestions.length === 0 && query.length >= 2 && (
