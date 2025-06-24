@@ -17,7 +17,6 @@ import { FeatherShoppingCart } from "@subframe/core";
 import { FeatherMenu } from "@subframe/core";
 import MobileNavMenu from "../../components/MobileNavMenu";
 import FoodSearchField from "../../components/FoodSearchField";
-import LocationButton from "../../components/LocationButton";
 import { type FoodSearchSuggestion } from "../../services/foodSearchService";
 
 interface DefaultPageLayoutRootProps
@@ -117,24 +116,16 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
             />
           }
           rightSlot={
-            <div className="flex items-center justify-end gap-2">
-              <LocationButton className="flex-shrink-0" />
-              <div className="flex-shrink-0">
-                <LocationButton />
+            <>
+    <LocationButton className="flex-shrink-0" />
     <Button variant="brand-secondary" icon={<FeatherUser />}>
       Sign In
     </Button>
-    <Button icon={<FeatherShoppingCart />}>Cart</Button>
-              </div>
-              <div className="flex-shrink-0">
-                <Button
-                  icon={<FeatherShoppingCart />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                >
-                  Cart
-                </Button>
-              </div>
-            </div>
+    <Button icon={<FeatherShoppingCart />}>
+      Cart
+    </Button>
+  </>
+}
           }
         />
       </div>
