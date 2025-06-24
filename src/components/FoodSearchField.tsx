@@ -260,7 +260,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
     return (
       <div 
-        className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[100] max-h-96 overflow-y-auto"
+        className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-96 overflow-y-auto"
         style={{ 
           // Extend beyond text field on mobile
           width: isMobile ? 'calc(100vw - 2rem)' : '100%',
@@ -298,15 +298,6 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
             onMouseEnter={() => setSelectedIndex(index)}
           >
             <div className={`flex items-start ${isMobile ? 'gap-4' : 'gap-3'}`}>
-              {/* Show image only on desktop */}
-              {!isMobile && suggestion.image && (
-                <img
-                  src={suggestion.image}
-                  alt={suggestion.title}
-                  className="w-12 h-12 rounded-md object-cover flex-shrink-0"
-                />
-              )}
-              
               {/* Content - Full width on mobile */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
