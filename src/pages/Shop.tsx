@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMap } from "@subframe/core";
@@ -57,6 +57,34 @@ function Shop() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
+
+  // Auto-hide sort bar state
+  const [sortBarVisible, setSortBarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-hide sort bar functionality
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isMobile = window.innerWidth < 1280; // xl breakpoint
+      
+      if (!isMobile) return; // Only apply on mobile
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down - hide sort bar
+        setSortBarVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up - show sort bar
+        setSortBarVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Load data from Supabase and handle URL search params
   useEffect(() => {
@@ -448,8 +476,8 @@ function Shop() {
 
   return (
     <div className="flex w-full h-full bg-default-background">
-     {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-<div className="hidden xl:flex w-full h-full" style={{paddingTop: '80px'}}>
+      {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
+      <div className="hidden xl:flex w-full h-full" style={{paddingTop: '80px'}}>
         {/* Left Side - Products (50% width, scrollable content) */}
         <div className="w-1/2 h-full flex flex-col bg-default-background">
           {/* Controls Bar - Fixed at top */}
@@ -586,9 +614,14 @@ function Shop() {
       </div>
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
-     <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative">
-{/* Mobile/Tablet Page Controls - Hide when modals are open */}
-<div className={`xl:hidden sticky left-0 right-0 z-[70] bg-white border-b border-neutral-200 shadow-sm w-full ${(showMobileFilters || showMobileMap) ? 'hidden' : ''}`} style={{top: '80px'}}>
+      <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative">
+        {/* Mobile/Tablet Page Controls - Auto-hide functionality */}
+        <div 
+          className={`xl:hidden sticky left-0 right-0 z-[70] bg-white border-b border-neutral-200 shadow-sm w-full transition-transform duration-300 ease-in-out ${
+            sortBarVisible ? 'transform translate-y-0' : 'transform -translate-y-full'
+          } ${(showMobileFilters || showMobileMap) ? 'hidden' : ''}`} 
+          style={{top: '80px'}}
+        >
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
@@ -733,29 +766,29 @@ function Shop() {
       </div>
 
       {/* Modals */}
-<MobileFilterModal
-  isOpen={showMobileFilters}
-  onClose={() => setShowMobileFilters(false)}
-  appliedFilters={appliedFilters}
-  onFiltersChange={setAppliedFilters}
-  categories={categories}
-  sellers={sellers}
-/>
+      <MobileFilterModal
+        isOpen={showMobileFilters}
+        onClose={() => setShowMobileFilters(false)}
+        appliedFilters={appliedFilters}
+        onFiltersChange={setAppliedFilters}
+        categories={categories}
+        sellers={sellers}
+      />
 
-<MobileMapModal
-  isOpen={showMobileMap}
-  onClose={() => setShowMobileMap(false)}
-/>
+      <MobileMapModal
+        isOpen={showMobileMap}
+        onClose={() => setShowMobileMap(false)}
+      />
 
-<DesktopFilterModal
-  isOpen={showDesktopFilters}
-  onClose={() => setShowDesktopFilters(false)}
-  appliedFilters={appliedFilters}
-  onFiltersChange={setAppliedFilters}
-  categories={categories}
-  sellers={sellers}
-  className="z-[200]"
-/>
+      <DesktopFilterModal
+        isOpen={showDesktopFilters}
+        onClose={() => setShowDesktopFilters(false)}
+        appliedFilters={appliedFilters}
+        onFiltersChange={setAppliedFilters}
+        categories={categories}
+        sellers={sellers}
+        className="z-[200]"
+      />
     </div>
   );
 }
