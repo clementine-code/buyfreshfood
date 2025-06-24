@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { IconButton } from "@/ui/components/IconButton";
-import { Dialog } from "@/ui/components/Dialog";
 import { FeatherMapPin, FeatherLocate, FeatherX } from "@subframe/core";
 
 interface LocationButtonProps {
@@ -46,7 +45,7 @@ export const LocationButton: React.FC<LocationButtonProps> = ({
   );
 };
 
-// Simple Location Dialog Component
+// Simple Location Dialog Component with Fixed Z-Index
 interface SimpleLocationDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -123,33 +122,47 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <Dialog.Content>
-        <div className="flex flex-col gap-6 p-6 w-full max-w-md mx-auto">
+    // Portal-style overlay with maximum z-index
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      style={{ zIndex: 999999 }}
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex flex-col gap-6 p-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-default-font">Set Your Location</h2>
-              <p className="text-sm text-subtext-color mt-1">Enter your location</p>
+              <h2 className="text-xl font-semibold text-gray-900">Set Your Location</h2>
+              <p className="text-sm text-gray-600 mt-1">Enter your location</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-neutral-100 rounded-md transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
               disabled={isLoading}
               type="button"
             >
-              <FeatherX className="w-5 h-5 text-subtext-color" />
+              <FeatherX className="w-5 h-5 text-gray-500" />
             </button>
           </div>
 
           {/* Input */}
           <div className="flex flex-col gap-3">
             <div className="relative">
-              <div className="flex items-center gap-2 px-3 py-3 border border-neutral-200 rounded-md bg-neutral-50 focus-within:border-brand-500 focus-within:bg-white transition-colors">
-                <FeatherMapPin className="w-5 h-5 text-neutral-400 flex-shrink-0" />
+              <div className="flex items-center gap-2 px-3 py-3 border border-gray-200 rounded-md bg-gray-50 focus-within:border-green-500 focus-within:bg-white transition-colors">
+                <FeatherMapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Enter your location to find fresh local food near you..."
@@ -158,7 +171,7 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
                   onKeyDown={handleKeyDown}
                   disabled={isLoading}
                   autoFocus
-                  className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-neutral-400 disabled:cursor-not-allowed"
+                  className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-gray-400 disabled:cursor-not-allowed text-gray-900"
                 />
               </div>
             </div>
@@ -167,14 +180,14 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
               type="button"
               onClick={handleDetectLocation}
               disabled={isLoading}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <FeatherLocate className="w-4 h-4 text-neutral-600" />
+                <FeatherLocate className="w-4 h-4 text-gray-600" />
               )}
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-gray-700">
                 {isLoading ? 'Detecting...' : 'Use current location'}
               </span>
             </button>
@@ -186,7 +199,7 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
@@ -194,14 +207,14 @@ const SimpleLocationDialog: React.FC<SimpleLocationDialogProps> = ({
               type="button"
               onClick={handleSave}
               disabled={!inputValue.trim() || isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Saving...' : 'Save Location'}
             </button>
           </div>
         </div>
-      </Dialog.Content>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
