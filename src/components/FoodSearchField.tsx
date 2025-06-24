@@ -276,19 +276,20 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
     // Different styling for mobile vs tablet vs desktop
     const containerClasses = isMobile 
-      ? "fixed inset-x-4 top-20 bg-white border border-neutral-200 rounded-lg shadow-2xl z-[999999] overflow-hidden max-h-80"
+      ? "fixed inset-x-4 top-20 bg-white border border-neutral-200 rounded-lg shadow-2xl z-[100] overflow-hidden max-h-80"
       : isTablet
-      ? "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[999999] max-h-96 overflow-y-auto"
-      : "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[999999] max-h-96 overflow-y-auto";
+      ? "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[100] max-h-96 overflow-y-auto"
+      : "absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[100] max-h-96 overflow-y-auto";
 
     return (
       <>
-        {/* Mobile overlay backdrop */}
-        {isMobile && (
+        {/* Mobile overlay backdrop - only show when suggestions are visible */}
+        {isMobile && showSuggestions && suggestions.length > 0 && (
           <div 
-            className="fixed inset-0 bg-black bg-opacity-25 z-[999998]"
+            className="fixed inset-0 bg-black bg-opacity-25 z-[99]"
             onClick={() => setShowSuggestions(false)}
           />
+        )}
         )}
         
         <div className={containerClasses}>
