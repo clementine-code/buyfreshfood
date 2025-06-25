@@ -1,4 +1,4 @@
-// Location service with Google Places API integration
+// Location service with backend proxy for Google Places API
 export interface LocationData {
   isNWA: boolean;
   city: string;
@@ -40,10 +40,16 @@ const NWA_CITIES = new Set([
 ]);
 
 class LocationService {
-  private googleApiKey: string;
+  private supabaseUrl: string;
+  private supabaseAnonKey: string;
 
   constructor() {
-    this.googleApiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY || '';
+    this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    this.supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    
+    if (!this.supabaseUrl || !this.supabaseAnonKey) {
+      console.error('Missing Supabase configuration');
+    }
   }
 
   /**
@@ -84,33 +90,47 @@ class LocationService {
   }
 
   /**
-   * Get location suggestions using Google Places Autocomplete API
+   * Make authenticated request to backend API
+   */
+  private async makeBackendRequest(endpoint: string, data: any): Promise<any> {
+    const url = `${this.supabaseUrl}/functions/v1/${endpoint}`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.supabaseAnonKey}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Backend API error: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Get location suggestions using backend proxy
    */
   async getLocationSuggestions(input: string): Promise<LocationSuggestion[]> {
-    if (input.length < 2 || !this.googleApiKey) {
+    if (input.length < 2) {
       return [];
     }
 
     try {
-      console.log('🔍 Fetching suggestions from Google Places API for:', input);
+      console.log('🔍 Fetching suggestions via backend proxy for:', input);
 
-      const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
-      url.searchParams.append('input', input);
-      url.searchParams.append('key', this.googleApiKey);
-      url.searchParams.append('types', '(cities)');
-      url.searchParams.append('components', 'country:us');
-      url.searchParams.append('language', 'en');
-
-      const response = await fetch(url.toString());
-      
-      if (!response.ok) {
-        throw new Error(`Google Places API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await this.makeBackendRequest('places-autocomplete', {
+        input,
+        types: '(cities)',
+        componentRestrictions: { country: 'us' }
+      });
 
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-        console.error('Google Places API error:', data.status, data.error_message);
+        console.error('Backend API error:', data.status, data.error_message);
         return this.getFallbackSuggestions(input);
       }
 
@@ -121,17 +141,17 @@ class LocationService {
         secondary_text: prediction.structured_formatting?.secondary_text || '',
       })) || [];
 
-      console.log('✅ Got suggestions from Google Places:', suggestions.length);
+      console.log('✅ Got suggestions via backend:', suggestions.length);
       return suggestions.slice(0, 8); // Limit to 8 suggestions
 
     } catch (error) {
-      console.error('❌ Error fetching location suggestions:', error);
+      console.error('❌ Error fetching location suggestions via backend:', error);
       return this.getFallbackSuggestions(input);
     }
   }
 
   /**
-   * Fallback suggestions when Google Places API is unavailable
+   * Fallback suggestions when backend API is unavailable
    */
   private getFallbackSuggestions(input: string): LocationSuggestion[] {
     const fallbackCities = [
@@ -159,18 +179,18 @@ class LocationService {
   }
 
   /**
-   * Get detailed location information using Google Places Details API
+   * Get detailed location information using backend proxy
    */
   async getLocationDetails(placeId?: string, coordinates?: { lat: number; lng: number }): Promise<LocationData | null> {
     try {
-      console.log('🔍 Getting location details for:', placeId, coordinates);
+      console.log('🔍 Getting location details via backend for:', placeId, coordinates);
 
       // Handle fallback suggestions
       if (placeId?.startsWith('fallback_')) {
         return this.handleFallbackPlaceId(placeId);
       }
 
-      if (placeId && this.googleApiKey) {
+      if (placeId) {
         return await this.getDetailsFromPlaceId(placeId);
       }
 
@@ -182,7 +202,7 @@ class LocationService {
       return null;
 
     } catch (error) {
-      console.error('❌ Error getting location details:', error);
+      console.error('❌ Error getting location details via backend:', error);
       
       if (coordinates) {
         return this.createFallbackLocationData(coordinates);
@@ -193,25 +213,17 @@ class LocationService {
   }
 
   /**
-   * Get location details from Google Places Details API
+   * Get location details from backend using place ID
    */
   private async getDetailsFromPlaceId(placeId: string): Promise<LocationData | null> {
     try {
-      const url = new URL('https://maps.googleapis.com/maps/api/place/details/json');
-      url.searchParams.append('place_id', placeId);
-      url.searchParams.append('key', this.googleApiKey);
-      url.searchParams.append('fields', 'address_components,formatted_address,geometry,name');
-
-      const response = await fetch(url.toString());
-      
-      if (!response.ok) {
-        throw new Error(`Google Places Details API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await this.makeBackendRequest('places-details', {
+        place_id: placeId,
+        fields: ['address_components', 'formatted_address', 'geometry', 'name']
+      });
 
       if (data.status !== 'OK') {
-        console.error('Google Places Details API error:', data.status, data.error_message);
+        console.error('Backend Places Details API error:', data.status, data.error_message);
         return null;
       }
 
@@ -251,30 +263,23 @@ class LocationService {
       };
 
     } catch (error) {
-      console.error('❌ Error fetching place details:', error);
+      console.error('❌ Error fetching place details via backend:', error);
       return null;
     }
   }
 
   /**
-   * Get location details from coordinates using Google Geocoding API
+   * Get location details from coordinates using backend proxy
    */
   private async getDetailsFromCoordinates(coordinates: { lat: number; lng: number }): Promise<LocationData | null> {
     try {
-      const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
-      url.searchParams.append('latlng', `${coordinates.lat},${coordinates.lng}`);
-      url.searchParams.append('key', this.googleApiKey);
-
-      const response = await fetch(url.toString());
-      
-      if (!response.ok) {
-        throw new Error(`Google Geocoding API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await this.makeBackendRequest('places-reverse-geocode', {
+        lat: coordinates.lat,
+        lng: coordinates.lng
+      });
 
       if (data.status !== 'OK' || !data.results?.length) {
-        console.error('Google Geocoding API error:', data.status, data.error_message);
+        console.error('Backend Reverse Geocoding API error:', data.status, data.error_message);
         return this.createFallbackLocationData(coordinates);
       }
 
@@ -312,7 +317,7 @@ class LocationService {
       };
 
     } catch (error) {
-      console.error('❌ Error reverse geocoding:', error);
+      console.error('❌ Error reverse geocoding via backend:', error);
       return this.createFallbackLocationData(coordinates);
     }
   }
@@ -403,12 +408,12 @@ class LocationService {
   }
 
   /**
-   * Validate location input using Google Places API
+   * Validate location input using backend proxy
    */
   async validateLocationInput(input: string): Promise<LocationData | null> {
     const trimmedInput = input.trim();
     
-    console.log('🔍 Validating location input:', trimmedInput);
+    console.log('🔍 Validating location input via backend:', trimmedInput);
 
     try {
       // Get suggestions first
@@ -420,30 +425,26 @@ class LocationService {
         return await this.getLocationDetails(firstSuggestion.place_id);
       }
 
-      // If no suggestions, try direct geocoding
-      if (this.googleApiKey) {
-        const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
-        url.searchParams.append('address', trimmedInput);
-        url.searchParams.append('key', this.googleApiKey);
-        url.searchParams.append('components', 'country:US');
-
-        const response = await fetch(url.toString());
+      // If no suggestions, try direct geocoding via backend
+      try {
+        const data = await this.makeBackendRequest('places-geocode', {
+          address: trimmedInput,
+          components: 'country:US'
+        });
         
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data.status === 'OK' && data.results?.length > 0) {
-            const result = data.results[0];
-            return await this.getLocationDetails(result.place_id);
-          }
+        if (data.status === 'OK' && data.results?.length > 0) {
+          const result = data.results[0];
+          return await this.getLocationDetails(result.place_id);
         }
+      } catch (geocodeError) {
+        console.warn('Geocoding via backend failed:', geocodeError);
       }
 
-      console.log('⚠️ Could not validate location input:', trimmedInput);
+      console.log('⚠️ Could not validate location input via backend:', trimmedInput);
       return null;
 
     } catch (error) {
-      console.error('❌ Error validating location input:', error);
+      console.error('❌ Error validating location input via backend:', error);
       return null;
     }
   }
