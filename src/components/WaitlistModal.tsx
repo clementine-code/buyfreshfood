@@ -8,7 +8,7 @@ import { FeatherArrowRight } from "@subframe/core";
 import { TextField } from "@/ui/components/TextField";
 import { CheckboxCard } from "@/ui/components/CheckboxCard";
 import { Button } from "@/ui/components/Button";
-import { FeatherExternalLink } from "@subframe/core";
+import { FeatherExternalLink, FeatherMapPin, FeatherEdit3 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
 import { 
@@ -19,15 +19,18 @@ import {
   getPrefilledProductInterest,
   trackUserBehavior
 } from "../utils/waitlistUtils";
+import { locationService, type LocationData } from "../services/locationService";
 import { useNavigate } from "react-router-dom";
 
 const WaitlistModal: React.FC = () => {
-  const { state, closeWaitlistModal, showSuccessView } = useWaitlistContext();
+  const { state, closeAllModals, showSuccessView, openLocationModal } = useWaitlistContext();
   const { state: locationState } = useLocationContext();
   const navigate = useNavigate();
 
   // Form state
   const [email, setEmail] = useState("");
+  const [locationInput, setLocationInput] = useState("");
+  const [currentLocationData, setCurrentLocationData] = useState<LocationData | null>(null);
   const [interests, setInterests] = useState({
     buying: false,
     selling: false,
@@ -36,10 +39,20 @@ const WaitlistModal: React.FC = () => {
   const [productInterests, setProductInterests] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [isValidatingLocation, setIsValidatingLocation] = useState(false);
 
-  // Initialize form with tracked behavior
+  // Initialize form when modal opens
   useEffect(() => {
-    if (state.isModalOpen && !state.isSuccessView) {
+    if (state.isWaitlistModalOpen && !state.isSuccessView) {
+      // Set location data from context
+      if (state.currentLocationData) {
+        setCurrentLocationData(state.currentLocationData);
+        setLocationInput(state.currentLocationData.formattedAddress || 
+                        `${state.currentLocationData.city}, ${state.currentLocationData.state}`);
+      }
+
+      // Pre-fill form based on tracked behavior
       const trackedBehavior = getTrackedBehavior();
       const prechecked = getPrecheckedInterests(trackedBehavior);
       const prefilledProducts = getPrefilledProductInterest(trackedBehavior);
@@ -47,6 +60,7 @@ const WaitlistModal: React.FC = () => {
       setInterests(prechecked);
       setProductInterests(prefilledProducts);
       setError("");
+      setIsEditingLocation(false);
       
       // Track modal open
       trackUserBehavior('opened_waitlist_modal', {
@@ -54,29 +68,70 @@ const WaitlistModal: React.FC = () => {
         location: state.currentLocationData?.formattedAddress
       }, locationState);
     }
-  }, [state.isModalOpen, state.isSuccessView, state.modalType]);
+  }, [state.isWaitlistModalOpen, state.isSuccessView, state.modalType, state.currentLocationData]);
+
+  const handleLocationEdit = () => {
+    setIsEditingLocation(true);
+  };
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocationInput(e.target.value);
+    setError("");
+  };
+
+  const handleLocationSave = async () => {
+    if (!locationInput.trim()) return;
+
+    setIsValidatingLocation(true);
+    setError("");
+
+    try {
+      const locationData = await locationService.validateLocationInput(locationInput.trim());
+      
+      if (locationData) {
+        setCurrentLocationData(locationData);
+        setLocationInput(locationData.formattedAddress || 
+                        `${locationData.city}, ${locationData.state}`);
+        setIsEditingLocation(false);
+      } else {
+        setError('Unable to validate location. Please try a different address.');
+      }
+    } catch (err) {
+      console.error('Error validating location:', err);
+      setError('Failed to validate location. Please try again.');
+    } finally {
+      setIsValidatingLocation(false);
+    }
+  };
+
+  const handleLocationCancel = () => {
+    // Restore original location
+    if (currentLocationData) {
+      setLocationInput(currentLocationData.formattedAddress || 
+                      `${currentLocationData.city}, ${currentLocationData.state}`);
+    }
+    setIsEditingLocation(false);
+    setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || isSubmitting) return;
+    if (!email.trim() || !currentLocationData || isSubmitting) return;
 
     setIsSubmitting(true);
     setError("");
 
     try {
-      const locationData = state.currentLocationData;
-      const parsedLocation = parseLocation(locationData?.formattedAddress || locationData?.city + ', ' + locationData?.state || '');
-      
       const selectedInterests = Object.entries(interests)
         .filter(([_, selected]) => selected)
         .map(([key, _]) => key);
 
       const formData = {
         email: email.trim(),
-        location: locationData?.formattedAddress || `${locationData?.city}, ${locationData?.state}`,
-        city: parsedLocation.city || locationData?.city || '',
-        state: parsedLocation.state || locationData?.state || '',
-        zipCode: parsedLocation.zipCode || locationData?.zipCode,
+        location: currentLocationData.formattedAddress || `${currentLocationData.city}, ${currentLocationData.state}`,
+        city: currentLocationData.city,
+        state: currentLocationData.state,
+        zipCode: currentLocationData.zipCode,
         interests: selectedInterests,
         productInterests: productInterests.trim(),
         waitlistType: state.modalType || 'geographic'
@@ -106,27 +161,31 @@ const WaitlistModal: React.FC = () => {
   };
 
   const handleBrowseClick = () => {
-    closeWaitlistModal();
+    closeAllModals();
     navigate('/shop');
   };
 
   const handleMaybeLater = () => {
     trackUserBehavior('dismissed_waitlist_modal', {
       type: state.modalType,
-      location: state.currentLocationData?.formattedAddress
+      location: currentLocationData?.formattedAddress
     }, locationState);
-    closeWaitlistModal();
+    closeAllModals();
   };
 
-  if (!state.isModalOpen) return null;
+  const handleChangeLocation = () => {
+    openLocationModal();
+  };
+
+  if (!state.isWaitlistModalOpen) return null;
 
   // Success View
   if (state.isSuccessView) {
     const isGeographic = state.modalType === 'geographic';
-    const cityName = state.currentLocationData?.city || 'your area';
+    const cityName = currentLocationData?.city || 'your area';
     
     return (
-      <DialogLayout open={true} onOpenChange={closeWaitlistModal}>
+      <DialogLayout open={true} onOpenChange={closeAllModals}>
         <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-default-background px-6 py-12">
           <div className="flex w-full max-w-[576px] flex-col items-center gap-6">
             <IconWithBackground variant="success" size="x-large" />
@@ -159,12 +218,10 @@ const WaitlistModal: React.FC = () => {
 
   // Form View
   const isGeographic = state.modalType === 'geographic';
-  const cityName = state.currentLocationData?.city || 'your city';
-  const locationDisplay = state.currentLocationData?.formattedAddress || 
-                         `${state.currentLocationData?.city}, ${state.currentLocationData?.state}`;
+  const cityName = currentLocationData?.city || 'your city';
 
   return (
-    <DialogLayout open={true} onOpenChange={closeWaitlistModal}>
+    <DialogLayout open={true} onOpenChange={closeAllModals}>
       <div className="flex h-full w-full max-w-[576px] flex-col items-start gap-8 bg-default-background px-8 py-8 mobile:flex-col mobile:flex-nowrap mobile:gap-8">
         <div className="flex w-full flex-col items-start gap-4">
           <span className="text-heading-1 font-heading-1 text-default-font">
@@ -216,19 +273,75 @@ const WaitlistModal: React.FC = () => {
             />
           </TextField>
           
-          <TextField
-            className="h-auto w-full flex-none"
-            disabled={true}
-            variant="filled"
-            label="Location"
-            helpText=""
-          >
-            <TextField.Input
-              placeholder={locationDisplay}
-              value={locationDisplay}
-              onChange={() => {}}
-            />
-          </TextField>
+          {/* Location Field - Editable */}
+          <div className="w-full">
+            <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
+              Location
+            </label>
+            
+            {!isEditingLocation ? (
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-3 px-3 py-2 bg-neutral-100 border border-neutral-200 rounded-md">
+                  <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
+                  <span className="text-body font-body text-default-font flex-1 truncate">
+                    {locationInput}
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="neutral-secondary"
+                  size="small"
+                  icon={<FeatherEdit3 />}
+                  onClick={handleLocationEdit}
+                >
+                  Edit
+                </Button>
+                <Button
+                  type="button"
+                  variant="neutral-tertiary"
+                  size="small"
+                  onClick={handleChangeLocation}
+                >
+                  Change
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <TextField
+                  variant="filled"
+                  icon={<FeatherMapPin />}
+                  error={!!error}
+                >
+                  <TextField.Input
+                    value={locationInput}
+                    onChange={handleLocationChange}
+                    placeholder="Enter city, state, or zip code..."
+                    disabled={isValidatingLocation}
+                  />
+                </TextField>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="small"
+                    onClick={handleLocationSave}
+                    disabled={!locationInput.trim() || isValidatingLocation}
+                    loading={isValidatingLocation}
+                  >
+                    {isValidatingLocation ? 'Validating...' : 'Save'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="neutral-secondary"
+                    size="small"
+                    onClick={handleLocationCancel}
+                    disabled={isValidatingLocation}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
           
           <div className="flex w-full flex-col items-start gap-2">
             <span className="text-body-bold font-body-bold text-default-font">
@@ -284,7 +397,7 @@ const WaitlistModal: React.FC = () => {
               type="submit"
               className="h-12 w-full flex-none"
               size="large"
-              disabled={!email.trim() || isSubmitting}
+              disabled={!email.trim() || !currentLocationData || isSubmitting || isEditingLocation}
               loading={isSubmitting}
             >
               {isSubmitting 

@@ -11,12 +11,12 @@ import { FeatherDollarSign } from "@subframe/core";
 import Footer from "../components/Footer";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
-import { checkUserAccess, trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
+import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Sell() {
   const navigate = useNavigate();
   const { state: locationState } = useLocationContext();
-  const { openWaitlistModal } = useWaitlistContext();
+  const { openWaitlistFlow } = useWaitlistContext();
 
   // Track page visit
   useEffect(() => {
@@ -24,28 +24,22 @@ function Sell() {
     storeLocalBehavior('visited_sell_page');
   }, [locationState]);
 
-  const handleStartSellingClick = () => {
+  const handleStartSellingClick = async () => {
     // Track the attempt
     trackUserBehavior('clicked_start_selling', {}, locationState);
     storeLocalBehavior('attempted_start_selling');
 
-    const accessLevel = checkUserAccess(locationState, 'sell');
+    // Determine waitlist type based on location
+    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
-    switch (accessLevel) {
-      case 'PROMPT_LOCATION':
-        // This should be handled by location button in navbar
-        break;
-      case 'EARLY_ACCESS_WAITLIST':
-        openWaitlistModal('early_access', locationState);
-        break;
-      case 'GEOGRAPHIC_WAITLIST':
-        openWaitlistModal('geographic', locationState);
-        break;
-      case 'FULL_ACCESS':
-        // Future: Navigate to actual seller onboarding
-        navigate('/waitlist'); // For now, still go to waitlist
-        break;
-    }
+    // Open waitlist flow with current location data
+    await openWaitlistFlow(waitlistType, locationState.isSet ? {
+      isNWA: locationState.isNWA,
+      city: locationState.city || '',
+      state: locationState.state || '',
+      zipCode: locationState.zipCode || '',
+      formattedAddress: locationState.location || ''
+    } : undefined);
   };
 
   return (

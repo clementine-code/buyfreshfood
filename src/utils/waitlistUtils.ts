@@ -119,7 +119,55 @@ export const getQueuePosition = async (city: string, waitlistType: string): Prom
   }
 };
 
-// Submit waitlist form to Supabase
+// Check if user is already waitlisted with 3-second timeout
+export const checkIfUserIsWaitlisted = async (email: string, location: string): Promise<boolean> => {
+  try {
+    console.log('🔍 Checking if user is waitlisted:', email, location);
+
+    // 3-second timeout for the query
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Request timeout'));
+      }, 3000);
+    });
+
+    const queryPromise = supabase
+      .from('waitlist')
+      .select('id, email, location')
+      .eq('email', email.toLowerCase().trim())
+      .limit(1);
+
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
+    if (error) {
+      console.error('Error checking waitlist status:', error);
+      return false;
+    }
+
+    // Check if any entry matches the location (flexible matching)
+    const isWaitlisted = data && data.length > 0 && data.some(entry => {
+      const entryLocation = entry.location.toLowerCase();
+      const checkLocation = location.toLowerCase();
+      
+      // Exact match or contains match
+      return entryLocation === checkLocation || 
+             entryLocation.includes(checkLocation) || 
+             checkLocation.includes(entryLocation);
+    });
+
+    console.log('✅ Waitlist check result:', isWaitlisted);
+    return !!isWaitlisted;
+
+  } catch (error) {
+    console.error('Error checking waitlist status:', error);
+    if (error.message === 'Request timeout') {
+      throw error; // Re-throw timeout errors
+    }
+    return false;
+  }
+};
+
+// Submit waitlist form to Supabase with 3-second timeout
 export const submitWaitlist = async (formData: {
   email: string;
   location: string;
@@ -131,10 +179,19 @@ export const submitWaitlist = async (formData: {
   waitlistType: 'geographic' | 'early_access';
 }) => {
   try {
-    const { data, error } = await supabase
+    console.log('📝 Submitting waitlist form:', formData);
+
+    // 3-second timeout for the submission
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Request timeout'));
+      }, 3000);
+    });
+
+    const submitPromise = supabase
       .from('waitlist')
       .insert({
-        email: formData.email,
+        email: formData.email.toLowerCase().trim(),
         location: formData.location,
         city: formData.city,
         state: formData.state,
@@ -143,16 +200,34 @@ export const submitWaitlist = async (formData: {
         product_interests: formData.productInterests,
         waitlist_type: formData.waitlistType
       })
-      .select();
+      .select()
+      .single();
 
-    if (error) throw error;
+    const { data, error } = await Promise.race([submitPromise, timeoutPromise]);
+
+    if (error) {
+      console.error('Error submitting waitlist:', error);
+      throw error;
+    }
 
     const queuePosition = await getQueuePosition(formData.city, formData.waitlistType);
     
-    return { success: true, queuePosition, data: data[0] };
+    console.log('✅ Waitlist submission successful:', data);
+    return { success: true, queuePosition, data };
+
   } catch (error) {
     console.error('Error submitting waitlist:', error);
-    return { success: false, error: error.message };
+    
+    if (error.message === 'Request timeout') {
+      return { success: false, error: 'Request timed out. Please try again.' };
+    }
+    
+    // Handle specific Supabase errors
+    if (error.code === '23505') { // Unique constraint violation
+      return { success: false, error: 'You are already on the waitlist with this email.' };
+    }
+    
+    return { success: false, error: error.message || 'Failed to join waitlist. Please try again.' };
   }
 };
 

@@ -31,7 +31,7 @@ import { getProducts, getCategories, getSellers, type Product } from "../lib/sup
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
-import { checkUserAccess, trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
+import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Shop() {
   const [searchParams] = useSearchParams();
@@ -63,7 +63,7 @@ function Shop() {
 
   // Waitlist integration
   const { state: locationState } = useLocationContext();
-  const { openWaitlistModal } = useWaitlistContext();
+  const { openWaitlistFlow } = useWaitlistContext();
 
   // Track page visit
   useEffect(() => {
@@ -177,7 +177,7 @@ function Shop() {
   };
 
   // Handle Add to Cart with waitlist logic
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = async (product: any) => {
     // Track the attempt
     trackUserBehavior('attempted_add_to_cart', {
       productId: product.id,
@@ -186,55 +186,37 @@ function Shop() {
     }, locationState);
     storeLocalBehavior('attempted_add_to_cart', { productName: product.name });
 
-    const accessLevel = checkUserAccess(locationState, 'purchase');
+    // Determine waitlist type based on location
+    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
-    switch (accessLevel) {
-      case 'PROMPT_LOCATION':
-        // This should be handled by location button in navbar
-        break;
-      case 'EARLY_ACCESS_WAITLIST':
-        openWaitlistModal('early_access', locationState);
-        break;
-      case 'GEOGRAPHIC_WAITLIST':
-        openWaitlistModal('geographic', locationState);
-        break;
-      case 'FULL_ACCESS':
-        // Future: Implement actual cart functionality
-        console.log('Add to cart:', product);
-        break;
-    }
+    // Open waitlist flow with current location data
+    await openWaitlistFlow(waitlistType, locationState.isSet ? {
+      isNWA: locationState.isNWA,
+      city: locationState.city || '',
+      state: locationState.state || '',
+      zipCode: locationState.zipCode || '',
+      formattedAddress: locationState.location || ''
+    } : undefined);
   };
 
   // Handle Save for Later with waitlist logic
-  const handleSaveForLater = (product: any) => {
+  const handleSaveForLater = async (product: any) => {
     trackUserBehavior('attempted_save_for_later', {
       productId: product.id,
       productName: product.name
     }, locationState);
 
-    const accessLevel = checkUserAccess(locationState, 'save');
+    // Determine waitlist type based on location
+    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
-    switch (accessLevel) {
-      case 'PROMPT_LOCATION':
-        // This should be handled by location button in navbar
-        break;
-      case 'FULL_ACCESS':
-        // Save to localStorage for NWA users
-        const saved = JSON.parse(localStorage.getItem('saved_products') || '[]');
-        saved.push(product);
-        localStorage.setItem('saved_products', JSON.stringify(saved));
-        // Show success feedback
-        break;
-      case 'GEOGRAPHIC_WAITLIST':
-        openWaitlistModal('geographic', locationState);
-        break;
-      case 'EARLY_ACCESS_WAITLIST':
-        // For NWA users, save for later should work
-        const savedEarly = JSON.parse(localStorage.getItem('saved_products') || '[]');
-        savedEarly.push(product);
-        localStorage.setItem('saved_products', JSON.stringify(savedEarly));
-        break;
-    }
+    // Open waitlist flow with current location data
+    await openWaitlistFlow(waitlistType, locationState.isSet ? {
+      isNWA: locationState.isNWA,
+      city: locationState.city || '',
+      state: locationState.state || '',
+      zipCode: locationState.zipCode || '',
+      formattedAddress: locationState.location || ''
+    } : undefined);
   };
 
   // Track product views

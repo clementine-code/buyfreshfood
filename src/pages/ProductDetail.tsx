@@ -26,14 +26,14 @@ import { getProductById, addProductReview, type Product, type ProductReview } fr
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
-import { checkUserAccess, trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
+import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 import Footer from "../components/Footer";
 
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { state: locationState } = useLocationContext();
-  const { openWaitlistModal } = useWaitlistContext();
+  const { openWaitlistFlow } = useWaitlistContext();
   
   const [product, setProduct] = useState<Product | FoodItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,7 +94,7 @@ function ProductDetail() {
     loadProduct();
   }, [id, locationState]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
 
     // Track the attempt
@@ -105,26 +105,20 @@ function ProductDetail() {
     }, locationState);
     storeLocalBehavior('attempted_add_to_cart', { productName: product.name });
 
-    const accessLevel = checkUserAccess(locationState, 'purchase');
+    // Determine waitlist type based on location
+    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
-    switch (accessLevel) {
-      case 'PROMPT_LOCATION':
-        // This should be handled by location button in navbar
-        break;
-      case 'EARLY_ACCESS_WAITLIST':
-        openWaitlistModal('early_access', locationState);
-        break;
-      case 'GEOGRAPHIC_WAITLIST':
-        openWaitlistModal('geographic', locationState);
-        break;
-      case 'FULL_ACCESS':
-        // Future: Implement actual cart functionality
-        console.log('Add to cart:', { productId: id, quantity });
-        break;
-    }
+    // Open waitlist flow with current location data
+    await openWaitlistFlow(waitlistType, locationState.isSet ? {
+      isNWA: locationState.isNWA,
+      city: locationState.city || '',
+      state: locationState.state || '',
+      zipCode: locationState.zipCode || '',
+      formattedAddress: locationState.location || ''
+    } : undefined);
   };
 
-  const handleSaveForLater = () => {
+  const handleSaveForLater = async () => {
     if (!product) return;
 
     trackUserBehavior('attempted_save_for_later_detail', {
@@ -132,32 +126,20 @@ function ProductDetail() {
       productName: product.name
     }, locationState);
 
-    const accessLevel = checkUserAccess(locationState, 'save');
+    // Determine waitlist type based on location
+    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
-    switch (accessLevel) {
-      case 'PROMPT_LOCATION':
-        // This should be handled by location button in navbar
-        break;
-      case 'FULL_ACCESS':
-        // Save to localStorage for NWA users
-        const saved = JSON.parse(localStorage.getItem('saved_products') || '[]');
-        saved.push(product);
-        localStorage.setItem('saved_products', JSON.stringify(saved));
-        // Show success feedback
-        break;
-      case 'GEOGRAPHIC_WAITLIST':
-        openWaitlistModal('geographic', locationState);
-        break;
-      case 'EARLY_ACCESS_WAITLIST':
-        // For NWA users, save for later should work
-        const savedEarly = JSON.parse(localStorage.getItem('saved_products') || '[]');
-        savedEarly.push(product);
-        localStorage.setItem('saved_products', JSON.stringify(savedEarly));
-        break;
-    }
+    // Open waitlist flow with current location data
+    await openWaitlistFlow(waitlistType, locationState.isSet ? {
+      isNWA: locationState.isNWA,
+      city: locationState.city || '',
+      state: locationState.state || '',
+      zipCode: locationState.zipCode || '',
+      formattedAddress: locationState.location || ''
+    } : undefined);
   };
 
-  const handleContactSeller = () => {
+  const handleContactSeller = async () => {
     if (!product) return;
 
     trackUserBehavior('attempted_contact_seller', {
@@ -166,23 +148,17 @@ function ProductDetail() {
       seller: 'seller' in product ? product.seller?.name : product.seller
     }, locationState);
 
-    const accessLevel = checkUserAccess(locationState, 'contact');
+    // Determine waitlist type based on location
+    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
-    switch (accessLevel) {
-      case 'PROMPT_LOCATION':
-        // This should be handled by location button in navbar
-        break;
-      case 'EARLY_ACCESS_WAITLIST':
-        openWaitlistModal('early_access', locationState);
-        break;
-      case 'GEOGRAPHIC_WAITLIST':
-        openWaitlistModal('geographic', locationState);
-        break;
-      case 'FULL_ACCESS':
-        // Future: Implement actual messaging functionality
-        console.log('Contact seller for product:', product.id);
-        break;
-    }
+    // Open waitlist flow with current location data
+    await openWaitlistFlow(waitlistType, locationState.isSet ? {
+      isNWA: locationState.isNWA,
+      city: locationState.city || '',
+      state: locationState.state || '',
+      zipCode: locationState.zipCode || '',
+      formattedAddress: locationState.location || ''
+    } : undefined);
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
