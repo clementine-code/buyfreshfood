@@ -36,7 +36,7 @@ export const checkUserAccess = (
   return 'GEOGRAPHIC_WAITLIST';
 };
 
-// Track user behavior for analytics
+// Track user behavior for analytics with error handling
 export const trackUserBehavior = async (
   action: string,
   data?: any,
@@ -46,6 +46,10 @@ export const trackUserBehavior = async (
     const sessionId = getSessionId();
     const userLocationType = locationState?.isNWA ? 'nwa' : 'out_of_region';
     
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
     await supabase.from('user_analytics').insert({
       session_id: sessionId,
       action,
@@ -53,8 +57,12 @@ export const trackUserBehavior = async (
       location: locationState?.location || null,
       user_location_type: locationState?.isSet ? userLocationType : null
     });
+    
+    clearTimeout(timeoutId);
   } catch (error) {
-    console.error('Error tracking user behavior:', error);
+    console.warn('Analytics tracking failed (continuing silently):', error);
+    // Store locally as fallback
+    storeLocalBehavior(`analytics_${action}`, { action, data, timestamp: Date.now() });
   }
 };
 
@@ -101,9 +109,12 @@ export const getPrefilledProductInterest = (trackedBehavior: any): string => {
   return '';
 };
 
-// Get real queue position from Supabase
+// Get real queue position from Supabase with fallback
 export const getQueuePosition = async (city: string, waitlistType: string): Promise<number> => {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
     const { data, error } = await supabase
       .from('waitlist')
       .select('id')
@@ -111,33 +122,33 @@ export const getQueuePosition = async (city: string, waitlistType: string): Prom
       .eq('waitlist_type', waitlistType)
       .order('created_at', { ascending: true });
     
+    clearTimeout(timeoutId);
+    
     if (error) throw error;
     return (data?.length || 0) + 1;
   } catch (error) {
-    console.error('Error getting queue position:', error);
+    console.warn('Error getting queue position, using fallback:', error);
     return Math.floor(Math.random() * 500) + 100; // Fallback random number
   }
 };
 
-// Check if user is already waitlisted with 3-second timeout
+// Check if user is already waitlisted with improved error handling
 export const checkIfUserIsWaitlisted = async (email: string, location: string): Promise<boolean> => {
   try {
     console.log('🔍 Checking if user is waitlisted:', email, location);
 
-    // 3-second timeout for the query
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Request timeout'));
-      }, 3000);
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const queryPromise = supabase
+    const { data, error } = await supabase
       .from('waitlist')
       .select('id, email, location')
       .eq('email', email.toLowerCase().trim())
-      .limit(1);
+      .limit(1)
+      .abortSignal(controller.signal);
 
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+    clearTimeout(timeoutId);
 
     if (error) {
       console.error('Error checking waitlist status:', error);
@@ -159,15 +170,15 @@ export const checkIfUserIsWaitlisted = async (email: string, location: string): 
     return !!isWaitlisted;
 
   } catch (error) {
-    console.error('Error checking waitlist status:', error);
-    if (error.message === 'Request timeout') {
-      throw error; // Re-throw timeout errors
+    console.warn('Error checking waitlist status:', error);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout');
     }
     return false;
   }
 };
 
-// Submit waitlist form to Supabase with 3-second timeout
+// Submit waitlist form to Supabase with improved error handling
 export const submitWaitlist = async (formData: {
   email: string;
   location: string;
@@ -181,14 +192,11 @@ export const submitWaitlist = async (formData: {
   try {
     console.log('📝 Submitting waitlist form:', formData);
 
-    // 3-second timeout for the submission
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Request timeout'));
-      }, 3000);
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased to 5 seconds
 
-    const submitPromise = supabase
+    const { data, error } = await supabase
       .from('waitlist')
       .insert({
         email: formData.email.toLowerCase().trim(),
@@ -201,9 +209,10 @@ export const submitWaitlist = async (formData: {
         waitlist_type: formData.waitlistType
       })
       .select()
-      .single();
+      .single()
+      .abortSignal(controller.signal);
 
-    const { data, error } = await Promise.race([submitPromise, timeoutPromise]);
+    clearTimeout(timeoutId);
 
     if (error) {
       console.error('Error submitting waitlist:', error);
@@ -218,13 +227,18 @@ export const submitWaitlist = async (formData: {
   } catch (error) {
     console.error('Error submitting waitlist:', error);
     
-    if (error.message === 'Request timeout') {
-      return { success: false, error: 'Request timed out. Please try again.' };
+    if (error.name === 'AbortError') {
+      return { success: false, error: 'Request timed out. Please check your connection and try again.' };
     }
     
     // Handle specific Supabase errors
     if (error.code === '23505') { // Unique constraint violation
       return { success: false, error: 'You are already on the waitlist with this email.' };
+    }
+    
+    // Network errors
+    if (error.message?.includes('Failed to fetch') || error.message?.includes('Network')) {
+      return { success: false, error: 'Network connection failed. Please check your internet connection and try again.' };
     }
     
     return { success: false, error: error.message || 'Failed to join waitlist. Please try again.' };

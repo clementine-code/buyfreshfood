@@ -42,6 +42,7 @@ const NWA_CITIES = new Set([
 class LocationService {
   private supabaseUrl: string;
   private supabaseAnonKey: string;
+  private isOnline: boolean = true;
 
   constructor() {
     this.supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -49,7 +50,19 @@ class LocationService {
     
     if (!this.supabaseUrl || !this.supabaseAnonKey) {
       console.error('Missing Supabase configuration');
+      this.isOnline = false;
     }
+
+    // Monitor online status
+    window.addEventListener('online', () => {
+      this.isOnline = true;
+      console.log('🌐 Connection restored');
+    });
+    
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+      console.log('📴 Connection lost');
+    });
   }
 
   /**
@@ -90,30 +103,55 @@ class LocationService {
   }
 
   /**
-   * Make authenticated request to backend API
+   * Make authenticated request to backend API with improved error handling
    */
   private async makeBackendRequest(endpoint: string, data: any): Promise<any> {
-    const url = `${this.supabaseUrl}/functions/v1/${endpoint}`;
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.supabaseAnonKey}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Backend API error: ${response.status}`);
+    if (!this.isOnline) {
+      throw new Error('No internet connection');
     }
 
-    return await response.json();
+    const url = `${this.supabaseUrl}/functions/v1/${endpoint}`;
+    
+    try {
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.supabaseAnonKey}`,
+        },
+        body: JSON.stringify(data),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Backend API error: ${response.status}`);
+      }
+
+      return await response.json();
+
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - please check your connection');
+      }
+      
+      if (error.message?.includes('Failed to fetch')) {
+        this.isOnline = false;
+        throw new Error('Network connection failed');
+      }
+      
+      throw error;
+    }
   }
 
   /**
-   * Get location suggestions using backend proxy
+   * Get location suggestions using backend proxy with fallback
    */
   async getLocationSuggestions(input: string): Promise<LocationSuggestion[]> {
     if (input.length < 2) {
@@ -145,7 +183,7 @@ class LocationService {
       return suggestions.slice(0, 8); // Limit to 8 suggestions
 
     } catch (error) {
-      console.error('❌ Error fetching location suggestions via backend:', error);
+      console.warn('❌ Backend unavailable, using fallback suggestions:', error);
       return this.getFallbackSuggestions(input);
     }
   }
@@ -161,6 +199,10 @@ class LocationService {
       { city: 'Springdale', state: 'AR' },
       { city: 'Little Rock', state: 'AR' },
       { city: 'Fort Smith', state: 'AR' },
+      { city: 'Bella Vista', state: 'AR' },
+      { city: 'Siloam Springs', state: 'AR' },
+      { city: 'Prairie Grove', state: 'AR' },
+      { city: 'Farmington', state: 'AR' }
     ];
 
     const query = input.toLowerCase();
@@ -175,11 +217,11 @@ class LocationService {
         main_text: location.city,
         secondary_text: `${location.state}, USA`
       }))
-      .slice(0, 5);
+      .slice(0, 8);
   }
 
   /**
-   * Get detailed location information using backend proxy
+   * Get detailed location information using backend proxy with fallback
    */
   async getLocationDetails(placeId?: string, coordinates?: { lat: number; lng: number }): Promise<LocationData | null> {
     try {
@@ -202,10 +244,14 @@ class LocationService {
       return null;
 
     } catch (error) {
-      console.error('❌ Error getting location details via backend:', error);
+      console.warn('❌ Backend unavailable, using fallback location data:', error);
       
       if (coordinates) {
         return this.createFallbackLocationData(coordinates);
+      }
+      
+      if (placeId?.startsWith('fallback_')) {
+        return this.handleFallbackPlaceId(placeId);
       }
       
       return null;
@@ -213,7 +259,7 @@ class LocationService {
   }
 
   /**
-   * Get location details from backend using place ID
+   * Get location details from backend using place ID with fallback
    */
   private async getDetailsFromPlaceId(placeId: string): Promise<LocationData | null> {
     try {
@@ -263,13 +309,13 @@ class LocationService {
       };
 
     } catch (error) {
-      console.error('❌ Error fetching place details via backend:', error);
+      console.warn('❌ Error fetching place details via backend, using fallback:', error);
       return null;
     }
   }
 
   /**
-   * Get location details from coordinates using backend proxy
+   * Get location details from coordinates using backend proxy with fallback
    */
   private async getDetailsFromCoordinates(coordinates: { lat: number; lng: number }): Promise<LocationData | null> {
     try {
@@ -317,7 +363,7 @@ class LocationService {
       };
 
     } catch (error) {
-      console.error('❌ Error reverse geocoding via backend:', error);
+      console.warn('❌ Error reverse geocoding via backend, using fallback:', error);
       return this.createFallbackLocationData(coordinates);
     }
   }
@@ -327,12 +373,16 @@ class LocationService {
    */
   private handleFallbackPlaceId(placeId: string): LocationData {
     const fallbackData = {
-      'fallback_0': { city: 'Fayetteville', state: 'AR', isNWA: true },
-      'fallback_1': { city: 'Rogers', state: 'AR', isNWA: true },
-      'fallback_2': { city: 'Bentonville', state: 'AR', isNWA: true },
-      'fallback_3': { city: 'Springdale', state: 'AR', isNWA: true },
-      'fallback_4': { city: 'Little Rock', state: 'AR', isNWA: false },
-      'fallback_5': { city: 'Fort Smith', state: 'AR', isNWA: false },
+      'fallback_0': { city: 'Fayetteville', state: 'AR', isNWA: true, lat: 36.0625, lng: -94.1574 },
+      'fallback_1': { city: 'Rogers', state: 'AR', isNWA: true, lat: 36.3320, lng: -94.1185 },
+      'fallback_2': { city: 'Bentonville', state: 'AR', isNWA: true, lat: 36.3729, lng: -94.2088 },
+      'fallback_3': { city: 'Springdale', state: 'AR', isNWA: true, lat: 36.1867, lng: -94.1288 },
+      'fallback_4': { city: 'Little Rock', state: 'AR', isNWA: false, lat: 34.7465, lng: -92.2896 },
+      'fallback_5': { city: 'Fort Smith', state: 'AR', isNWA: false, lat: 35.3859, lng: -94.3985 },
+      'fallback_6': { city: 'Bella Vista', state: 'AR', isNWA: true, lat: 36.4812, lng: -94.2688 },
+      'fallback_7': { city: 'Siloam Springs', state: 'AR', isNWA: true, lat: 36.1881, lng: -94.5405 },
+      'fallback_8': { city: 'Prairie Grove', state: 'AR', isNWA: true, lat: 35.9995, lng: -94.3169 },
+      'fallback_9': { city: 'Farmington', state: 'AR', isNWA: true, lat: 36.0420, lng: -94.2469 }
     };
 
     const data = fallbackData[placeId as keyof typeof fallbackData];
@@ -342,6 +392,8 @@ class LocationService {
       city: data?.city || 'Unknown',
       state: data?.state || 'AR',
       zipCode: '',
+      latitude: data?.lat,
+      longitude: data?.lng,
       formattedAddress: `${data?.city}, ${data?.state}, USA`,
       placeId
     };
@@ -365,7 +417,7 @@ class LocationService {
   }
 
   /**
-   * Get user's current location using browser geolocation
+   * Get user's current location using browser geolocation with improved error handling
    */
   async getCurrentLocation(): Promise<LocationData | null> {
     return new Promise((resolve) => {
@@ -377,8 +429,15 @@ class LocationService {
 
       console.log('📍 Requesting current location...');
 
+      const timeoutId = setTimeout(() => {
+        console.warn('⏰ Geolocation timeout, using fallback');
+        resolve(null);
+      }, 15000);
+
       navigator.geolocation.getCurrentPosition(
         async (position) => {
+          clearTimeout(timeoutId);
+          
           const coordinates = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
@@ -390,17 +449,18 @@ class LocationService {
             const locationData = await this.getLocationDetails(undefined, coordinates);
             resolve(locationData);
           } catch (error) {
-            console.error('❌ Error getting location details:', error);
+            console.warn('❌ Error getting location details, using fallback:', error);
             resolve(this.createFallbackLocationData(coordinates));
           }
         },
         (error) => {
-          console.error('❌ Error getting current location:', error);
+          clearTimeout(timeoutId);
+          console.warn('❌ Error getting current location:', error);
           resolve(null);
         },
         {
           enableHighAccuracy: true,
-          timeout: 15000,
+          timeout: 10000,
           maximumAge: 300000 // 5 minutes
         }
       );
@@ -408,7 +468,7 @@ class LocationService {
   }
 
   /**
-   * Validate location input using backend proxy
+   * Validate location input using backend proxy with fallback
    */
   async validateLocationInput(input: string): Promise<LocationData | null> {
     const trimmedInput = input.trim();
@@ -444,7 +504,14 @@ class LocationService {
       return null;
 
     } catch (error) {
-      console.error('❌ Error validating location input via backend:', error);
+      console.warn('❌ Error validating location input via backend, using fallback:', error);
+      
+      // Try to match against fallback cities
+      const fallbackSuggestions = this.getFallbackSuggestions(trimmedInput);
+      if (fallbackSuggestions.length > 0) {
+        return this.handleFallbackPlaceId(fallbackSuggestions[0].place_id);
+      }
+      
       return null;
     }
   }

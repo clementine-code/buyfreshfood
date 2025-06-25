@@ -21,7 +21,10 @@ import { FeatherChevronDown } from "@subframe/core";
 import { Badge } from "@/ui/components/Badge";
 import { FeatherHeart } from "@subframe/core";
 import { FeatherX } from "@subframe/core";
+import { FeatherWifi } from "@subframe/core";
+import { FeatherWifiOff } from "@subframe/core";
 import { Loader } from "@/ui/components/Loader";
+import { Alert } from "@/ui/components/Alert";
 import Map from "../components/Map";
 import MobileFilterModal from "../components/MobileFilterModal";
 import MobileMapModal from "../components/MobileMapModal";
@@ -51,6 +54,7 @@ function Shop() {
   const [sellers, setSellers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   // Search state
   const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
@@ -65,7 +69,7 @@ function Shop() {
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
 
-  // Track page visit
+  // Track page visit with error handling
   useEffect(() => {
     trackUserBehavior('visited_shop_page', {}, locationState);
     storeLocalBehavior('visited_shop_page');
@@ -76,6 +80,8 @@ function Shop() {
     const loadData = async () => {
       try {
         setLoading(true);
+        setError(null);
+        setIsOfflineMode(false);
         
         // Load all data in parallel
         const [productsResult, categoriesResult, sellersResult] = await Promise.all([
@@ -84,20 +90,23 @@ function Shop() {
           getSellers()
         ]);
 
-        if (productsResult.error) {
-          throw new Error(productsResult.error.message);
-        }
-        if (categoriesResult.error) {
-          throw new Error(categoriesResult.error.message);
-        }
-        if (sellersResult.error) {
-          throw new Error(sellersResult.error.message);
+        // Check if any requests failed (indicating offline mode)
+        const hasErrors = productsResult.error || categoriesResult.error || sellersResult.error;
+        
+        if (hasErrors) {
+          console.warn('Some data requests failed, checking if using fallback data');
+          // If we got data despite errors, we're using fallback data
+          if (productsResult.data?.length > 0) {
+            setIsOfflineMode(true);
+            console.log('Using fallback data due to network issues');
+          } else {
+            throw new Error('Unable to load product data');
+          }
         }
 
-        setProducts(productsResult.data);
-        setCategories(categoriesResult.data);
-        setSellers(sellersResult.data);
-        setError(null);
+        setProducts(productsResult.data || []);
+        setCategories(categoriesResult.data || []);
+        setSellers(sellersResult.data || []);
 
         // Check for search query in URL
         const urlSearchQuery = searchParams.get('search');
@@ -128,7 +137,14 @@ function Shop() {
         }
       } catch (err) {
         console.error('Error loading data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load data');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
+        
+        if (errorMessage.includes('Network') || errorMessage.includes('fetch')) {
+          setError('Unable to connect to our servers. Please check your internet connection and try again.');
+          setIsOfflineMode(true);
+        } else {
+          setError(errorMessage);
+        }
       } finally {
         setLoading(false);
       }
@@ -510,10 +526,11 @@ function Shop() {
     );
   }
 
-  if (error) {
+  if (error && !isOfflineMode) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-default-background">
         <div className="flex flex-col items-center gap-4 text-center max-w-md">
+          <FeatherWifiOff className="w-16 h-16 text-error-600" />
           <span className="text-heading-2 font-heading-2 text-error-700">Unable to load products</span>
           <span className="text-body font-body text-subtext-color">{error}</span>
           <Button onClick={() => window.location.reload()}>
@@ -526,8 +543,21 @@ function Shop() {
 
   return (
     <div className="flex w-full h-full bg-default-background">
+      {/* Offline Mode Alert */}
+      {isOfflineMode && (
+        <div className="fixed top-20 left-4 right-4 z-[90] xl:left-6 xl:right-6">
+          <Alert variant="warning" className="shadow-lg">
+            <FeatherWifiOff className="w-5 h-5" />
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">Limited connectivity</span>
+              <span className="text-sm">Showing sample products. Some features may be unavailable.</span>
+            </div>
+          </Alert>
+        </div>
+      )}
+
      {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-<div className="hidden xl:flex w-full h-full" style={{paddingTop: '80px'}}>
+<div className="hidden xl:flex w-full h-full" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
         {/* Left Side - Products (50% width, scrollable content) */}
         <div className="w-1/2 h-full flex flex-col bg-default-background">
           {/* Controls Bar - Fixed at top */}
@@ -664,9 +694,9 @@ function Shop() {
       </div>
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
-     <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative">
+     <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
 {/* Mobile/Tablet Page Controls - Hide when modals are open */}
-<div className={`xl:hidden sticky left-0 right-0 z-[70] bg-white border-b border-neutral-200 shadow-sm w-full ${(showMobileFilters || showMobileMap) ? 'hidden' : ''}`} style={{top: '80px'}}>
+<div className={`xl:hidden sticky left-0 right-0 z-[70] bg-white border-b border-neutral-200 shadow-sm w-full ${(showMobileFilters || showMobileMap) ? 'hidden' : ''}`} style={{top: isOfflineMode ? '120px' : '80px'}}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">

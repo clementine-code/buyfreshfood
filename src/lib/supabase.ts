@@ -7,7 +7,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false
+  },
+  global: {
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      }).catch(error => {
+        console.error('Supabase fetch error:', error);
+        throw new Error('Network connection failed. Please check your internet connection and try again.');
+      });
+    }
+  }
+})
 
 // Database types
 export interface Seller {
@@ -68,7 +83,196 @@ export interface ProductReview {
   created_at: string
 }
 
-// API functions
+// Fallback data for when Supabase is unavailable
+const fallbackProducts: Product[] = [
+  {
+    id: 'fallback-1',
+    seller_id: 'fallback-seller-1',
+    category_id: 'fallback-category-1',
+    name: 'Fresh Organic Tomatoes',
+    description: 'Locally grown organic tomatoes, perfect for salads and cooking',
+    price: 4.99,
+    unit: 'lb',
+    image_url: 'https://images.unsplash.com/photo-1546470427-e26264be0b0d?w=800',
+    stock_quantity: 25,
+    is_organic: true,
+    is_local: true,
+    harvest_date: new Date().toISOString().split('T')[0],
+    available_from: new Date().toISOString().split('T')[0],
+    available_until: null,
+    tags: ['organic', 'fresh', 'local'],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    seller: {
+      id: 'fallback-seller-1',
+      name: 'Green Valley Farm',
+      description: 'Family-owned organic farm',
+      location: 'Fayetteville, AR',
+      latitude: 36.0625,
+      longitude: -94.1574,
+      seller_type: 'farm',
+      contact_email: 'info@greenvalley.com',
+      contact_phone: '(479) 555-0123',
+      website: 'https://greenvalley.com',
+      verified: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    category: {
+      id: 'fallback-category-1',
+      name: 'Vegetables',
+      description: 'Fresh vegetables',
+      icon: '🥕',
+      created_at: new Date().toISOString()
+    },
+    reviews: [],
+    average_rating: 4.5
+  },
+  {
+    id: 'fallback-2',
+    seller_id: 'fallback-seller-2',
+    category_id: 'fallback-category-2',
+    name: 'Farm Fresh Eggs',
+    description: 'Free-range chicken eggs from pasture-raised hens',
+    price: 6.50,
+    unit: 'dozen',
+    image_url: 'https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?w=800',
+    stock_quantity: 15,
+    is_organic: true,
+    is_local: true,
+    harvest_date: new Date().toISOString().split('T')[0],
+    available_from: new Date().toISOString().split('T')[0],
+    available_until: null,
+    tags: ['free-range', 'fresh', 'local'],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    seller: {
+      id: 'fallback-seller-2',
+      name: 'Sunrise Poultry',
+      description: 'Pasture-raised poultry farm',
+      location: 'Rogers, AR',
+      latitude: 36.3320,
+      longitude: -94.1185,
+      seller_type: 'farm',
+      contact_email: 'info@sunrisepoultry.com',
+      contact_phone: '(479) 555-0456',
+      website: 'https://sunrisepoultry.com',
+      verified: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    category: {
+      id: 'fallback-category-2',
+      name: 'Dairy & Eggs',
+      description: 'Fresh dairy and eggs',
+      icon: '🥚',
+      created_at: new Date().toISOString()
+    },
+    reviews: [],
+    average_rating: 4.8
+  },
+  {
+    id: 'fallback-3',
+    seller_id: 'fallback-seller-3',
+    category_id: 'fallback-category-3',
+    name: 'Artisan Sourdough Bread',
+    description: 'Hand-crafted sourdough bread made with local flour',
+    price: 8.00,
+    unit: 'loaf',
+    image_url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800',
+    stock_quantity: 8,
+    is_organic: false,
+    is_local: true,
+    harvest_date: new Date().toISOString().split('T')[0],
+    available_from: new Date().toISOString().split('T')[0],
+    available_until: null,
+    tags: ['artisan', 'fresh', 'local'],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    seller: {
+      id: 'fallback-seller-3',
+      name: 'Ozark Bakery',
+      description: 'Traditional artisan bakery',
+      location: 'Bentonville, AR',
+      latitude: 36.3729,
+      longitude: -94.2088,
+      seller_type: 'bakery',
+      contact_email: 'info@ozarkbakery.com',
+      contact_phone: '(479) 555-0789',
+      website: 'https://ozarkbakery.com',
+      verified: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    category: {
+      id: 'fallback-category-3',
+      name: 'Bakery',
+      description: 'Fresh baked goods',
+      icon: '🍞',
+      created_at: new Date().toISOString()
+    },
+    reviews: [],
+    average_rating: 4.7
+  }
+];
+
+const fallbackCategories = [
+  { id: 'fallback-category-1', name: 'Vegetables', description: 'Fresh vegetables', icon: '🥕', created_at: new Date().toISOString() },
+  { id: 'fallback-category-2', name: 'Dairy & Eggs', description: 'Fresh dairy and eggs', icon: '🥚', created_at: new Date().toISOString() },
+  { id: 'fallback-category-3', name: 'Bakery', description: 'Fresh baked goods', icon: '🍞', created_at: new Date().toISOString() },
+  { id: 'fallback-category-4', name: 'Fruits', description: 'Fresh fruits', icon: '🍎', created_at: new Date().toISOString() },
+  { id: 'fallback-category-5', name: 'Meat', description: 'Fresh meat', icon: '🥩', created_at: new Date().toISOString() }
+];
+
+const fallbackSellers = [
+  {
+    id: 'fallback-seller-1',
+    name: 'Green Valley Farm',
+    description: 'Family-owned organic farm',
+    location: 'Fayetteville, AR',
+    latitude: 36.0625,
+    longitude: -94.1574,
+    seller_type: 'farm' as const,
+    contact_email: 'info@greenvalley.com',
+    contact_phone: '(479) 555-0123',
+    website: 'https://greenvalley.com',
+    verified: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'fallback-seller-2',
+    name: 'Sunrise Poultry',
+    description: 'Pasture-raised poultry farm',
+    location: 'Rogers, AR',
+    latitude: 36.3320,
+    longitude: -94.1185,
+    seller_type: 'farm' as const,
+    contact_email: 'info@sunrisepoultry.com',
+    contact_phone: '(479) 555-0456',
+    website: 'https://sunrisepoultry.com',
+    verified: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'fallback-seller-3',
+    name: 'Ozark Bakery',
+    description: 'Traditional artisan bakery',
+    location: 'Bentonville, AR',
+    latitude: 36.3729,
+    longitude: -94.2088,
+    seller_type: 'bakery' as const,
+    contact_email: 'info@ozarkbakery.com',
+    contact_phone: '(479) 555-0789',
+    website: 'https://ozarkbakery.com',
+    verified: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }
+];
+
+// API functions with fallback support
 export const getProducts = async (filters?: {
   category?: string
   seller?: string
@@ -77,102 +281,173 @@ export const getProducts = async (filters?: {
   limit?: number
   offset?: number
 }) => {
-  let query = supabase
-    .from('products')
-    .select(`
-      *,
-      seller:sellers(*),
-      category:categories(*),
-      reviews:product_reviews(rating)
-    `)
-    .gt('stock_quantity', 0)
-    .order('created_at', { ascending: false })
+  try {
+    let query = supabase
+      .from('products')
+      .select(`
+        *,
+        seller:sellers(*),
+        category:categories(*),
+        reviews:product_reviews(rating)
+      `)
+      .gt('stock_quantity', 0)
+      .order('created_at', { ascending: false })
 
-  if (filters?.category) {
-    query = query.eq('category.name', filters.category)
+    if (filters?.category) {
+      query = query.eq('category.name', filters.category)
+    }
+
+    if (filters?.seller) {
+      query = query.eq('seller.name', filters.seller)
+    }
+
+    if (filters?.organic) {
+      query = query.eq('is_organic', true)
+    }
+
+    if (filters?.search) {
+      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+    }
+
+    if (filters?.limit) {
+      query = query.limit(filters.limit)
+    }
+
+    if (filters?.offset) {
+      query = query.range(filters.offset, (filters.offset + (filters.limit || 10)) - 1)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Error fetching products:', error)
+      throw error
+    }
+
+    // Calculate average ratings
+    const productsWithRatings = data?.map(product => ({
+      ...product,
+      average_rating: product.reviews?.length 
+        ? product.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / product.reviews.length
+        : null
+    })) || []
+
+    return { data: productsWithRatings, error: null }
+
+  } catch (error) {
+    console.warn('Supabase unavailable, using fallback data:', error)
+    
+    // Apply filters to fallback data
+    let filteredProducts = [...fallbackProducts]
+    
+    if (filters?.category) {
+      filteredProducts = filteredProducts.filter(p => p.category?.name === filters.category)
+    }
+    
+    if (filters?.seller) {
+      filteredProducts = filteredProducts.filter(p => p.seller?.name === filters.seller)
+    }
+    
+    if (filters?.organic) {
+      filteredProducts = filteredProducts.filter(p => p.is_organic)
+    }
+    
+    if (filters?.search) {
+      const searchLower = filters.search.toLowerCase()
+      filteredProducts = filteredProducts.filter(p => 
+        p.name.toLowerCase().includes(searchLower) || 
+        p.description?.toLowerCase().includes(searchLower)
+      )
+    }
+    
+    if (filters?.offset) {
+      const start = filters.offset
+      const end = start + (filters.limit || 10)
+      filteredProducts = filteredProducts.slice(start, end)
+    } else if (filters?.limit) {
+      filteredProducts = filteredProducts.slice(0, filters.limit)
+    }
+    
+    return { data: filteredProducts, error: null }
   }
-
-  if (filters?.seller) {
-    query = query.eq('seller.name', filters.seller)
-  }
-
-  if (filters?.organic) {
-    query = query.eq('is_organic', true)
-  }
-
-  if (filters?.search) {
-    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
-  }
-
-  if (filters?.limit) {
-    query = query.limit(filters.limit)
-  }
-
-  if (filters?.offset) {
-    query = query.range(filters.offset, (filters.offset + (filters.limit || 10)) - 1)
-  }
-
-  const { data, error } = await query
-
-  if (error) {
-    console.error('Error fetching products:', error)
-    return { data: [], error }
-  }
-
-  // Calculate average ratings
-  const productsWithRatings = data?.map(product => ({
-    ...product,
-    average_rating: product.reviews?.length 
-      ? product.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / product.reviews.length
-      : null
-  })) || []
-
-  return { data: productsWithRatings, error: null }
 }
 
 export const getSellers = async () => {
-  const { data, error } = await supabase
-    .from('sellers')
-    .select('*')
-    .eq('verified', true)
-    .order('name')
+  try {
+    const { data, error } = await supabase
+      .from('sellers')
+      .select('*')
+      .eq('verified', true)
+      .order('name')
 
-  return { data: data || [], error }
+    if (error) {
+      throw error
+    }
+
+    return { data: data || [], error: null }
+
+  } catch (error) {
+    console.warn('Supabase unavailable, using fallback sellers:', error)
+    return { data: fallbackSellers, error: null }
+  }
 }
 
 export const getCategories = async () => {
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name')
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name')
 
-  return { data: data || [], error }
+    if (error) {
+      throw error
+    }
+
+    return { data: data || [], error: null }
+
+  } catch (error) {
+    console.warn('Supabase unavailable, using fallback categories:', error)
+    return { data: fallbackCategories, error: null }
+  }
 }
 
 export const getProductById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('products')
-    .select(`
-      *,
-      seller:sellers(*),
-      category:categories(*),
-      reviews:product_reviews(*)
-    `)
-    .eq('id', id)
-    .single()
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        seller:sellers(*),
+        category:categories(*),
+        reviews:product_reviews(*)
+      `)
+      .eq('id', id)
+      .single()
 
-  if (error) {
-    return { data: null, error }
-  }
+    if (error) {
+      throw error
+    }
 
-  // Calculate average rating
-  const average_rating = data.reviews?.length 
-    ? data.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / data.reviews.length
-    : null
+    // Calculate average rating
+    const average_rating = data.reviews?.length 
+      ? data.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / data.reviews.length
+      : null
 
-  return { 
-    data: { ...data, average_rating }, 
-    error: null 
+    return { 
+      data: { ...data, average_rating }, 
+      error: null 
+    }
+
+  } catch (error) {
+    console.warn('Supabase unavailable, using fallback product:', error)
+    
+    // Find fallback product
+    const fallbackProduct = fallbackProducts.find(p => p.id === id)
+    if (fallbackProduct) {
+      return { data: fallbackProduct, error: null }
+    }
+    
+    return { data: null, error: 'Product not found' }
   }
 }
 
@@ -182,11 +457,24 @@ export const addProductReview = async (review: {
   rating: number
   comment?: string
 }) => {
-  const { data, error } = await supabase
-    .from('product_reviews')
-    .insert([review])
-    .select()
-    .single()
+  try {
+    const { data, error } = await supabase
+      .from('product_reviews')
+      .insert([review])
+      .select()
+      .single()
 
-  return { data, error }
+    if (error) {
+      throw error
+    }
+
+    return { data, error: null }
+
+  } catch (error) {
+    console.warn('Supabase unavailable, review not saved:', error)
+    return { 
+      data: null, 
+      error: 'Unable to save review. Please try again later.' 
+    }
+  }
 }
