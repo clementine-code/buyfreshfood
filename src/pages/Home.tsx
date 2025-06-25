@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FeatherShoppingBag } from "@subframe/core";
 import { FeatherArrowRight } from "@subframe/core";
@@ -11,16 +11,31 @@ import { FeatherLeaf } from "@subframe/core";
 import { Button } from "@/ui/components/Button";
 import LocationSearchField from "../components/LocationSearchField";
 import Footer from "../components/Footer";
+import { useLocationContext } from "../contexts/LocationContext";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
+import { checkUserAccess, trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Home() {
   const navigate = useNavigate();
+  const { state: locationState } = useLocationContext();
+  const { openWaitlistModal } = useWaitlistContext();
+
+  // Track page visit
+  useEffect(() => {
+    trackUserBehavior('visited_home_page', {}, locationState);
+    storeLocalBehavior('visited_home_page');
+  }, [locationState]);
 
   const handleShopClick = () => {
-    // Always navigate to shop - let users browse regardless of location
+    // Always navigate to shop - no barriers for browsing
+    trackUserBehavior('clicked_start_shopping', {}, locationState);
     navigate('/shop');
   };
 
   const handleSellClick = () => {
+    // Always navigate to sell page - no barriers for browsing
+    trackUserBehavior('clicked_become_seller', {}, locationState);
+    storeLocalBehavior('visited_sell_page');
     navigate('/sell');
   };
 
@@ -46,7 +61,7 @@ function Home() {
                 placeholder="Enter your location to find fresh local food near you..."
                 showValidation={true}
                 autoFocus={false}
-                enableInlineEditing={true} // Enable inline editing for hero section
+                enableInlineEditing={true}
               />
             </div>
           </div>

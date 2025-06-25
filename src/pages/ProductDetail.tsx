@@ -19,15 +19,21 @@ import {
   FeatherTruck,
   FeatherCalendar,
   FeatherUser,
-  FeatherCheck
+  FeatherCheck,
+  FeatherMessageCircle
 } from "@subframe/core";
 import { getProductById, addProductReview, type Product, type ProductReview } from "../lib/supabase";
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
+import { useLocationContext } from "../contexts/LocationContext";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
+import { checkUserAccess, trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 import Footer from "../components/Footer";
 
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { state: locationState } = useLocationContext();
+  const { openWaitlistModal } = useWaitlistContext();
   
   const [product, setProduct] = useState<Product | FoodItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,11 +63,22 @@ function ProductDetail() {
         
         if (supabaseProduct && !supabaseError) {
           setProduct(supabaseProduct);
+          // Track product detail view
+          trackUserBehavior('viewed_product_detail', {
+            productId: id,
+            productName: supabaseProduct.name,
+            seller: supabaseProduct.seller?.name
+          }, locationState);
         } else {
           // Fallback to food search service
           const foodItem = await foodSearchService.getFoodItemById(id);
           if (foodItem) {
             setProduct(foodItem);
+            trackUserBehavior('viewed_product_detail', {
+              productId: id,
+              productName: foodItem.name,
+              seller: foodItem.seller
+            }, locationState);
           } else {
             setError('Product not found');
           }
@@ -75,12 +92,97 @@ function ProductDetail() {
     };
 
     loadProduct();
-  }, [id]);
+  }, [id, locationState]);
 
   const handleAddToCart = () => {
-    // Implement add to cart functionality
-    console.log('Adding to cart:', { productId: id, quantity });
-    // Show success message or update cart state
+    if (!product) return;
+
+    // Track the attempt
+    trackUserBehavior('attempted_add_to_cart_detail', {
+      productId: product.id,
+      productName: product.name,
+      quantity
+    }, locationState);
+    storeLocalBehavior('attempted_add_to_cart', { productName: product.name });
+
+    const accessLevel = checkUserAccess(locationState, 'purchase');
+    
+    switch (accessLevel) {
+      case 'PROMPT_LOCATION':
+        // This should be handled by location button in navbar
+        break;
+      case 'EARLY_ACCESS_WAITLIST':
+        openWaitlistModal('early_access', locationState);
+        break;
+      case 'GEOGRAPHIC_WAITLIST':
+        openWaitlistModal('geographic', locationState);
+        break;
+      case 'FULL_ACCESS':
+        // Future: Implement actual cart functionality
+        console.log('Add to cart:', { productId: id, quantity });
+        break;
+    }
+  };
+
+  const handleSaveForLater = () => {
+    if (!product) return;
+
+    trackUserBehavior('attempted_save_for_later_detail', {
+      productId: product.id,
+      productName: product.name
+    }, locationState);
+
+    const accessLevel = checkUserAccess(locationState, 'save');
+    
+    switch (accessLevel) {
+      case 'PROMPT_LOCATION':
+        // This should be handled by location button in navbar
+        break;
+      case 'FULL_ACCESS':
+        // Save to localStorage for NWA users
+        const saved = JSON.parse(localStorage.getItem('saved_products') || '[]');
+        saved.push(product);
+        localStorage.setItem('saved_products', JSON.stringify(saved));
+        // Show success feedback
+        break;
+      case 'GEOGRAPHIC_WAITLIST':
+        openWaitlistModal('geographic', locationState);
+        break;
+      case 'EARLY_ACCESS_WAITLIST':
+        // For NWA users, save for later should work
+        const savedEarly = JSON.parse(localStorage.getItem('saved_products') || '[]');
+        savedEarly.push(product);
+        localStorage.setItem('saved_products', JSON.stringify(savedEarly));
+        break;
+    }
+  };
+
+  const handleContactSeller = () => {
+    if (!product) return;
+
+    trackUserBehavior('attempted_contact_seller', {
+      productId: product.id,
+      productName: product.name,
+      seller: 'seller' in product ? product.seller?.name : product.seller
+    }, locationState);
+
+    const accessLevel = checkUserAccess(locationState, 'contact');
+    
+    switch (accessLevel) {
+      case 'PROMPT_LOCATION':
+        // This should be handled by location button in navbar
+        break;
+      case 'EARLY_ACCESS_WAITLIST':
+        openWaitlistModal('early_access', locationState);
+        break;
+      case 'GEOGRAPHIC_WAITLIST':
+        openWaitlistModal('geographic', locationState);
+        break;
+      case 'FULL_ACCESS':
+        // Future: Implement actual messaging functionality
+        console.log('Contact seller for product:', product.id);
+        break;
+    }
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -213,7 +315,7 @@ function ProductDetail() {
             <IconButton
               variant="destructive-secondary"
               icon={<FeatherHeart />}
-              onClick={() => {}}
+              onClick={handleSaveForLater}
             />
           </div>
         </div>
@@ -303,6 +405,14 @@ function ProductDetail() {
                       </div>
                     )}
                   </div>
+                  <Button
+                    variant="brand-secondary"
+                    size="small"
+                    icon={<FeatherMessageCircle />}
+                    onClick={handleContactSeller}
+                  >
+                    Contact
+                  </Button>
                 </div>
               </div>
 
@@ -349,7 +459,7 @@ function ProductDetail() {
                     variant="destructive-secondary"
                     size="large"
                     icon={<FeatherHeart />}
-                    onClick={() => {}}
+                    onClick={handleSaveForLater}
                   />
                 </div>
 

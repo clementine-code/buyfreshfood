@@ -29,6 +29,9 @@ import DesktopFilterModal from "../components/DesktopFilterModal";
 import Footer from "../components/Footer";
 import { getProducts, getCategories, getSellers, type Product } from "../lib/supabase";
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
+import { useLocationContext } from "../contexts/LocationContext";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
+import { checkUserAccess, trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Shop() {
   const [searchParams] = useSearchParams();
@@ -57,6 +60,16 @@ function Shop() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
+
+  // Waitlist integration
+  const { state: locationState } = useLocationContext();
+  const { openWaitlistModal } = useWaitlistContext();
+
+  // Track page visit
+  useEffect(() => {
+    trackUserBehavior('visited_shop_page', {}, locationState);
+    storeLocalBehavior('visited_shop_page');
+  }, [locationState]);
 
   // Load data from Supabase and handle URL search params
   useEffect(() => {
@@ -163,6 +176,84 @@ function Shop() {
     window.history.replaceState({}, '', '/shop');
   };
 
+  // Handle Add to Cart with waitlist logic
+  const handleAddToCart = (product: any) => {
+    // Track the attempt
+    trackUserBehavior('attempted_add_to_cart', {
+      productId: product.id,
+      productName: product.name,
+      price: product.price
+    }, locationState);
+    storeLocalBehavior('attempted_add_to_cart', { productName: product.name });
+
+    const accessLevel = checkUserAccess(locationState, 'purchase');
+    
+    switch (accessLevel) {
+      case 'PROMPT_LOCATION':
+        // This should be handled by location button in navbar
+        break;
+      case 'EARLY_ACCESS_WAITLIST':
+        openWaitlistModal('early_access', locationState);
+        break;
+      case 'GEOGRAPHIC_WAITLIST':
+        openWaitlistModal('geographic', locationState);
+        break;
+      case 'FULL_ACCESS':
+        // Future: Implement actual cart functionality
+        console.log('Add to cart:', product);
+        break;
+    }
+  };
+
+  // Handle Save for Later with waitlist logic
+  const handleSaveForLater = (product: any) => {
+    trackUserBehavior('attempted_save_for_later', {
+      productId: product.id,
+      productName: product.name
+    }, locationState);
+
+    const accessLevel = checkUserAccess(locationState, 'save');
+    
+    switch (accessLevel) {
+      case 'PROMPT_LOCATION':
+        // This should be handled by location button in navbar
+        break;
+      case 'FULL_ACCESS':
+        // Save to localStorage for NWA users
+        const saved = JSON.parse(localStorage.getItem('saved_products') || '[]');
+        saved.push(product);
+        localStorage.setItem('saved_products', JSON.stringify(saved));
+        // Show success feedback
+        break;
+      case 'GEOGRAPHIC_WAITLIST':
+        openWaitlistModal('geographic', locationState);
+        break;
+      case 'EARLY_ACCESS_WAITLIST':
+        // For NWA users, save for later should work
+        const savedEarly = JSON.parse(localStorage.getItem('saved_products') || '[]');
+        savedEarly.push(product);
+        localStorage.setItem('saved_products', JSON.stringify(savedEarly));
+        break;
+    }
+  };
+
+  // Track product views
+  const trackProductView = (product: any) => {
+    trackUserBehavior('viewed_product', {
+      productId: product.id,
+      productName: product.name,
+      category: product.category?.name || product.category,
+      seller: product.seller?.name || product.seller
+    }, locationState);
+
+    // Store for pre-filling waitlist
+    const existing = JSON.parse(localStorage.getItem('fresh_food_behavior') || '{}');
+    const viewedProducts = existing.viewed_products || [];
+    viewedProducts.push({ id: product.id, name: product.name });
+    existing.viewed_products = viewedProducts.slice(-5); // Keep last 5
+    localStorage.setItem('fresh_food_behavior', JSON.stringify(existing));
+  };
+
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
@@ -217,6 +308,11 @@ function Shop() {
     // Handle both Product and FoodItem types
     const displayProduct = product.seller ? product : convertFoodItemToProduct(product);
     
+    // Track view when card is rendered
+    React.useEffect(() => {
+      trackProductView(displayProduct);
+    }, []);
+    
     if (isListView) {
       return (
         <div className="flex items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
@@ -267,7 +363,7 @@ function Shop() {
                   <Button
                     className="h-8"
                     size="small"
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                    onClick={() => handleAddToCart(displayProduct)}
                   >
                     Add to Cart
                   </Button>
@@ -275,7 +371,7 @@ function Shop() {
                     variant="destructive-secondary"
                     size="small"
                     icon={<FeatherHeart />}
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                    onClick={() => handleSaveForLater(displayProduct)}
                   />
                 </div>
               </div>
@@ -328,14 +424,14 @@ function Shop() {
         <div className="flex w-full items-center gap-2">
           <Button
             className="h-8 grow shrink-0 basis-0"
-            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+            onClick={() => handleAddToCart(displayProduct)}
           >
             Add to Cart
           </Button>
           <IconButton
             variant="destructive-secondary"
             icon={<FeatherHeart />}
-            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+            onClick={() => handleSaveForLater(displayProduct)}
           />
         </div>
       </div>

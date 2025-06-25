@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/ui/components/Badge";
 import { Button } from "@/ui/components/Button";
@@ -8,15 +8,44 @@ import { FeatherArrowRight } from "@subframe/core";
 import { FeatherClipboard } from "@subframe/core";
 import { FeatherUsers } from "@subframe/core";
 import { FeatherDollarSign } from "@subframe/core";
-import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import Footer from "../components/Footer";
+import { useLocationContext } from "../contexts/LocationContext";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
+import { checkUserAccess, trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Sell() {
   const navigate = useNavigate();
+  const { state: locationState } = useLocationContext();
+  const { openWaitlistModal } = useWaitlistContext();
+
+  // Track page visit
+  useEffect(() => {
+    trackUserBehavior('visited_sell_page', {}, locationState);
+    storeLocalBehavior('visited_sell_page');
+  }, [locationState]);
 
   const handleStartSellingClick = () => {
-    // For now, navigate to waitlist since seller onboarding isn't implemented
-    navigate('/waitlist');
+    // Track the attempt
+    trackUserBehavior('clicked_start_selling', {}, locationState);
+    storeLocalBehavior('attempted_start_selling');
+
+    const accessLevel = checkUserAccess(locationState, 'sell');
+    
+    switch (accessLevel) {
+      case 'PROMPT_LOCATION':
+        // This should be handled by location button in navbar
+        break;
+      case 'EARLY_ACCESS_WAITLIST':
+        openWaitlistModal('early_access', locationState);
+        break;
+      case 'GEOGRAPHIC_WAITLIST':
+        openWaitlistModal('geographic', locationState);
+        break;
+      case 'FULL_ACCESS':
+        // Future: Navigate to actual seller onboarding
+        navigate('/waitlist'); // For now, still go to waitlist
+        break;
+    }
   };
 
   return (
