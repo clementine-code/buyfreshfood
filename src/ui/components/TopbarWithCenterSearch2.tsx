@@ -1,20 +1,8 @@
 "use client";
-/*
- * Documentation:
- * Topbar with center search2 — https://app.subframe.com/6b5c53cba769/library?component=Topbar+with+center+search2_b7addef3-c5e9-4667-af46-c01b7b1bf439
- * Text Field — https://app.subframe.com/6b5c53cba769/library?component=Text+Field_be48ca43-f8e7-4c0e-8870-d219ea11abfe
- * Dropdown Menu — https://app.subframe.com/6b5c53cba769/library?component=Dropdown+Menu_99951515-459b-4286-919e-a89e7549b43b
- * Button — https://app.subframe.com/6b5c53cba769/library?component=Button_3b777358-b86b-40af-9327-891efc6826fe
- * Icon Button — https://app.subframe.com/6b5c53cba769/library?component=Icon+Button_af9405b1-8c54-4e01-9786-5aad308224f6
- */
 
 import React from "react";
 import * as SubframeUtils from "../utils";
 import { FeatherMenu } from "@subframe/core";
-import { TextField } from "./TextField";
-import { FeatherLocateFixed } from "@subframe/core";
-import { DropdownMenu } from "./DropdownMenu";
-import * as SubframeCore from "@subframe/core";
 
 interface NavItemProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
@@ -46,14 +34,12 @@ const NavItem = React.forwardRef<HTMLElement, NavItemProps>(function NavItem(
       {...otherProps}
     >
       {icon ? (
-        <SubframeCore.IconWrapper
-          className={SubframeUtils.twClassNames(
-            "text-heading-3 font-heading-3 text-subtext-color",
-            { "text-default-font": selected }
-          )}
-        >
+        <div className={SubframeUtils.twClassNames(
+          "text-heading-3 font-heading-3 text-subtext-color",
+          { "text-default-font": selected }
+        )}>
           {icon}
-        </SubframeCore.IconWrapper>
+        </div>
       ) : null}
       {children ? (
         <span
@@ -72,12 +58,12 @@ const NavItem = React.forwardRef<HTMLElement, NavItemProps>(function NavItem(
   );
 });
 
-interface TopbarWithCenterSearch2RootProps
-  extends React.HTMLAttributes<HTMLElement> {
+interface TopbarWithCenterSearch2RootProps extends React.HTMLAttributes<HTMLElement> {
   centerSlot?: React.ReactNode;
   rightSlot?: React.ReactNode;
   mobile?: "default" | "phone" | "tablet";
   className?: string;
+  onMenuClick?: () => void;
 }
 
 const TopbarWithCenterSearch2Root = React.forwardRef<
@@ -89,6 +75,7 @@ const TopbarWithCenterSearch2Root = React.forwardRef<
     rightSlot,
     mobile = "default",
     className,
+    onMenuClick,
     ...otherProps
   }: TopbarWithCenterSearch2RootProps,
   ref
@@ -106,7 +93,13 @@ const TopbarWithCenterSearch2Root = React.forwardRef<
       ref={ref as any}
       {...otherProps}
     >
-      <FeatherMenu className="text-body font-body text-default-font" />
+      <button
+        onClick={onMenuClick}
+        className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors"
+      >
+        <FeatherMenu className="w-5 h-5 text-default-font" />
+      </button>
+      
       {centerSlot ? (
         <div
           className={SubframeUtils.twClassNames(
@@ -117,6 +110,7 @@ const TopbarWithCenterSearch2Root = React.forwardRef<
           {centerSlot}
         </div>
       ) : null}
+      
       {rightSlot ? (
         <div className="flex items-center justify-end gap-2">{rightSlot}</div>
       ) : null}
@@ -130,3 +124,48 @@ export const TopbarWithCenterSearch2 = Object.assign(
     NavItem,
   }
 );
+
+// STEP 2: Update MobileNavMenu.tsx to include Sign In
+// Add this to your MobileNavMenu.tsx (find the navigation links section and add):
+
+// In MobileNavMenu.tsx, add this to the navigation section:
+<Link to="/signin" onClick={onClose}>
+  <div className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
+    location.pathname === "/signin" 
+      ? "bg-brand-100 text-brand-700" 
+      : "hover:bg-neutral-50 text-default-font"
+  }`}>
+    <FeatherUser className="w-5 h-5" />
+    <span className="text-body-bold font-body-bold">Sign In</span>
+  </div>
+</Link>
+
+// STEP 3: Update DefaultPageLayout.tsx mobile section
+// Replace the mobile topbar section with this:
+
+{/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
+<div className="xl:hidden w-full" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
+  <TopbarWithCenterSearch2
+    className="w-full bg-default-background border-b border-neutral-border"
+    onMenuClick={() => setShowMobileNav(true)}
+    centerSlot={
+      <FoodSearchField
+        className="h-auto grow shrink-0 basis-0"
+        onItemSelect={handleFoodItemSelect}
+        onSearchSubmit={handleFoodSearchSubmit}
+        placeholder="Search fresh food..."
+        showTrending={false}
+      />
+    }
+    rightSlot={
+      <>
+        <LocationButton className="flex-shrink-0" />
+        <IconButton
+          variant="brand-primary"
+          icon={<FeatherShoppingCart />}
+          onClick={() => {}}
+        />
+      </>
+    }
+  />
+</div>
