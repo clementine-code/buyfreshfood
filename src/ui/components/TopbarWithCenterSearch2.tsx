@@ -1,3 +1,6 @@
+// FIXED TopbarWithCenterSearch2.tsx - Remove any Link references
+// Replace the entire src/ui/components/TopbarWithCenterSearch2.tsx file with this:
+
 "use client";
 
 import React from "react";
@@ -96,6 +99,7 @@ const TopbarWithCenterSearch2Root = React.forwardRef<
       <button
         onClick={onMenuClick}
         className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors"
+        type="button"
       >
         <FeatherMenu className="w-5 h-5 text-default-font" />
       </button>
@@ -125,47 +129,5 @@ export const TopbarWithCenterSearch2 = Object.assign(
   }
 );
 
-// STEP 2: Update MobileNavMenu.tsx to include Sign In
-// Add this to your MobileNavMenu.tsx (find the navigation links section and add):
-
-// In MobileNavMenu.tsx, add this to the navigation section:
-<Link to="/signin" onClick={onClose}>
-  <div className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
-    location.pathname === "/signin" 
-      ? "bg-brand-100 text-brand-700" 
-      : "hover:bg-neutral-50 text-default-font"
-  }`}>
-    <FeatherUser className="w-5 h-5" />
-    <span className="text-body-bold font-body-bold">Sign In</span>
-  </div>
-</Link>
-
-// STEP 3: Update DefaultPageLayout.tsx mobile section
-// Replace the mobile topbar section with this:
-
-{/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-<div className="xl:hidden w-full" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
-  <TopbarWithCenterSearch2
-    className="w-full bg-default-background border-b border-neutral-border"
-    onMenuClick={() => setShowMobileNav(true)}
-    centerSlot={
-      <FoodSearchField
-        className="h-auto grow shrink-0 basis-0"
-        onItemSelect={handleFoodItemSelect}
-        onSearchSubmit={handleFoodSearchSubmit}
-        placeholder="Search fresh food..."
-        showTrending={false}
-      />
-    }
-    rightSlot={
-      <>
-        <LocationButton className="flex-shrink-0" />
-        <IconButton
-          variant="brand-primary"
-          icon={<FeatherShoppingCart />}
-          onClick={() => {}}
-        />
-      </>
-    }
-  />
-</div>
+// This component is now clean and only handles the layout structure
+// No Link imports needed since navigation logic is handled in DefaultPageLayout
