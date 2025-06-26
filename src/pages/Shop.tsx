@@ -102,10 +102,6 @@ function Shop() {
   event.target.lastScrollY = currentY;
 }; // <-- FUNCTION ENDS HERE with semicolon
 
-// Your next code block continues here...
-// Waitlist integration
-const { state: locationState } = useLocationContext();
-
   // Waitlist integration
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
