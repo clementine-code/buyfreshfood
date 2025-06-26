@@ -34,7 +34,6 @@ import { getProducts, getCategories, getSellers, type Product } from "../lib/sup
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
-import { useScrollDirection } from "../hooks/useScrollDirection";
 import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Shop() {
@@ -67,7 +66,7 @@ function Shop() {
   const itemsPerPage = 50;
 
   // Scroll direction for mobile filter bar
-  const { scrollDirection } = useScrollDirection({ threshold: 10, debounceMs: 100 });
+  const [scrollDirection, setScrollDirection] = useState('up');
 
   // Waitlist integration
   const { state: locationState } = useLocationContext();
@@ -276,6 +275,51 @@ function Shop() {
   useEffect(() => {
     setCurrentPage(1);
   }, [isSearchMode, appliedFilters]);
+
+   // Mobile scroll detection for filter bar
+  useEffect(() => {
+    // Skip on desktop
+    if (window.innerWidth >= 1280) return;
+
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const updateScrollDirection = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Only change direction if we've scrolled enough and past the header
+      if (Math.abs(currentScrollY - lastScrollY) > 15 && currentScrollY > 80) {
+        const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+        if (direction !== scrollDirection) {
+          setScrollDirection(direction);
+        }
+      }
+      
+      // Always show filter bar when near top
+      if (currentScrollY <= 80) {
+        setScrollDirection('up');
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScrollDirection);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [scrollDirection]);
+
+  // DEBUG: Remove this after testing
+  useEffect(() => {
+    console.log('🔄 Scroll direction changed to:', scrollDirection);
+  }, [scrollDirection]);
 
   const getBadgeVariant = (tag: string) => {
     if (tag.includes('organic') || tag.includes('pesticide-free')) return 'success';
