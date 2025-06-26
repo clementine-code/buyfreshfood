@@ -192,3 +192,55 @@ html, body {
 * {
   scroll-behavior: auto !important;
 }
+
+/* MOBILE FIXES - Remove gap between sort/filter bar and products */
+@media (max-width: 1279px) {
+  /* Remove any padding/margin from the products container */
+  .mobile-shop-content .w-full.px-4.py-4 {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  /* Ensure sort/filter bar connects seamlessly */
+  .sort-filter-bar {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Products grid should start immediately after filter bar */
+  .mobile-shop-content > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+}
+
+/* DESKTOP FIXES - Remove gap between navbar and content */
+@media (min-width: 1280px) {
+  /* Remove padding from desktop container */
+  .desktop-shop-container {
+    padding-top: 73px !important;
+    margin-top: 0 !important;
+  }
+  
+  /* Ensure sort/filter bar sits directly under navbar */
+  .sort-filter-bar {
+    top: 0 !important;
+    margin-top: 0 !important;
+    border-top: none !important;
+  }
+  
+  /* Remove any gaps in the desktop layout */
+  .hidden.xl\\:flex.w-full.h-full {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Products area should have no top gap */
+  .w-1\\/2.h-full.flex.flex-col.bg-default-background {
+    margin-top: 0 !important;
+  }
+  
+  /* Map area should have no top gap */
+  .w-1\\/2.h-full.relative {
+    margin-top: 0 !important;
+  }
+}
