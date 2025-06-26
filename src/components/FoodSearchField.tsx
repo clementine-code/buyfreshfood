@@ -355,30 +355,54 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
   // Render suggestions portal
   const suggestionList = useMemo(() => {
-    if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) {
-      return null;
+  if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) {
+    return null;
+  }
+
+  const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
+  const top = inputRect.bottom + window.scrollY + 4;
+  
+  // FIXED: Better mobile positioning to prevent overflow
+  let left = inputRect.left + window.scrollX;
+  let width = inputRect.width;
+  
+  if (isMobile) {
+    // On mobile, use better positioning to prevent overflow
+    const viewportWidth = window.innerWidth;
+    const suggestionWidth = Math.min(viewportWidth - 32, 400); // 16px margin on each side
+    
+    // Center the suggestions or align to input, whichever fits better
+    const idealLeft = inputRect.left + window.scrollX;
+    const rightEdge = idealLeft + suggestionWidth;
+    
+    if (rightEdge > viewportWidth - 16) {
+      // If it would overflow, position from right edge
+      left = viewportWidth - suggestionWidth - 16;
+    } else if (idealLeft < 16) {
+      // If it would overflow left, position from left edge
+      left = 16;
+    } else {
+      // Use ideal position
+      left = idealLeft;
     }
+    
+    width = suggestionWidth;
+  }
 
-    const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
-    const top = inputRect.bottom + window.scrollY + 4;
-    const left = inputRect.left + window.scrollX;
-    const width = inputRect.width;
-
-    const suggestionContent = (
-      <div 
-        className="bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden"
-        style={{ 
-          position: 'absolute',
-          top: `${top}px`,
-          left: `${left}px`,
-          width: isMobile ? '90vw' : `${width}px`,
-          maxWidth: isMobile ? '400px' : 'none',
-          maxHeight: '400px',
-          overflowY: 'auto',
-          zIndex: 99999,
-          pointerEvents: 'auto'
-        }}
-      >
+  const suggestionContent = (
+    <div 
+      className="bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden"
+      style={{ 
+        position: 'absolute',
+        top: `${top}px`,
+        left: `${left}px`,
+        width: `${width}px`, // Changed from responsive width
+        maxHeight: '400px',
+        overflowY: 'auto',
+        zIndex: 99999,
+        pointerEvents: 'auto'
+      }}
+    >
         {isLoading && (
           <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
             <div className="flex items-center justify-center gap-2">
