@@ -65,40 +65,42 @@ function Shop() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
-  const handlePageScroll = () => {
+  const handlePageScroll = (event) => {
   // Only run on mobile
   if (window.innerWidth >= 1280) return;
   
-  const currentY = window.scrollY;
-  console.log('📱 Direct scroll handler triggered:', currentY);
+  // Get scroll position from multiple sources
+  const windowScrollY = window.scrollY;
+  const documentScrollTop = document.documentElement.scrollTop;
+  const bodyScrollTop = document.body.scrollTop;
+  const eventTargetScroll = event.target.scrollTop;
+  
+  console.log('📱 All scroll values:', {
+    window: windowScrollY,
+    document: documentScrollTop,
+    body: bodyScrollTop,
+    eventTarget: eventTargetScroll,
+    target: event.target.tagName
+  });
+  
+  // Use the event target's scroll position if it's the scrolling container
+  const currentY = eventTargetScroll || windowScrollY || documentScrollTop || bodyScrollTop;
+  
+  console.log('📱 Using scroll position:', currentY);
   
   if (currentY <= 50) {
     console.log('🔝 Top area - showing filter');
     setScrollDirection('up');
-  } else if (currentY > (window.lastScrollY || 0) + 30) {
+  } else if (currentY > (event.target.lastScrollY || 0) + 30) {
     console.log('⬇️ Scrolling down - hiding filter');
     setScrollDirection('down');
-  } else if (currentY < (window.lastScrollY || 0) - 30) {
+  } else if (currentY < (event.target.lastScrollY || 0) - 30) {
     console.log('⬆️ Scrolling up - showing filter');
     setScrollDirection('up');
   }
   
-  window.lastScrollY = currentY;
+  event.target.lastScrollY = currentY;
 };
-
-  // Scroll direction for mobile filter bar
-  const [scrollDirection, setScrollDirection] = useState('up');
-
-  // ADD THE DEBUG CODE HERE:
-useEffect(() => {
-  console.log('🎨 Current scrollDirection:', scrollDirection);
-  const filterBar = document.querySelector('.sort-filter-bar');
-  if (filterBar) {
-    console.log('🔍 Filter bar classes:', filterBar.className);
-    console.log('🔍 Filter bar style:', filterBar.style.transform);
-  }
-}, [scrollDirection]);
-
   // Waitlist integration
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
