@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Dialog } from "@/ui/components/Dialog";
 import { Button } from "@/ui/components/Button";
 import { CheckboxCard } from "@/ui/components/CheckboxCard";
 import { FeatherX } from "@subframe/core";
@@ -78,7 +77,7 @@ const MobileFilterModal: React.FC<MobileFilterModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex items-end md:items-center md:justify-center">
+    <div className="modal-overlay flex items-end md:items-center md:justify-center">
       <div className="bg-white w-full h-[90vh] md:w-[500px] md:h-auto md:max-h-[80vh] md:rounded-lg overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-200">

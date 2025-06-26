@@ -37,7 +37,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const [showMobileNav, setShowMobileNav] = useState(false);
 
     const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
-      console.log('Selected food item:', suggestion);
+      console.log('🍎 Food item selected in navbar:', suggestion);
       
       // Navigate based on suggestion type
       switch (suggestion.type) {
@@ -61,7 +61,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     };
 
     const handleFoodSearchSubmit = (query: string) => {
-      console.log('Food search submitted:', query);
+      console.log('🔍 Food search submitted in navbar:', query);
       // Navigate to search results page
       navigate(`/shop?search=${encodeURIComponent(query)}`);
     };
@@ -78,7 +78,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         {...otherProps}
       >
         {/* Desktop Topbar - Only show on large screens (1280px+) */}
-        <div className="hidden xl:block w-full bg-default-background border-b border-neutral-border" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
+        <div className="hidden xl:block fixed-navbar">
           <TopbarWithCenterSearch3
             className="py-3 h-full"
             leftSlot={
@@ -132,7 +132,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         </div>
 
         {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-        <div className="xl:hidden w-full bg-default-background border-b border-neutral-border" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
+        <div className="xl:hidden fixed-navbar">
           <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
             {/* Hamburger Menu Button */}
             <button
@@ -184,8 +184,8 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         {children ? (
           <div className={
             enableMarketplaceMode 
-              ? "flex-1 w-full bg-default-background overflow-hidden" 
-              : "flex-1 w-full bg-default-background overflow-y-auto pt-20"
+              ? "marketplace-content" 
+              : "main-content"
           }>
             {children}
           </div>

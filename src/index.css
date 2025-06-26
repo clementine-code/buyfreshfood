@@ -24,7 +24,19 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Ensure the main content area doesn't overlap with fixed navbar */
+/* Fixed navbar positioning - ALWAYS visible */
+.fixed-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 73px;
+  background-color: #fcfaf5;
+  border-bottom: 1px solid #f0efed;
+}
+
+/* Main content area - accounts for fixed navbar */
 .main-content {
   padding-top: 73px;
   min-height: calc(100vh - 73px);
@@ -32,24 +44,91 @@ html, body {
   z-index: 1;
 }
 
-/* Ensure fixed navbar stays above content */
-.fixed-navbar {
+/* Marketplace mode - full height layout */
+.marketplace-content {
+  padding-top: 73px;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sort/Filter bar positioning */
+.sort-filter-bar {
+  position: sticky;
+  top: 73px;
+  z-index: 60;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f0efed;
+  box-shadow: 0px 1px 3px 0px rgba(55, 48, 40, 0.06);
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Mobile scroll behavior for sort/filter bar */
+@media (max-width: 1279px) {
+  .sort-filter-bar.hidden-on-scroll {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .sort-filter-bar.visible-on-scroll {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Desktop - always visible */
+@media (min-width: 1280px) {
+  .sort-filter-bar {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* Floating action buttons */
+.floating-actions {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  z-index: 80;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Modal overlays */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Search suggestions portal */
+.search-suggestions-portal {
+  z-index: 99999;
+  pointer-events: auto;
+}
+
+/* Ensure proper layering for dropdowns */
+.dropdown-menu {
   z-index: 100;
-  height: 73px;
 }
 
-/* Prevent content from appearing behind navbar */
-body {
-  padding-top: 0;
+/* Offline mode adjustments */
+.offline-mode .main-content,
+.offline-mode .marketplace-content {
+  padding-top: 120px;
 }
 
-/* Ensure scrollbar doesn't interfere with fixed elements */
-html {
-  scroll-padding-top: 73px;
+.offline-mode .sort-filter-bar {
+  top: 120px;
+}
+
+/* Smooth transitions for all interactive elements */
+.transition-smooth {
+  transition: all 0.3s ease-in-out;
 }
 
 /* Override any smooth scrolling that might interfere with scroll to top */

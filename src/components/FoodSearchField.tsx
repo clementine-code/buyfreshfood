@@ -47,6 +47,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     if (!container) {
       container = document.createElement('div');
       container.id = 'search-suggestions-portal';
+      container.className = 'search-suggestions-portal';
       container.style.position = 'absolute';
       container.style.top = '0';
       container.style.left = '0';
@@ -143,25 +144,33 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     const trimmedQuery = searchQuery.trim();
     if (!trimmedQuery) return;
 
+    console.log('🔍 Navigating to shop with:', { query: trimmedQuery, suggestion });
+
     if (suggestion) {
       switch (suggestion.type) {
         case 'category':
           const categoryName = suggestion.title.replace(/^All\s+/, '');
+          console.log('📂 Category navigation:', categoryName);
           navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
           break;
         case 'product':
+          console.log('🛍️ Product navigation:', trimmedQuery);
           navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
           break;
         case 'seller':
+          console.log('🏪 Seller navigation:', suggestion.title);
           navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
           break;
         default:
+          console.log('🔍 Default navigation:', trimmedQuery);
           navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
       }
     } else {
+      console.log('🔍 Search navigation:', trimmedQuery);
       navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
     }
 
+    // Close suggestions and clear input focus
     setShowSuggestions(false);
     setSelectedIndex(-1);
     inputRef.current?.blur();
@@ -236,14 +245,23 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [showSuggestions, suggestions, selectedIndex, handleSearchClick]);
 
-  // Handle suggestion clicks
+  // Handle suggestion clicks - FIXED NAVIGATION
   const handleSuggestionClick = useCallback((suggestion: FoodSearchSuggestion) => {
+    console.log('🖱️ Suggestion clicked:', suggestion);
+    
+    // Prevent blur during click handling
     preventBlurRef.current = true;
     
+    // Update query to show selected item
     setQuery(suggestion.title);
+    
+    // Call the onItemSelect callback if provided
     onItemSelect?.(suggestion);
+    
+    // Navigate to shop page with the suggestion
     navigateToShop(suggestion.title, suggestion);
     
+    // Reset prevention flag after navigation
     setTimeout(() => {
       preventBlurRef.current = false;
     }, 100);
@@ -351,7 +369,12 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
             className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
               index === selectedIndex ? 'bg-brand-50' : ''
             }`}
-            onClick={() => handleSuggestionClick(suggestion)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🖱️ Button clicked for suggestion:', suggestion);
+              handleSuggestionClick(suggestion);
+            }}
             onMouseDown={(e) => {
               e.preventDefault();
               preventBlurRef.current = true;
@@ -362,6 +385,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
               }, 100);
             }}
             onMouseEnter={() => setSelectedIndex(index)}
+            type="button"
           >
             <div className={`flex items-start ${isMobile ? 'gap-4' : 'gap-3'}`}>
               <div className="flex-1 min-w-0">
@@ -423,8 +447,13 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
         {!isLoading && suggestions.length > limitedSuggestions.length && (
           <button
-            onClick={handleSearchClick}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSearchClick();
+            }}
             className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-brand-50 border-t border-brand-200 bg-brand-25 transition-colors text-brand-700`}
+            type="button"
           >
             <div className="flex items-center justify-center gap-2">
               <FeatherSearch className="w-4 h-4" />
@@ -442,8 +471,13 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
               <span className={`font-body ${isMobile ? 'text-base' : 'text-sm'}`}>No items found for "{query}"</span>
               <span className={`font-caption text-neutral-400 ${isMobile ? 'text-sm' : 'text-xs'}`}>Try searching for fruits, vegetables, or local sellers</span>
               <button
-                onClick={handleSearchClick}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSearchClick();
+                }}
                 className={`mt-3 px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-500 transition-colors ${isMobile ? 'text-base' : 'text-sm'}`}
+                type="button"
               >
                 Search anyway
               </button>

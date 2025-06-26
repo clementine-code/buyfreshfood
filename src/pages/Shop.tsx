@@ -34,6 +34,7 @@ import { getProducts, getCategories, getSellers, type Product } from "../lib/sup
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
+import { useScrollDirection } from "../hooks/useScrollDirection";
 import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Shop() {
@@ -64,6 +65,9 @@ function Shop() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
+
+  // Scroll direction for mobile filter bar
+  const { scrollDirection } = useScrollDirection({ threshold: 10, debounceMs: 100 });
 
   // Waitlist integration
   const { state: locationState } = useLocationContext();
@@ -556,12 +560,12 @@ function Shop() {
         </div>
       )}
 
-     {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-<div className="hidden xl:flex w-full h-full" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
+      {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
+      <div className="hidden xl:flex w-full h-full" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
         {/* Left Side - Products (50% width, scrollable content) */}
         <div className="w-1/2 h-full flex flex-col bg-default-background">
           {/* Controls Bar - Fixed at top */}
-          <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+          <div className="sort-filter-bar flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -614,7 +618,7 @@ function Shop() {
                     side="bottom"
                     align="end"
                     sideOffset={12}
-                    className="z-[100]"
+                    className="dropdown-menu"
                     asChild={true}
                   >
                     <DropdownMenu>
@@ -694,9 +698,13 @@ function Shop() {
       </div>
 
       {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
-     <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
-{/* Mobile/Tablet Page Controls - Hide when modals are open */}
-<div className={`xl:hidden sticky left-0 right-0 z-[70] bg-white border-b border-neutral-200 shadow-sm w-full ${(showMobileFilters || showMobileMap) ? 'hidden' : ''}`} style={{top: isOfflineMode ? '120px' : '80px'}}>
+      <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
+        {/* Mobile/Tablet Page Controls - Hide when modals are open, with scroll behavior */}
+        <div className={`xl:hidden sort-filter-bar left-0 right-0 bg-white border-b border-neutral-200 shadow-sm w-full ${
+          (showMobileFilters || showMobileMap) ? 'hidden' : ''
+        } ${
+          scrollDirection === 'down' ? 'hidden-on-scroll' : 'visible-on-scroll'
+        }`} style={{top: isOfflineMode ? '120px' : '80px'}}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
@@ -739,7 +747,7 @@ function Shop() {
                       side="bottom"
                       align="end"
                       sideOffset={12}
-                      className="z-[100]"
+                      className="dropdown-menu"
                       asChild={true}
                     >
                       <DropdownMenu>
@@ -816,7 +824,7 @@ function Shop() {
 
         {/* Floating Action Buttons - Mobile & Tablet Only - Only show on main product view */}
         {isMainProductView && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[80]">
+          <div className="floating-actions">
             <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">
               <Button
                 variant="neutral-secondary"
@@ -841,29 +849,28 @@ function Shop() {
       </div>
 
       {/* Modals */}
-<MobileFilterModal
-  isOpen={showMobileFilters}
-  onClose={() => setShowMobileFilters(false)}
-  appliedFilters={appliedFilters}
-  onFiltersChange={setAppliedFilters}
-  categories={categories}
-  sellers={sellers}
-/>
+      <MobileFilterModal
+        isOpen={showMobileFilters}
+        onClose={() => setShowMobileFilters(false)}
+        appliedFilters={appliedFilters}
+        onFiltersChange={setAppliedFilters}
+        categories={categories}
+        sellers={sellers}
+      />
 
-<MobileMapModal
-  isOpen={showMobileMap}
-  onClose={() => setShowMobileMap(false)}
-/>
+      <MobileMapModal
+        isOpen={showMobileMap}
+        onClose={() => setShowMobileMap(false)}
+      />
 
-<DesktopFilterModal
-  isOpen={showDesktopFilters}
-  onClose={() => setShowDesktopFilters(false)}
-  appliedFilters={appliedFilters}
-  onFiltersChange={setAppliedFilters}
-  categories={categories}
-  sellers={sellers}
-  className="z-[200]"
-/>
+      <DesktopFilterModal
+        isOpen={showDesktopFilters}
+        onClose={() => setShowDesktopFilters(false)}
+        appliedFilters={appliedFilters}
+        onFiltersChange={setAppliedFilters}
+        categories={categories}
+        sellers={sellers}
+      />
     </div>
   );
 }
