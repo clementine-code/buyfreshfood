@@ -49,10 +49,10 @@ html, body {
   z-index: 1;
 }
 
-/* SORT/FILTER BAR - NO GAPS, sits directly under navbar */
+/* SORT/FILTER BAR - COMPLETELY FIXED - NO GAPS */
 .sort-filter-bar {
   position: sticky;
-  top: 73px;
+  top: 0; /* FIXED: Changed from 73px to 0 - sits directly under navbar */
   z-index: 60;
   background-color: #ffffff;
   border-bottom: 1px solid #f0efed;
@@ -61,8 +61,16 @@ html, body {
   padding: 0;
 }
 
-/* Mobile scroll behavior - hide/show filter bar */
+/* Mobile specific positioning - NO GAPS */
 @media (max-width: 1279px) {
+  .sort-filter-bar {
+    position: fixed;
+    top: 73px; /* Mobile: stick under navbar */
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+  
   .sort-filter-bar.scroll-hidden {
     transform: translateY(-100%);
     transition: transform 0.3s ease-in-out;
@@ -72,12 +80,25 @@ html, body {
     transform: translateY(0);
     transition: transform 0.3s ease-in-out;
   }
+  
+  /* Account for fixed filter bar in mobile content */
+  .mobile-content-with-filter {
+    padding-top: 120px; /* 73px navbar + ~47px filter bar */
+  }
 }
 
-/* Desktop - always visible */
+/* Desktop - always visible, no gaps */
 @media (min-width: 1280px) {
   .sort-filter-bar {
+    position: sticky;
+    top: 0; /* Stick to top of its container */
     transform: translateY(0) !important;
+  }
+  
+  /* Desktop container should have no padding-top */
+  .desktop-shop-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
   }
 }
 
@@ -109,14 +130,47 @@ html, body {
   z-index: 100;
 }
 
-/* Offline mode - adjust for alert */
+/* Offline mode - adjust for alert - FIXED */
 .offline-mode .main-content,
 .offline-mode .marketplace-content {
-  padding-top: 120px;
+  padding-top: 120px; /* 73px navbar + 47px alert */
 }
 
 .offline-mode .sort-filter-bar {
-  top: 120px;
+  top: 120px; /* Mobile: under navbar + alert */
+}
+
+@media (min-width: 1280px) {
+  .offline-mode .sort-filter-bar {
+    top: 47px; /* Desktop: just account for alert height */
+  }
+}
+
+/* Mobile content spacing when filter bar is present */
+.mobile-shop-content {
+  padding-top: 73px; /* Just navbar by default */
+}
+
+.offline-mode .mobile-shop-content {
+  padding-top: 120px; /* Navbar + alert */
+}
+
+/* When filter bar is hidden on scroll, adjust content spacing */
+.mobile-shop-content.filter-hidden {
+  padding-top: 73px; /* Just navbar */
+}
+
+.offline-mode .mobile-shop-content.filter-hidden {
+  padding-top: 120px; /* Navbar + alert */
+}
+
+/* When filter bar is visible, account for its height */
+.mobile-shop-content.filter-visible {
+  padding-top: 120px; /* Navbar + filter bar (~47px) */
+}
+
+.offline-mode .mobile-shop-content.filter-visible {
+  padding-top: 167px; /* Navbar + alert + filter bar */
 }
 
 /* Override smooth scrolling */
