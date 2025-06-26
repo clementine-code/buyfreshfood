@@ -89,6 +89,16 @@ function Shop() {
   // Scroll direction for mobile filter bar
   const [scrollDirection, setScrollDirection] = useState('up');
 
+  // ADD THE DEBUG CODE HERE:
+useEffect(() => {
+  console.log('🎨 Current scrollDirection:', scrollDirection);
+  const filterBar = document.querySelector('.sort-filter-bar');
+  if (filterBar) {
+    console.log('🔍 Filter bar classes:', filterBar.className);
+    console.log('🔍 Filter bar style:', filterBar.style.transform);
+  }
+}, [scrollDirection]);
+
   // Waitlist integration
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
