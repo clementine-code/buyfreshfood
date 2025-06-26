@@ -1,111 +1,184 @@
-"use client";
-/*
- * Documentation:
- * Default Page Layout — https://app.subframe.com/6b5c53cba769/library?component=Default+Page+Layout_a57b1c43-310a-493f-b807-8cc88e2452cf
- * Text Field — https://app.subframe.com/6b5c53cba769/library?component=Text+Field_be48ca43-f8e7-4c0e-8870-d219ea11abfe
- * Dropdown Menu — https://app.subframe.com/6b5c53cba769/library?component=Dropdown+Menu_99951515-459b-4286-919e-a89e7549b43b
- * Button — https://app.subframe.com/6b5c53cba769/library?component=Button_3b777358-b86b-40af-9327-891efc6826fe
- * Topbar with center search3 — https://app.subframe.com/6b5c53cba769/library?component=Topbar+with+center+search3_2cf578a5-28e7-4c6a-9cae-fd7f815e3509
- */
+// COMPLETE FIX for DefaultPageLayout.tsx
+// Replace your entire DefaultPageLayout.tsx file with this:
 
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as SubframeUtils from "../utils";
-import { TextField } from "../components/TextField";
-import { FeatherLocateFixed } from "@subframe/core";
-import { DropdownMenu } from "../components/DropdownMenu";
-import * as SubframeCore from "@subframe/core";
+import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
+import { TopbarWithCenterSearch2 } from "../components/TopbarWithCenterSearch2";
 import { Button } from "../components/Button";
-import { FeatherMapPin } from "@subframe/core";
+import { IconButton } from "../components/IconButton";
 import { FeatherUser } from "@subframe/core";
 import { FeatherShoppingCart } from "@subframe/core";
-import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
+import { FeatherMenu } from "@subframe/core";
+import LocationButton from "../../components/LocationButton";
+import MobileNavMenu from "../../components/MobileNavMenu";
+import FoodSearchField from "../../components/FoodSearchField";
+import { type FoodSearchSuggestion } from "../../services/foodSearchService";
 
-interface DefaultPageLayoutRootProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface DefaultPageLayoutRootProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   className?: string;
+  enableMarketplaceMode?: boolean;
 }
 
-const DefaultPageLayoutRoot = React.forwardRef<
-  HTMLElement,
-  DefaultPageLayoutRootProps
->(function DefaultPageLayoutRoot(
-  { children, className, ...otherProps }: DefaultPageLayoutRootProps,
-  ref
-) {
-  return (
-    <div
-      className={SubframeUtils.twClassNames(
-        "flex h-screen w-full flex-col items-center bg-medium-background",
-        className
-      )}
-      ref={ref as any}
-      {...otherProps}
-    >
-      <TopbarWithCenterSearch3
-        leftSlot={
-          <>
-            <img
-              className="h-6 w-6 flex-none object-cover"
-              src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
-            />
-            <div className="flex items-center gap-2">
-              <TopbarWithCenterSearch3.NavItem selected={true}>
-                Home
-              </TopbarWithCenterSearch3.NavItem>
-              <TopbarWithCenterSearch3.NavItem>
-                Shop
-              </TopbarWithCenterSearch3.NavItem>
-              <TopbarWithCenterSearch3.NavItem>
-                Sell
-              </TopbarWithCenterSearch3.NavItem>
-            </div>
-          </>
-        }
-        rightSlot={
-          <>
-            <SubframeCore.DropdownMenu.Root>
-              <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                <Button
-                  variant="destructive-secondary"
-                  icon={<FeatherMapPin />}
-                />
-              </SubframeCore.DropdownMenu.Trigger>
-              <SubframeCore.DropdownMenu.Portal>
-                <SubframeCore.DropdownMenu.Content
-                  side="bottom"
-                  align="end"
-                  sideOffset={4}
-                  asChild={true}
-                >
-                  <DropdownMenu>
-                    <TextField
-                      className="h-auto w-44 flex-none"
-                      variant="filled"
-                      label=""
-                      helpText=""
-                      icon={<FeatherLocateFixed />}
-                    >
-                      <TextField.Input placeholder="Enter location" />
-                    </TextField>
-                  </DropdownMenu>
-                </SubframeCore.DropdownMenu.Content>
-              </SubframeCore.DropdownMenu.Portal>
-            </SubframeCore.DropdownMenu.Root>
-            <Button variant="brand-secondary" icon={<FeatherUser />}>
-              Sign In
-            </Button>
-            <Button icon={<FeatherShoppingCart />}>Cart</Button>
-          </>
-        }
-      />
-      {children ? (
-        <div className="flex w-full grow shrink-0 basis-0 flex-col items-start gap-4 overflow-y-auto bg-default-background">
-          {children}
+const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayoutRootProps>(
+  function DefaultPageLayoutRoot(
+    { children, className, enableMarketplaceMode = false, ...otherProps }: DefaultPageLayoutRootProps,
+    ref
+  ) {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [showMobileNav, setShowMobileNav] = useState(false);
+
+    const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
+      console.log('Selected food item:', suggestion);
+      
+      // Navigate based on suggestion type
+      switch (suggestion.type) {
+        case 'product':
+          // Navigate to shop with product search
+          navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+          break;
+        case 'category':
+          // Extract category name from "All [Category]" format
+          const categoryName = suggestion.title.replace(/^All\s+/, '');
+          navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+          break;
+        case 'seller':
+          // Navigate to shop with seller filter
+          navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
+          break;
+        default:
+          // Navigate to search results
+          navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+      }
+    };
+
+    const handleFoodSearchSubmit = (query: string) => {
+      console.log('Food search submitted:', query);
+      // Navigate to search results page
+      navigate(`/shop?search=${encodeURIComponent(query)}`);
+    };
+
+    return (
+      <div
+        className={SubframeUtils.twClassNames(
+          enableMarketplaceMode 
+            ? "flex h-screen w-full flex-col bg-default-background"
+            : "flex min-h-screen w-full flex-col bg-default-background",
+          className
+        )}
+        ref={ref}
+        {...otherProps}
+      >
+        {/* Desktop Topbar - Only show on large screens (1280px+) */}
+        <div className="hidden xl:block w-full" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
+          <TopbarWithCenterSearch3
+            className="w-full bg-default-background border-b border-neutral-border"
+            leftSlot={
+              <>
+                <Link to="/">
+                  <img
+                    className="h-6 flex-none object-cover cursor-pointer"
+                    src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye54aye.png"
+                    alt="Logo"
+                  />
+                </Link>
+                <div className="flex items-center gap-2">
+                  <Link to="/">
+                    <TopbarWithCenterSearch3.NavItem selected={location.pathname === "/"}>
+                      Home
+                    </TopbarWithCenterSearch3.NavItem>
+                  </Link>
+                  <Link to="/shop">
+                    <TopbarWithCenterSearch3.NavItem selected={location.pathname === "/shop"}>
+                      Shop
+                    </TopbarWithCenterSearch3.NavItem>
+                  </Link>
+                  <Link to="/sell">
+                    <TopbarWithCenterSearch3.NavItem selected={location.pathname === "/sell"}>
+                      Sell
+                    </TopbarWithCenterSearch3.NavItem>
+                  </Link>
+                </div>
+              </>
+            }
+            centerSlot={
+              <FoodSearchField
+                className="h-auto grow shrink-0 basis-0"
+                onItemSelect={handleFoodItemSelect}
+                onSearchSubmit={handleFoodSearchSubmit}
+                placeholder="Search for fresh local food..."
+                showTrending={true}
+              />
+            }
+            rightSlot={
+              <>
+                <LocationButton className="flex-shrink-0" />
+                <Button variant="brand-secondary" icon={<FeatherUser />}>
+                  Sign In
+                </Button>
+                <Button icon={<FeatherShoppingCart />}>
+                  Cart
+                </Button>
+              </>
+            }
+          />
         </div>
-      ) : null}
-    </div>
-  );
-});
+
+        {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
+        <div className="xl:hidden w-full" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
+          <TopbarWithCenterSearch2
+            className="w-full bg-default-background border-b border-neutral-border"
+            centerSlot={
+              <FoodSearchField
+                className="h-auto grow shrink-0 basis-0"
+                onItemSelect={handleFoodItemSelect}
+                onSearchSubmit={handleFoodSearchSubmit}
+                placeholder="Search fresh food..."
+                showTrending={false}
+              />
+            }
+            rightSlot={
+              <>
+                <LocationButton className="flex-shrink-0" />
+                <IconButton
+                  variant="brand-secondary"
+                  icon={<FeatherUser />}
+                  onClick={() => {}}
+                />
+                <IconButton
+                  variant="brand-primary"
+                  icon={<FeatherShoppingCart />}
+                  onClick={() => {}}
+                />
+              </>
+            }
+          />
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <MobileNavMenu
+          isOpen={showMobileNav}
+          onClose={() => setShowMobileNav(false)}
+        />
+
+        {/* Main Content - Conditional overflow based on marketplace mode */}
+        {children ? (
+          <div className={
+            enableMarketplaceMode 
+              ? "flex-1 w-full bg-default-background overflow-hidden pt-20" 
+              : "flex-1 w-full bg-default-background overflow-y-auto pt-20"
+          }>
+            {children}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+);
 
 export const DefaultPageLayout = DefaultPageLayoutRoot;
