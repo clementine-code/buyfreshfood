@@ -61,18 +61,26 @@ html, body {
   padding: 0;
   width: 100%;
   border-top: 1px solid #ffffff;
+  margin-bottom: 0 !important;
+}
+
+/* Filter bar content padding */
+.sort-filter-bar > div {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
 }
 
 /* Desktop adjustments */
 @media (min-width: 1280px) {
   .sort-filter-bar {
-    top: 0;
+    top: 0 !important;
     transform: translateY(0) !important;
     min-height: 80px;
     display: flex;
     align-items: center;
-    border-top: 2px solid #ffffff;
-    margin-top: -1px;
+    border-top: none !important;
+    margin-top: 0 !important;
   }
   
   .sort-filter-bar > div {
@@ -84,7 +92,29 @@ html, body {
   }
   
   .desktop-shop-container {
-    padding-top: 73px;
+    padding-top: 73px !important;
+    margin-top: 0 !important;
+  }
+  
+  .desktop-shop-container .sort-filter-bar {
+    top: 0 !important;
+    position: sticky !important;
+  }
+  
+  /* Remove any gaps in the desktop layout */
+  .hidden.xl\\:flex.w-full.h-full {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  
+  /* Products area should have no top gap */
+  .w-1\\/2.h-full.flex.flex-col.bg-default-background {
+    margin-top: 0 !important;
+  }
+  
+  /* Map area should have no top gap */
+  .w-1\\/2.h-full.relative {
+    margin-top: 0 !important;
   }
 }
 
@@ -92,7 +122,7 @@ html, body {
 @media (max-width: 1279px) {
   .sort-filter-bar {
     position: fixed !important;
-    top: 73px;
+    top: 73px !important;
     left: 0;
     right: 0;
     width: 100%;
@@ -110,13 +140,9 @@ html, body {
     transform: translateY(0) !important;
   }
   
-/* Desktop: Sort/filter bar should sit at very top of container */
-@media (min-width: 1280px) {
-  .desktop-shop-container .sort-filter-bar {
-    top: 0 !important;
-    position: sticky !important;
+  .mobile-shop-content {
+    padding-top: 73px !important;
   }
-}
   
   .mobile-shop-content.filter-visible {
     padding-top: 120px;
@@ -125,13 +151,18 @@ html, body {
   .mobile-shop-content.filter-hidden {
     padding-top: 73px;
   }
-}
-
-/* Filter bar content padding */
-.sort-filter-bar > div {
-  min-height: 60px;
-  display: flex;
-  align-items: center;
+  
+  /* Remove any top padding from products area on mobile */
+  .mobile-shop-content > .w-full.px-4.flex-1 {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  /* Products grid should start immediately after filter bar */
+  .mobile-shop-content > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
 }
 
 /* Floating actions positioning */
@@ -195,62 +226,4 @@ html, body {
 /* Override smooth scrolling */
 * {
   scroll-behavior: auto !important;
-}
-
-/* Mobile: Ensure no extra spacing */
-@media (max-width: 1279px) {
-  .mobile-shop-content .sort-filter-bar {
-    top: 73px !important;
-    position: fixed !important;
-  }
-  
-  /* Remove any top padding from products area on mobile */
-  .mobile-shop-content > .w-full.px-4.flex-1 {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-  }
-}
-  
-  /* Ensure sort/filter bar connects seamlessly */
-  .sort-filter-bar {
-    margin-bottom: 0 !important;
-  }
-  
-  /* Products grid should start immediately after filter bar */
-  .mobile-shop-content > div:first-child {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-  }
-}
-
-/* DESKTOP FIXES - Remove gap between navbar and content */
-@media (min-width: 1280px) {
-  /* Remove padding from desktop container */
-  .desktop-shop-container {
-    padding-top: 73px !important;
-    margin-top: 0 !important;
-  }
-  
-  /* Ensure sort/filter bar sits directly under navbar */
-  .sort-filter-bar {
-    top: 0 !important;
-    margin-top: 0 !important;
-    border-top: none !important;
-  }
-  
-  /* Remove any gaps in the desktop layout */
-  .hidden.xl\\:flex.w-full.h-full {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-  }
-  
-  /* Products area should have no top gap */
-  .w-1\\/2.h-full.flex.flex-col.bg-default-background {
-    margin-top: 0 !important;
-  }
-  
-  /* Map area should have no top gap */
-  .w-1\\/2.h-full.relative {
-    margin-top: 0 !important;
-  }
 }
