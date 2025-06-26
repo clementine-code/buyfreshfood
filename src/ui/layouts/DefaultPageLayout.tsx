@@ -131,7 +131,9 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
 
         {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
         {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-<div className="xl:hidden w-full" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
+{/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
+<div className="xl:hidden w-full bg-default-background border-b border-neutral-border fixed-navbar">
+  <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
   <TopbarWithCenterSearch2
     className="w-full bg-default-background border-b border-neutral-border"
     onMenuClick={() => setShowMobileNav(true)}
