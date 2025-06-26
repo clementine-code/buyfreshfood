@@ -7,6 +7,7 @@ import { TextField } from "@/ui/components/TextField";
 import { Badge } from "@/ui/components/Badge";
 import { FeatherSearch, FeatherTrendingUp, FeatherTag, FeatherMapPin, FeatherStore, FeatherGrid } from "@subframe/core";
 import { foodSearchService, type FoodSearchSuggestion, formatFoodPrice } from "../services/foodSearchService";
+import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
 
 interface FoodSearchFieldProps {
   className?: string;
@@ -24,6 +25,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   showTrending = true
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<FoodSearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -336,6 +338,17 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
       }
     };
   }, []);
+
+  // Clear search text when navigating away from shop page
+useEffect(() => {
+  if (location.pathname !== '/shop') {
+    console.log('📍 Left shop page, clearing search text');
+    setQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+  }
+}, [location.pathname]);
 
   // Get suggestion icon based on type
   const getSuggestionIcon = useCallback((suggestion: FoodSearchSuggestion) => {
