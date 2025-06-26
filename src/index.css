@@ -52,53 +52,89 @@ html, body {
 /* SORT/FILTER BAR - COMPLETELY FIXED - NO GAPS */
 .sort-filter-bar {
   position: sticky;
-  top: 0; /* FIXED: Changed from 73px to 0 - sits directly under navbar */
+  top: 0;
   z-index: 60;
   background-color: #ffffff;
   border-bottom: 1px solid #f0efed;
   box-shadow: 0px 1px 3px 0px rgba(55, 48, 40, 0.06);
   margin: 0;
   padding: 0;
+  width: 100%;
+  /* Seal any tiny gaps */
+  border-top: 1px solid #ffffff;
 }
 
-/* Mobile specific positioning - NO GAPS */
+/* Desktop - make filter bar thicker and seal gaps */
+@media (min-width: 1280px) {
+  .sort-filter-bar {
+    position: sticky;
+    top: 0;
+    transform: translateY(0) !important;
+    /* DESKTOP FIX: Make filter bar thicker */
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    /* SEAL GAPS: Ensure solid background connection */
+    border-top: 2px solid #ffffff;
+    margin-top: -1px; /* Pull up slightly to eliminate micro-gaps */
+  }
+  
+  /* Ensure desktop container has no spacing issues */
+  .desktop-shop-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+}
+
+/* Mobile - fix scroll behavior and ensure no gaps */
 @media (max-width: 1279px) {
   .sort-filter-bar {
-    position: fixed;
-    top: 73px; /* Mobile: stick under navbar */
+    position: fixed !important;
+    top: 73px;
     left: 0;
     right: 0;
     width: 100%;
+    /* MOBILE FIX: Ensure scroll hiding works */
+    transition: transform 0.3s ease-in-out;
+    will-change: transform;
+    /* SEAL GAPS */
+    border-top: 1px solid #ffffff;
+    margin-top: -1px;
   }
   
   .sort-filter-bar.scroll-hidden {
-    transform: translateY(-100%);
-    transition: transform 0.3s ease-in-out;
+    transform: translateY(-100%) !important;
   }
   
   .sort-filter-bar.scroll-visible {
-    transform: translateY(0);
-    transition: transform 0.3s ease-in-out;
+    transform: translateY(0) !important;
   }
   
   /* Account for fixed filter bar in mobile content */
   .mobile-content-with-filter {
-    padding-top: 120px; /* 73px navbar + ~47px filter bar */
+    padding-top: 125px;
+  }
+  
+  /* Adjust mobile content spacing when filter bar changes */
+  .mobile-shop-content.filter-visible {
+    padding-top: 125px;
+  }
+  
+  .mobile-shop-content.filter-hidden {
+    padding-top: 73px;
   }
 }
 
-/* Desktop - always visible, no gaps */
+/* Ensure the filter bar content has proper padding */
+.sort-filter-bar > div {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
 @media (min-width: 1280px) {
-  .sort-filter-bar {
-    position: sticky;
-    top: 0; /* Stick to top of its container */
-    transform: translateY(0) !important;
-  }
-  
-  /* Desktop container should have no padding-top */
-  .desktop-shop-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+  .sort-filter-bar > div {
+    min-height: 80px; /* Thicker on desktop */
   }
 }
 
@@ -138,11 +174,13 @@ html, body {
 
 .offline-mode .sort-filter-bar {
   top: 120px; /* Mobile: under navbar + alert */
+  border-top: 2px solid #ffffff; /* Extra sealing for offline alert */
 }
 
 @media (min-width: 1280px) {
   .offline-mode .sort-filter-bar {
-    top: 47px; /* Desktop: just account for alert height */
+    top: 47px; /* Desktop: account for alert height */
+    margin-top: -2px; /* Extra pull-up for offline mode */
   }
 }
 
