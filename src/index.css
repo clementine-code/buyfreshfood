@@ -110,9 +110,13 @@ html, body {
     transform: translateY(0) !important;
   }
   
-  .mobile-shop-content {
-    padding-top: 73px;
+/* Desktop: Sort/filter bar should sit at very top of container */
+@media (min-width: 1280px) {
+  .desktop-shop-container .sort-filter-bar {
+    top: 0 !important;
+    position: sticky !important;
   }
+}
   
   .mobile-shop-content.filter-visible {
     padding-top: 120px;
@@ -193,13 +197,19 @@ html, body {
   scroll-behavior: auto !important;
 }
 
-/* MOBILE FIXES - Remove gap between sort/filter bar and products */
+/* Mobile: Ensure no extra spacing */
 @media (max-width: 1279px) {
-  /* Remove any padding/margin from the products container */
-  .mobile-shop-content .w-full.px-4.py-4 {
+  .mobile-shop-content .sort-filter-bar {
+    top: 73px !important;
+    position: fixed !important;
+  }
+  
+  /* Remove any top padding from products area on mobile */
+  .mobile-shop-content > .w-full.px-4.flex-1 {
     padding-top: 0 !important;
     margin-top: 0 !important;
   }
+}
   
   /* Ensure sort/filter bar connects seamlessly */
   .sort-filter-bar {
