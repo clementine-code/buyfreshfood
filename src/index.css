@@ -20,13 +20,13 @@ html, body {
   overflow-x: hidden;
 }
 
-/* FIXED NAVBAR - Always visible, no gaps */
+/* FIXED NAVBAR - Always on top */
 .fixed-navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  z-index: 100 !important;
   height: 73px;
   background-color: #fcfaf5;
   border-bottom: 1px solid #f0efed;
@@ -49,55 +49,46 @@ html, body {
   z-index: 1;
 }
 
-/* SORT/FILTER BAR - COMPLETELY FIXED - NO GAPS */
+/* SORT/FILTER BAR - Below navbar */
 .sort-filter-bar {
   position: sticky;
-  top: 0;
-  z-index: 60;
+  top: 73px;
+  z-index: 60 !important;
   background-color: #ffffff;
   border-bottom: 1px solid #f0efed;
   box-shadow: 0px 1px 3px 0px rgba(55, 48, 40, 0.06);
   margin: 0;
   padding: 0;
   width: 100%;
-  /* Seal any tiny gaps */
   border-top: 1px solid #ffffff;
 }
 
-/* Desktop - make filter bar thicker and seal gaps */
+/* Desktop adjustments */
 @media (min-width: 1280px) {
   .sort-filter-bar {
-    position: sticky;
     top: 0;
     transform: translateY(0) !important;
-    /* DESKTOP FIX: Make filter bar thicker */
     min-height: 80px;
     display: flex;
     align-items: center;
-    /* SEAL GAPS: Ensure solid background connection */
     border-top: 2px solid #ffffff;
-    margin-top: -1px; /* Pull up slightly to eliminate micro-gaps */
+    margin-top: -1px;
   }
   
-  /* Ensure desktop container has no spacing issues */
-  .desktop-shop-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-  }
-}
-
-/* Add this to your index.css - Desktop filter bar padding fix */
-@media (min-width: 1280px) {
   .sort-filter-bar > div {
-    min-height: 80px; /* Keep existing thickness */
+    min-height: 80px;
     display: flex;
     align-items: center;
-    padding-left: 24px !important; /* Add left padding */
-    padding-right: 24px !important; /* Add right padding */
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+  
+  .desktop-shop-container {
+    padding-top: 73px;
   }
 }
 
-/* Mobile - fix scroll behavior and ensure no gaps */
+/* Mobile adjustments */
 @media (max-width: 1279px) {
   .sort-filter-bar {
     position: fixed !important;
@@ -105,10 +96,8 @@ html, body {
     left: 0;
     right: 0;
     width: 100%;
-    /* MOBILE FIX: Ensure scroll hiding works */
     transition: transform 0.3s ease-in-out;
     will-change: transform;
-    /* SEAL GAPS */
     border-top: 1px solid #ffffff;
     margin-top: -1px;
   }
@@ -121,14 +110,12 @@ html, body {
     transform: translateY(0) !important;
   }
   
-  /* Account for fixed filter bar in mobile content */
-  .mobile-content-with-filter {
-    padding-top: 125px;
+  .mobile-shop-content {
+    padding-top: 73px;
   }
   
-  /* Adjust mobile content spacing when filter bar changes */
   .mobile-shop-content.filter-visible {
-    padding-top: 125px;
+    padding-top: 120px;
   }
   
   .mobile-shop-content.filter-hidden {
@@ -136,26 +123,20 @@ html, body {
   }
 }
 
-/* Ensure the filter bar content has proper padding */
+/* Filter bar content padding */
 .sort-filter-bar > div {
   min-height: 60px;
   display: flex;
   align-items: center;
 }
 
-@media (min-width: 1280px) {
-  .sort-filter-bar > div {
-    min-height: 80px; /* Thicker on desktop */
-  }
-}
-
-/* Floating buttons */
+/* Floating actions positioning */
 .floating-actions {
   position: fixed;
-  z-index: 80;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 80;
 }
 
 /* Modal overlays */
@@ -166,60 +147,45 @@ html, body {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.modal-backdrop {
+  z-index: 200;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  z-index: 90;
+}
+
 /* Search suggestions - highest z-index */
 .search-suggestions-portal {
   z-index: 99999 !important;
   pointer-events: auto !important;
 }
 
-/* Dropdown menus */
-.dropdown-menu {
-  z-index: 100;
-}
-
-/* Offline mode - adjust for alert - FIXED */
+/* Offline mode adjustments */
 .offline-mode .main-content,
 .offline-mode .marketplace-content {
   padding-top: 120px; /* 73px navbar + 47px alert */
 }
 
 .offline-mode .sort-filter-bar {
-  top: 120px; /* Mobile: under navbar + alert */
-  border-top: 2px solid #ffffff; /* Extra sealing for offline alert */
-}
-
-@media (min-width: 1280px) {
-  .offline-mode .sort-filter-bar {
-    top: 47px; /* Desktop: account for alert height */
-    margin-top: -2px; /* Extra pull-up for offline mode */
-  }
-}
-
-/* Mobile content spacing when filter bar is present */
-.mobile-shop-content {
-  padding-top: 73px; /* Just navbar by default */
+  top: 120px;
+  border-top: 2px solid #ffffff;
 }
 
 .offline-mode .mobile-shop-content {
-  padding-top: 120px; /* Navbar + alert */
-}
-
-/* When filter bar is hidden on scroll, adjust content spacing */
-.mobile-shop-content.filter-hidden {
-  padding-top: 73px; /* Just navbar */
-}
-
-.offline-mode .mobile-shop-content.filter-hidden {
-  padding-top: 120px; /* Navbar + alert */
-}
-
-/* When filter bar is visible, account for its height */
-.mobile-shop-content.filter-visible {
-  padding-top: 120px; /* Navbar + filter bar (~47px) */
+  padding-top: 120px;
 }
 
 .offline-mode .mobile-shop-content.filter-visible {
   padding-top: 167px; /* Navbar + alert + filter bar */
+}
+
+@media (min-width: 1280px) {
+  .offline-mode .sort-filter-bar {
+    top: 47px;
+    margin-top: -2px;
+  }
 }
 
 /* Override smooth scrolling */
