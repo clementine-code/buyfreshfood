@@ -31,8 +31,8 @@ function Home() {
 
   return (
     <DefaultPageLayout>
-      <div className="flex w-full flex-col items-center justify-center gap-4 bg-default-background overflow-x-hidden">
-        <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 py-24 max-w-full relative mobile:px-4 mobile:py-16">
+     <div className="flex w-full flex-col items-center justify-center bg-default-background overflow-x-hidden">
+  <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 pt-0 pb-24 max-w-full relative mobile:px-4 mobile:pt-0 mobile:pb-16">
           <div className="flex flex-col items-center justify-center gap-8 px-6 py-6 z-10">
             <Badge>Welcome to BuyFresh.Food!</Badge>
             <div className="flex w-full max-w-[768px] flex-col items-start gap-4 rounded-md bg-[#edfcefcc] px-6 py-6 shadow-sm">
