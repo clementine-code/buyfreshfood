@@ -66,22 +66,40 @@ function Shop() {
   const itemsPerPage = 50;
 
   useEffect(() => {
-  console.log('🟢 Component mounted, testing useEffect...');
+  console.log('🟢 Component mounted, testing scroll detection...');
   console.log('🔍 Current scrollDirection state:', scrollDirection);
   console.log('🔍 Window width:', window.innerWidth);
+  console.log('🔍 Initial scroll position:', window.scrollY);
   
-  // Simple scroll test
-  const testScroll = () => {
-    console.log('🔄 SCROLL DETECTED! Current scroll:', window.scrollY);
+  // Test multiple scroll targets
+  const testScroll = (event) => {
+    console.log('🔄 SCROLL EVENT DETECTED!', {
+      scrollY: window.scrollY,
+      documentScrollTop: document.documentElement.scrollTop,
+      bodyScrollTop: document.body.scrollTop,
+      target: event.target,
+      timestamp: Date.now()
+    });
   };
   
-  window.addEventListener('scroll', testScroll);
+  // Add listeners to multiple possible scroll targets
+  console.log('📝 Adding scroll listeners...');
+  window.addEventListener('scroll', testScroll, { passive: true });
+  document.addEventListener('scroll', testScroll, { passive: true });
+  
+  // Also test with a timeout to see if something is interfering
+  const timeoutId = setTimeout(() => {
+    console.log('⏰ 3 seconds after mount - scroll position:', window.scrollY);
+    console.log('🧪 Manual scroll test - try scrolling now...');
+  }, 3000);
   
   return () => {
-    console.log('🔴 Cleaning up test scroll listener');
+    console.log('🔴 Cleaning up scroll listeners');
     window.removeEventListener('scroll', testScroll);
+    document.removeEventListener('scroll', testScroll);
+    clearTimeout(timeoutId);
   };
-}, []); // Empty dependency array
+}, []);
 
   // Scroll direction for mobile filter bar
   const [scrollDirection, setScrollDirection] = useState('up');
