@@ -91,20 +91,20 @@ html, body {
     padding-right: 24px !important;
   }
   
-  .desktop-shop-container {
+  /* Desktop container should account for navbar */
+  .hidden.xl\\:flex.w-full.h-full {
+    margin-top: 0 !important;
     padding-top: 73px !important;
+  }
+  
+  .desktop-shop-container {
+    padding-top: 0 !important;
     margin-top: 0 !important;
   }
   
   .desktop-shop-container .sort-filter-bar {
     top: 0 !important;
     position: sticky !important;
-  }
-  
-  /* Remove any gaps in the desktop layout */
-  .hidden.xl\\:flex.w-full.h-full {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
   }
   
   /* Products area should have no top gap */
