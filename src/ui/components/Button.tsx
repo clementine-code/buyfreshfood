@@ -56,7 +56,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonRootProps>(
               variant === "inverse",
             "bg-transparent hover:bg-error-50 active:bg-error-100":
               variant === "destructive-tertiary",
-            "bg-peach-50 hover:bg-peach-100 active:bg-peach-50":
+            "bg-peach-100 hover:bg-peach-200 active:bg-peach-100":
               variant === "destructive-secondary",
             "bg-peach-600 hover:bg-peach-500 active:bg-peach-600":
               variant === "destructive-primary",
@@ -68,7 +68,7 @@ const ButtonRoot = React.forwardRef<HTMLElement, ButtonRootProps>(
               variant === "neutral-primary",
             "bg-transparent hover:bg-brand-50 active:bg-brand-100":
               variant === "brand-tertiary",
-            "bg-brand-50 hover:bg-brand-100 active:bg-brand-50":
+            "bg-brand-100 hover:bg-brand-200 active:bg-brand-100":
               variant === "brand-secondary",
           },
           className
