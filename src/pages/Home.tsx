@@ -41,34 +41,38 @@ function Home() {
       {/* FIXED: Negative margin to eliminate gap from DefaultPageLayout */}
       <div className="flex w-full flex-col items-center justify-center bg-default-background overflow-x-hidden -mt-20">
         
-        {/* Hero Section - Starts immediately under navbar */}
-        <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 pt-20 pb-24 max-w-full relative mobile:px-4 mobile:pt-20 mobile:pb-16">
-          <div className="flex flex-col items-center justify-center gap-8 px-6 py-6 z-10">
-            <Badge>Welcome to BuyFresh.Food!</Badge>
-            <div className="flex w-full max-w-[768px] flex-col items-start gap-4 rounded-md bg-[#edfcefcc] px-6 py-6 shadow-sm">
-              <span className="w-full font-['Inter'] text-[48px] font-[700] leading-[48px] text-default-font text-center -tracking-[0.035em] mobile:font-['Inter'] mobile:text-[32px] mobile:font-[400] mobile:leading-[36px] mobile:tracking-normal">
-                Fresh Local Food From Your Neighbors
-              </span>
-              <span className="w-full whitespace-pre-wrap font-['Inter'] text-[24px] font-[500] leading-[32px] text-default-font text-center -tracking-[0.025em] mobile:font-['Inter'] mobile:text-[18px] mobile:font-[400] mobile:leading-[24px] mobile:tracking-normal">
-                Connect with local farmers and gardeners for the freshest produce, eggs, and more - right in your neighborhood.
-              </span>
-            </div>
-            <Button
-              size="large"
-              icon={<FeatherCarrot />}
-              onClick={handleShopClick}
-            >
-              Shop For Fresh Local Food
-            </Button>
-          </div>
-          {/* Background Image */}
-          <img
-            className="w-full grow shrink-0 basis-0 object-cover absolute inset-0"
-            src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3"
-          />
-          {/* Dark Overlay */}
-          <div className="flex w-full grow shrink-0 basis-0 flex-col items-start bg-[#00000066] absolute inset-0" />
-        </div>
+       {/* Hero Section - FIXED mobile overlay issue */}
+<div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 pt-20 pb-24 max-w-full relative mobile:px-4 mobile:pt-24 mobile:pb-16 mobile:min-h-[500px]">
+  <div className="flex flex-col items-center justify-center gap-8 px-6 py-6 z-10">
+    <Badge>Welcome to BuyFresh.Food!</Badge>
+    <div className="flex w-full max-w-[768px] flex-col items-start gap-4 rounded-md bg-[#edfcefcc] px-6 py-6 shadow-sm mobile:px-4 mobile:py-4 mobile:max-w-[90%]">
+      <span className="w-full font-['Inter'] text-[48px] font-[700] leading-[48px] text-default-font text-center -tracking-[0.035em] mobile:font-['Inter'] mobile:text-[28px] mobile:font-[400] mobile:leading-[32px] mobile:tracking-normal">
+        Fresh Local Food From Your Neighbors
+      </span>
+      <span className="w-full whitespace-pre-wrap font-['Inter'] text-[24px] font-[500] leading-[32px] text-default-font text-center -tracking-[0.025em] mobile:font-['Inter'] mobile:text-[16px] mobile:font-[400] mobile:leading-[22px] mobile:tracking-normal">
+        Connect with local farmers and gardeners for the freshest produce, eggs, and more - right in your neighborhood.
+      </span>
+    </div>
+    <Button
+      size="large"
+      icon={<FeatherCarrot />}
+      onClick={handleShopClick}
+      className="mobile:w-full mobile:max-w-[280px]"
+    >
+      Shop For Fresh Local Food
+    </Button>
+  </div>
+  
+  {/* Background Image - FIXED positioning */}
+  <img
+    className="w-full h-full object-cover absolute inset-0 mobile:object-center"
+    src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3"
+    alt="Fresh vegetables background"
+  />
+  
+  {/* Dark Overlay - FIXED for mobile */}
+  <div className="w-full h-full bg-[#00000066] absolute inset-0 mobile:bg-[#00000055]" />
+</div>
 
         {/* Main Content */}
         <div className="flex w-full flex-col items-center gap-8 px-4 pt-6 pb-24 max-w-full mobile:px-4 mobile:pt-6 mobile:pb-24">
