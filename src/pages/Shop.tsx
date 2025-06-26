@@ -780,9 +780,10 @@ useEffect(() => {
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
         <div className={`sort-filter-bar xl:hidden w-full ${
   (showMobileFilters || showMobileMap) ? 'hidden' : ''
-} ${
-  scrollDirection === 'down' ? 'scroll-hidden' : 'scroll-visible'
-}`}>
+}`} style={{
+  transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
+  transition: 'transform 0.3s ease-in-out'
+}}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
