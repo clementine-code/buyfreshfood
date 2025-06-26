@@ -37,7 +37,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const [showMobileNav, setShowMobileNav] = useState(false);
 
     const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
-      console.log('🍎 Food item selected in navbar:', suggestion);
+      console.log('🍎 NAVBAR: Food item selected:', suggestion);
       
       // Navigate based on suggestion type
       switch (suggestion.type) {
@@ -61,7 +61,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     };
 
     const handleFoodSearchSubmit = (query: string) => {
-      console.log('🔍 Food search submitted in navbar:', query);
+      console.log('🔍 NAVBAR: Food search submitted:', query);
       // Navigate to search results page
       navigate(`/shop?search=${encodeURIComponent(query)}`);
     };
@@ -77,7 +77,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         ref={ref}
         {...otherProps}
       >
-        {/* Desktop Topbar - Only show on large screens (1280px+) */}
+        {/* Desktop Topbar - FIXED NAVBAR */}
         <div className="hidden xl:block fixed-navbar">
           <TopbarWithCenterSearch3
             className="py-3 h-full"
@@ -131,7 +131,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
           />
         </div>
 
-        {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
+        {/* Mobile/Tablet Topbar - FIXED NAVBAR */}
         <div className="xl:hidden fixed-navbar">
           <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
             {/* Hamburger Menu Button */}
@@ -180,7 +180,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
           onClose={() => setShowMobileNav(false)}
         />
 
-        {/* Main Content - Conditional overflow based on marketplace mode */}
+        {/* Main Content - PROPER SPACING */}
         {children ? (
           <div className={
             enableMarketplaceMode 

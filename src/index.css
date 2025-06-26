@@ -6,25 +6,21 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #fcfaf5; /* Ensure body has the default background color */
-  /* Ensure consistent scrollbar space is always reserved */
+  background-color: #fcfaf5;
   scrollbar-gutter: stable;
-  /* Prevent horizontal overflow */
   overflow-x: hidden;
-  /* Ensure smooth scrolling behavior */
-  scroll-behavior: auto; /* Changed from smooth to auto for instant scroll to top */
+  scroll-behavior: auto;
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #fcfaf5; /* Ensure root has the default background color */
-  /* Prevent horizontal overflow */
+  background-color: #fcfaf5;
   overflow-x: hidden;
 }
 
-/* Fixed navbar positioning - ALWAYS visible */
+/* FIXED NAVBAR - Always visible, no gaps */
 .fixed-navbar {
   position: fixed;
   top: 0;
@@ -36,7 +32,7 @@ html, body {
   border-bottom: 1px solid #f0efed;
 }
 
-/* Main content area - accounts for fixed navbar */
+/* MAIN CONTENT - Accounts for navbar height */
 .main-content {
   padding-top: 73px;
   min-height: calc(100vh - 73px);
@@ -44,7 +40,7 @@ html, body {
   z-index: 1;
 }
 
-/* Marketplace mode - full height layout */
+/* MARKETPLACE MODE - Full height */
 .marketplace-content {
   padding-top: 73px;
   height: 100vh;
@@ -53,7 +49,7 @@ html, body {
   z-index: 1;
 }
 
-/* Sort/Filter bar positioning */
+/* SORT/FILTER BAR - NO GAPS, sits directly under navbar */
 .sort-filter-bar {
   position: sticky;
   top: 73px;
@@ -61,21 +57,20 @@ html, body {
   background-color: #ffffff;
   border-bottom: 1px solid #f0efed;
   box-shadow: 0px 1px 3px 0px rgba(55, 48, 40, 0.06);
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  margin: 0;
+  padding: 0;
 }
 
-/* Mobile scroll behavior for sort/filter bar */
+/* Mobile scroll behavior - hide/show filter bar */
 @media (max-width: 1279px) {
-  .sort-filter-bar.hidden-on-scroll {
+  .sort-filter-bar.scroll-hidden {
     transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
+    transition: transform 0.3s ease-in-out;
   }
   
-  .sort-filter-bar.visible-on-scroll {
+  .sort-filter-bar.scroll-visible {
     transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
+    transition: transform 0.3s ease-in-out;
   }
 }
 
@@ -83,12 +78,10 @@ html, body {
 @media (min-width: 1280px) {
   .sort-filter-bar {
     transform: translateY(0) !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
   }
 }
 
-/* Floating action buttons */
+/* Floating buttons */
 .floating-actions {
   position: fixed;
   z-index: 80;
@@ -105,18 +98,18 @@ html, body {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* Search suggestions portal */
+/* Search suggestions - highest z-index */
 .search-suggestions-portal {
-  z-index: 99999;
-  pointer-events: auto;
+  z-index: 99999 !important;
+  pointer-events: auto !important;
 }
 
-/* Ensure proper layering for dropdowns */
+/* Dropdown menus */
 .dropdown-menu {
   z-index: 100;
 }
 
-/* Offline mode adjustments */
+/* Offline mode - adjust for alert */
 .offline-mode .main-content,
 .offline-mode .marketplace-content {
   padding-top: 120px;
@@ -126,12 +119,7 @@ html, body {
   top: 120px;
 }
 
-/* Smooth transitions for all interactive elements */
-.transition-smooth {
-  transition: all 0.3s ease-in-out;
-}
-
-/* Override any smooth scrolling that might interfere with scroll to top */
+/* Override smooth scrolling */
 * {
   scroll-behavior: auto !important;
 }

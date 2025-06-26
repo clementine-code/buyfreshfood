@@ -547,9 +547,9 @@ function Shop() {
 
   return (
     <div className="flex w-full h-full bg-default-background">
-      {/* Offline Mode Alert */}
+      {/* Offline Mode Alert - FIXED POSITIONING */}
       {isOfflineMode && (
-        <div className="fixed top-20 left-4 right-4 z-[90] xl:left-6 xl:right-6">
+        <div className="fixed top-[73px] left-4 right-4 z-[90] xl:left-6 xl:right-6">
           <Alert variant="warning" className="shadow-lg">
             <FeatherWifiOff className="w-5 h-5" />
             <div className="flex flex-col gap-1">
@@ -560,12 +560,12 @@ function Shop() {
         </div>
       )}
 
-      {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-      <div className="hidden xl:flex w-full h-full" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
+      {/* Desktop Layout - FIXED HEIGHT, NO GAPS */}
+      <div className={`hidden xl:flex w-full h-full ${isOfflineMode ? 'offline-mode' : ''}`}>
         {/* Left Side - Products (50% width, scrollable content) */}
         <div className="w-1/2 h-full flex flex-col bg-default-background">
-          {/* Controls Bar - Fixed at top */}
-          <div className="sort-filter-bar flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+          {/* Controls Bar - NO GAP, sits directly under navbar */}
+          <div className="sort-filter-bar flex-shrink-0 flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -644,7 +644,7 @@ function Shop() {
             </div>
           </div>
 
-          {/* Products Area - Scrollable with ALL content (products + pagination + footer) */}
+          {/* Products Area - Scrollable with ALL content */}
           <div className="flex-1 overflow-y-auto bg-default-background">
             {/* Products Grid/List */}
             <div className="p-6">
@@ -697,14 +697,14 @@ function Shop() {
         </div>
       </div>
 
-      {/* Mobile & Tablet Layout - Show for all screens below 1280px */}
-      <div className="xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
-        {/* Mobile/Tablet Page Controls - Hide when modals are open, with scroll behavior */}
+      {/* Mobile & Tablet Layout - NO GAPS */}
+      <div className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative ${isOfflineMode ? 'offline-mode' : ''}`}>
+        {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
         <div className={`xl:hidden sort-filter-bar left-0 right-0 bg-white border-b border-neutral-200 shadow-sm w-full ${
           (showMobileFilters || showMobileMap) ? 'hidden' : ''
         } ${
-          scrollDirection === 'down' ? 'hidden-on-scroll' : 'visible-on-scroll'
-        }`} style={{top: isOfflineMode ? '120px' : '80px'}}>
+          scrollDirection === 'down' ? 'scroll-hidden' : 'scroll-visible'
+        }`}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
@@ -822,7 +822,7 @@ function Shop() {
         {/* Footer - Mobile & Tablet Only */}
         <Footer />
 
-        {/* Floating Action Buttons - Mobile & Tablet Only - Only show on main product view */}
+        {/* Floating Action Buttons - Mobile & Tablet Only */}
         {isMainProductView && (
           <div className="floating-actions">
             <div className="flex items-center gap-3 bg-white rounded-full px-4 py-3 shadow-lg border border-neutral-200">

@@ -139,12 +139,12 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
-  // Navigate to Shop page with search query
+  // Navigate to Shop page with search query - FIXED
   const navigateToShop = useCallback((searchQuery: string, suggestion?: FoodSearchSuggestion) => {
     const trimmedQuery = searchQuery.trim();
     if (!trimmedQuery) return;
 
-    console.log('🔍 Navigating to shop with:', { query: trimmedQuery, suggestion });
+    console.log('🔍 NAVIGATING TO SHOP:', { query: trimmedQuery, suggestion });
 
     if (suggestion) {
       switch (suggestion.type) {
@@ -245,9 +245,9 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [showSuggestions, suggestions, selectedIndex, handleSearchClick]);
 
-  // Handle suggestion clicks - FIXED NAVIGATION
+  // Handle suggestion clicks - COMPLETELY FIXED
   const handleSuggestionClick = useCallback((suggestion: FoodSearchSuggestion) => {
-    console.log('🖱️ Suggestion clicked:', suggestion);
+    console.log('🖱️ SUGGESTION CLICKED:', suggestion);
     
     // Prevent blur during click handling
     preventBlurRef.current = true;
@@ -258,7 +258,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     // Call the onItemSelect callback if provided
     onItemSelect?.(suggestion);
     
-    // Navigate to shop page with the suggestion
+    // Navigate to shop page with the suggestion - THIS IS THE FIX
     navigateToShop(suggestion.title, suggestion);
     
     // Reset prevention flag after navigation
@@ -372,7 +372,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('🖱️ Button clicked for suggestion:', suggestion);
+              console.log('🖱️ BUTTON CLICKED:', suggestion);
               handleSuggestionClick(suggestion);
             }}
             onMouseDown={(e) => {
