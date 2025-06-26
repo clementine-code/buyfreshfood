@@ -86,6 +86,17 @@ html, body {
   }
 }
 
+/* Add this to your index.css - Desktop filter bar padding fix */
+@media (min-width: 1280px) {
+  .sort-filter-bar > div {
+    min-height: 80px; /* Keep existing thickness */
+    display: flex;
+    align-items: center;
+    padding-left: 24px !important; /* Add left padding */
+    padding-right: 24px !important; /* Add right padding */
+  }
+}
+
 /* Mobile - fix scroll behavior and ensure no gaps */
 @media (max-width: 1279px) {
   .sort-filter-bar {
