@@ -65,64 +65,26 @@ function Shop() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
-  useEffect(() => {
-  // Skip on desktop
-  if (window.innerWidth >= 1280) {
-    console.log('🖥️ Desktop mode - skipping scroll detection');
-    return;
-  }
-
-  console.log('📱 Mobile mode - setting up scroll detection');
+  const handlePageScroll = () => {
+  // Only run on mobile
+  if (window.innerWidth >= 1280) return;
   
-  let lastScrollY = window.scrollY;
-  let timeoutId = null;
-
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-    const scrollDifference = Math.abs(currentScrollY - lastScrollY);
-    
-    console.log('📊 Scroll:', {
-      current: currentScrollY,
-      last: lastScrollY,
-      diff: scrollDifference,
-      rawDirection: currentScrollY > lastScrollY ? 'down' : 'up'
-    });
-
-    // Clear any existing timeout
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    // Use timeout to debounce and avoid too many state updates
-    timeoutId = setTimeout(() => {
-      if (currentScrollY <= 50) {
-        // Near top - always show
-        console.log('🔝 Near top - showing filter bar');
-        setScrollDirection('up');
-      } else if (scrollDifference > 20) {
-        // Significant scroll - update direction
-        const newDirection = currentScrollY > lastScrollY ? 'down' : 'up';
-        console.log(`🎯 Setting direction to: ${newDirection}`);
-        setScrollDirection(newDirection);
-      }
-      
-      lastScrollY = currentScrollY;
-    }, 100); // 100ms debounce
-  };
-
-  // Add scroll listener
-  console.log('✅ Adding scroll listener');
-  window.addEventListener('scroll', handleScroll, { passive: true });
-
-  // Cleanup function
-  return () => {
-    console.log('🧹 Cleaning up scroll listener');
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    window.removeEventListener('scroll', handleScroll);
-  };
-}, []);
+  const currentY = window.scrollY;
+  console.log('📱 Direct scroll handler triggered:', currentY);
+  
+  if (currentY <= 50) {
+    console.log('🔝 Top area - showing filter');
+    setScrollDirection('up');
+  } else if (currentY > (window.lastScrollY || 0) + 30) {
+    console.log('⬇️ Scrolling down - hiding filter');
+    setScrollDirection('down');
+  } else if (currentY < (window.lastScrollY || 0) - 30) {
+    console.log('⬆️ Scrolling up - showing filter');
+    setScrollDirection('up');
+  }
+  
+  window.lastScrollY = currentY;
+};
 
   // Scroll direction for mobile filter bar
   const [scrollDirection, setScrollDirection] = useState('up');
@@ -811,7 +773,10 @@ useEffect(() => {
       </div>
 
       {/* Mobile & Tablet Layout - NO GAPS */}
-      <div className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative mobile-shop-content ${isOfflineMode ? 'offline-mode' : ''} ${scrollDirection === 'down' ? 'filter-hidden' : 'filter-visible'}`}>
+      <div 
+  className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative mobile-shop-content ${isOfflineMode ? 'offline-mode' : ''} ${scrollDirection === 'down' ? 'filter-hidden' : 'filter-visible'}`}
+  onScroll={handlePageScroll}
+>
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
         <div className={`sort-filter-bar xl:hidden w-full ${
   (showMobileFilters || showMobileMap) ? 'hidden' : ''
