@@ -130,35 +130,32 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         </div>
 
         {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-        <div className="xl:hidden w-full" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
-          <TopbarWithCenterSearch2
-            className="w-full bg-default-background border-b border-neutral-border"
-            centerSlot={
-              <FoodSearchField
-                className="h-auto grow shrink-0 basis-0"
-                onItemSelect={handleFoodItemSelect}
-                onSearchSubmit={handleFoodSearchSubmit}
-                placeholder="Search fresh food..."
-                showTrending={false}
-              />
-            }
-            rightSlot={
-              <>
-                <LocationButton className="flex-shrink-0" />
-                <IconButton
-                  variant="brand-secondary"
-                  icon={<FeatherUser />}
-                  onClick={() => {}}
-                />
-                <IconButton
-                  variant="brand-primary"
-                  icon={<FeatherShoppingCart />}
-                  onClick={() => {}}
-                />
-              </>
-            }
-          />
-        </div>
+        {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
+<div className="xl:hidden w-full" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
+  <TopbarWithCenterSearch2
+    className="w-full bg-default-background border-b border-neutral-border"
+    onMenuClick={() => setShowMobileNav(true)}
+    centerSlot={
+      <FoodSearchField
+        className="h-auto grow shrink-0 basis-0"
+        onItemSelect={handleFoodItemSelect}
+        onSearchSubmit={handleFoodSearchSubmit}
+        placeholder="Search fresh food..."
+        showTrending={false}
+      />
+    }
+    rightSlot={
+      <>
+        <LocationButton className="flex-shrink-0" />
+        <IconButton
+          variant="brand-primary"
+          icon={<FeatherShoppingCart />}
+          onClick={() => {}}
+        />
+      </>
+    }
+  />
+</div>
 
         {/* Mobile Navigation Menu */}
         <MobileNavMenu
