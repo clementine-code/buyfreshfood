@@ -549,7 +549,7 @@ function Shop() {
     <div className="flex w-full h-full bg-default-background">
       {/* Offline Mode Alert - FIXED POSITIONING */}
       {isOfflineMode && (
-        <div className="fixed top-[73px] left-4 right-4 z-[90] xl:left-6 xl:right-6">
+        <div className="fixed left-4 right-4 z-[90] xl:left-6 xl:right-6" style={{top: '73px'}}>
           <Alert variant="warning" className="shadow-lg">
             <FeatherWifiOff className="w-5 h-5" />
             <div className="flex flex-col gap-1">
@@ -561,11 +561,11 @@ function Shop() {
       )}
 
       {/* Desktop Layout - FIXED HEIGHT, NO GAPS */}
-      <div className={`hidden xl:flex w-full h-full ${isOfflineMode ? 'offline-mode' : ''}`}>
+      <div className={`hidden xl:flex w-full h-full desktop-shop-container ${isOfflineMode ? 'offline-mode' : ''}`}>
         {/* Left Side - Products (50% width, scrollable content) */}
         <div className="w-1/2 h-full flex flex-col bg-default-background">
           {/* Controls Bar - NO GAP, sits directly under navbar */}
-          <div className="sort-filter-bar flex-shrink-0 flex items-center justify-between px-6 py-4">
+          <div className="sort-filter-bar flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
             <div className="flex items-center gap-4">
               <Button
                 variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
@@ -698,13 +698,13 @@ function Shop() {
       </div>
 
       {/* Mobile & Tablet Layout - NO GAPS */}
-      <div className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative ${isOfflineMode ? 'offline-mode' : ''}`}>
+      <div className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative mobile-shop-content ${isOfflineMode ? 'offline-mode' : ''} ${scrollDirection === 'down' ? 'filter-hidden' : 'filter-visible'}`}>
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
-        <div className={`xl:hidden sort-filter-bar left-0 right-0 bg-white border-b border-neutral-200 shadow-sm w-full ${
-          (showMobileFilters || showMobileMap) ? 'hidden' : ''
-        } ${
-          scrollDirection === 'down' ? 'scroll-hidden' : 'scroll-visible'
-        }`}>
+        <div className={`sort-filter-bar xl:hidden w-full ${
+  (showMobileFilters || showMobileMap) ? 'hidden' : ''
+} ${
+  scrollDirection === 'down' ? 'scroll-hidden' : 'scroll-visible'
+}`}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
