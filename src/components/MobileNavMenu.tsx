@@ -4,6 +4,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FeatherX, FeatherHome, FeatherShoppingBag, FeatherStore } from "@subframe/core";
 import { IconButton } from "@/ui/components/IconButton";
+import { FeatherUser } from "@subframe/core";
 
 interface MobileNavMenuProps {
   isOpen: boolean;
@@ -77,6 +78,16 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
             </Link>
           </nav>
         </div>
+        <Link to="/signin" onClick={onClose}>
+  <div className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
+    location.pathname === "/signin" 
+      ? "bg-brand-100 text-brand-700" 
+      : "hover:bg-neutral-50 text-default-font"
+  }`}>
+    <FeatherUser className="w-5 h-5" />
+    <span className="text-body-bold font-body-bold">Sign In</span>
+  </div>
+</Link>
 
         {/* Footer with Slogan */}
         <div className="p-6 border-t border-neutral-200">
