@@ -65,6 +65,9 @@ function Shop() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
+  // Scroll direction for mobile filter bar
+const [scrollDirection, setScrollDirection] = useState('up');
+
   const handlePageScroll = (event) => {
   // Only run on mobile
   if (window.innerWidth >= 1280) return;
