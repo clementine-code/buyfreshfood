@@ -2,12 +2,11 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { TextField } from "@/ui/components/TextField";
 import { Badge } from "@/ui/components/Badge";
 import { FeatherSearch, FeatherTrendingUp, FeatherTag, FeatherMapPin, FeatherStore, FeatherGrid } from "@subframe/core";
 import { foodSearchService, type FoodSearchSuggestion, formatFoodPrice } from "../services/foodSearchService";
-import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
 
 interface FoodSearchFieldProps {
   className?: string;
