@@ -65,6 +65,24 @@ function Shop() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
+  useEffect(() => {
+  console.log('🟢 Component mounted, testing useEffect...');
+  console.log('🔍 Current scrollDirection state:', scrollDirection);
+  console.log('🔍 Window width:', window.innerWidth);
+  
+  // Simple scroll test
+  const testScroll = () => {
+    console.log('🔄 SCROLL DETECTED! Current scroll:', window.scrollY);
+  };
+  
+  window.addEventListener('scroll', testScroll);
+  
+  return () => {
+    console.log('🔴 Cleaning up test scroll listener');
+    window.removeEventListener('scroll', testScroll);
+  };
+}, []); // Empty dependency array
+
   // Scroll direction for mobile filter bar
   const [scrollDirection, setScrollDirection] = useState('up');
 
