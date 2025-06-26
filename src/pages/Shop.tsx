@@ -276,50 +276,60 @@ function Shop() {
     setCurrentPage(1);
   }, [isSearchMode, appliedFilters]);
 
-   // Mobile scroll detection for filter bar
-  useEffect(() => {
-    // Skip on desktop
-    if (window.innerWidth >= 1280) return;
+  // Mobile scroll detection for filter bar
+useEffect(() => {
+  // Skip on desktop
+  if (window.innerWidth >= 1280) return;
 
-    let lastScrollY = window.scrollY;
-    let ticking = false;
+  let lastScrollY = window.scrollY;
+  let ticking = false;
 
-    const updateScrollDirection = () => {
-      const currentScrollY = window.scrollY;
+  const updateScrollDirection = () => {
+    const currentScrollY = window.scrollY;
+    const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+    
+    // Debug logging to see what's happening
+    console.log('📊 Scroll Debug:', {
+      current: currentScrollY,
+      last: lastScrollY,
+      difference: scrollDifference,
+      direction: currentScrollY > lastScrollY ? 'down' : 'up'
+    });
+    
+    // Only change direction if we've scrolled enough
+    if (scrollDifference > 15) {
+      const direction = currentScrollY > lastScrollY ? 'down' : 'up';
       
-      // Only change direction if we've scrolled enough and past the header
-      if (Math.abs(currentScrollY - lastScrollY) > 15 && currentScrollY > 80) {
-        const direction = currentScrollY > lastScrollY ? 'down' : 'up';
-        if (direction !== scrollDirection) {
-          setScrollDirection(direction);
-        }
+      // Update if direction changed
+      if (direction !== scrollDirection) {
+        console.log('✅ Setting direction to:', direction);
+        setScrollDirection(direction);
       }
-      
-      // Always show filter bar when near top
-      if (currentScrollY <= 80) {
+    }
+    
+    // Always show filter bar when near top
+    if (currentScrollY <= 80) {
+      if (scrollDirection !== 'up') {
+        console.log('🔝 Near top - setting to up');
         setScrollDirection('up');
       }
+    }
 
-      lastScrollY = currentScrollY;
-      ticking = false;
-    };
+    lastScrollY = currentScrollY;
+    ticking = false;
+  };
 
-    const onScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(updateScrollDirection);
-        ticking = true;
-      }
-    };
+  const onScroll = () => {
+    if (!ticking) {
+      requestAnimationFrame(updateScrollDirection);
+      ticking = true;
+    }
+  };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [scrollDirection]);
-
-  // DEBUG: Remove this after testing
-  useEffect(() => {
-    console.log('🔄 Scroll direction changed to:', scrollDirection);
-  }, [scrollDirection]);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  
+  return () => window.removeEventListener('scroll', onScroll);
+}, [scrollDirection]);
 
   const getBadgeVariant = (tag: string) => {
     if (tag.includes('organic') || tag.includes('pesticide-free')) return 'success';
