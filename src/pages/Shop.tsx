@@ -119,6 +119,10 @@ function Shop() {
     console.log('🧹 Cleaning up scroll listener');
     if (timeoutId) {
       clearTimeout(timeoutId);
+    }
+    window.removeEventListener('scroll', handleScroll);
+  };
+}, []);
 
   // Scroll direction for mobile filter bar
   const [scrollDirection, setScrollDirection] = useState('up');
