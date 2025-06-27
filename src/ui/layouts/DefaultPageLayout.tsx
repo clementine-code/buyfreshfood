@@ -126,47 +126,30 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         </div>
 
         {/* Mobile/Tablet Topbar - Show for all screens below 1280px */}
-<div className="xl:hidden w-full bg-default-background border-b border-neutral-border" style={{position: 'fixed', top: '0', left: '0', right: '0', zIndex: 50}}>
-  <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
-    {/* Hamburger Menu Button */}
-    <button
-      className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors"
-      onClick={() => setShowMobileNav(true)}
-    >
-      <FeatherMenu className="w-5 h-5 text-default-font" />
-    </button>
+        <div className="xl:hidden w-full bg-default-background border-b border-neutral-border fixed-navbar">
+          <nav className="flex w-full items-center gap-4 bg-default-background px-6 py-6 h-full">
+            {/* Hamburger Menu Button */}
+            <button
+              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors"
+              onClick={() => setShowMobileNav(true)}
+            >
+              <FeatherMenu className="w-5 h-5 text-default-font" />
+            </button>
 
-    {/* Center Search */}
-    <div className="flex grow shrink-0 basis-0 items-center justify-center gap-4">
-      <FoodSearchField
-        className="h-auto grow shrink-0 basis-0"
-        onItemSelect={handleFoodItemSelect}
-        onSearchSubmit={handleFoodSearchSubmit}
-        placeholder="Search fresh food..."
-        showTrending={false}
-      />
-    </div>
+            {/* Center Search */}
+            <div className="flex grow shrink-0 basis-0 items-center justify-center gap-4">
+              <FoodSearchField
+                className="h-auto grow shrink-0 basis-0"
+                onItemSelect={handleFoodItemSelect}
+                onSearchSubmit={handleFoodSearchSubmit}
+                placeholder="Search fresh food..."
+                showTrending={false}
+              />
+            </div>
 
-    {/* Right Actions - Only Location Button */}
-    <div className="flex items-center justify-end">
-      <LocationButton className="flex-shrink-0" />
-    </div>
-  </nav>
-</div>
-
-                <IconButton
-                  variant="brand-secondary"
-                  icon={<FeatherUser />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-              </div>
-              <div className="flex-shrink-0">
-                <IconButton
-                  variant="brand-primary"
-                  icon={<FeatherShoppingCart />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
-              </div>
+            {/* Right Actions - Only Location Button */}
+            <div className="flex items-center justify-end">
+              <LocationButton className="flex-shrink-0" />
             </div>
           </nav>
         </div>
