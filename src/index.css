@@ -227,3 +227,24 @@ html, body {
 * {
   scroll-behavior: auto !important;
 }
+
+/* Prevent auto-zoom on rotation and input focus */
+@media screen and (max-width: 768px) {
+  html, body {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Prevent iOS Safari zoom when focusing on inputs */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Ensure search fields don't cause zoom */
+  input[type="search"], 
+  input[type="text"],
+  input[type="email"] {
+    font-size: 16px !important;
+  }
+}
