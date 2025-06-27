@@ -1,10 +1,9 @@
 "use client";
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FeatherX, FeatherHome, FeatherShoppingBag, FeatherStore } from "@subframe/core";
+import { FeatherX, FeatherHome, FeatherShoppingBag, FeatherStore, FeatherUser, FeatherShoppingCart } from "@subframe/core";
 import { IconButton } from "@/ui/components/IconButton";
-import { FeatherUser } from "@subframe/core";
+import { Button } from "@/ui/components/Button";
 
 interface MobileNavMenuProps {
   isOpen: boolean;
@@ -77,17 +76,34 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               </div>
             </Link>
           </nav>
+
+          {/* Auth and Cart Actions */}
+          <div className="mt-8 space-y-3">
+            <Button 
+              variant="brand-secondary" 
+              icon={<FeatherUser />}
+              className="w-full justify-start"
+              onClick={() => {
+                onClose();
+                // Add your sign in logic here
+              }}
+            >
+              Sign In
+            </Button>
+            
+            <Button 
+              variant="brand-primary" 
+              icon={<FeatherShoppingCart />}
+              className="w-full justify-start"
+              onClick={() => {
+                onClose();
+                // Add your cart logic here
+              }}
+            >
+              Cart
+            </Button>
+          </div>
         </div>
-        <Link to="/signin" onClick={onClose}>
-  <div className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
-    location.pathname === "/signin" 
-      ? "bg-brand-100 text-brand-700" 
-      : "hover:bg-neutral-50 text-default-font"
-  }`}>
-    <FeatherUser className="w-5 h-5" />
-    <span className="text-body-bold font-body-bold">Sign In</span>
-  </div>
-</Link>
 
         {/* Footer with Slogan */}
         <div className="p-6 border-t border-neutral-200">
