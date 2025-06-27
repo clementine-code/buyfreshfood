@@ -651,142 +651,143 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Desktop Layout - FIXED HEIGHT, NO GAPS */}
-      <div className={`hidden xl:flex w-full h-full desktop-shop-container ${isOfflineMode ? 'offline-mode' : ''}`}>
-        {/* Left Side - Products (50% width, scrollable content) */}
-        <div className="w-1/2 h-full flex flex-col bg-default-background">
-          {/* Controls Bar - NO GAP, sits directly under navbar */}
-          <div className="sort-filter-bar flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
-            <div className="flex items-center gap-4">
-              <Button
-                variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
-                icon={<FeatherFilter />}
-                onClick={() => setShowDesktopFilters(true)}
-                className="rounded-full"
-              >
-                Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
-              </Button>
-              
-              <div className="flex flex-col gap-1">
-                <span className="text-heading-3 font-heading-3 text-default-font">
-                  {totalProducts} {isSearchMode ? 'search results' : 'local products'}
-                  {isSearchMode && currentSearchQuery && (
-                    <span className="text-body font-body text-subtext-color ml-2">
-                      for "{currentSearchQuery}"
-                    </span>
-                  )}
-                </span>
-                {isSearchMode && (
-                  <button
-                    onClick={clearSearch}
-                    className="text-caption font-caption text-brand-600 hover:text-brand-700 text-left"
-                  >
-                    ← Back to all products
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
-                <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
-                <ToggleGroup.Item icon={<FeatherList />} value="list" />
-              </ToggleGroup>
-              
-              <SubframeCore.DropdownMenu.Root>
-                <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                  <Button
-                    variant="neutral-tertiary"
-                    iconRight={<FeatherChevronDown />}
-                    size="small"
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-                  >
-                    Sort
-                  </Button>
-                </SubframeCore.DropdownMenu.Trigger>
-                <SubframeCore.DropdownMenu.Portal>
-                  <SubframeCore.DropdownMenu.Content
-                    side="bottom"
-                    align="end"
-                    sideOffset={12}
-                    className="dropdown-menu"
-                    asChild={true}
-                  >
-                    <DropdownMenu>
-                      <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
-                        Nearest to Me
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherStar />}>
-                        Top Rated
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
-                        Most Purchased
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                        Price - Low to High
-                      </DropdownMenu.DropdownItem>
-                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                        Price - High to Low
-                      </DropdownMenu.DropdownItem>
-                    </DropdownMenu>
-                  </SubframeCore.DropdownMenu.Content>
-                </SubframeCore.DropdownMenu.Portal>
-              </SubframeCore.DropdownMenu.Root>
-            </div>
-          </div>
-
-          {/* Products Area - Scrollable with ALL content */}
-          <div className="flex-1 overflow-y-auto bg-default-background">
-            {/* Products Grid/List */}
-            <div className="p-6">
-              {currentProducts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                  <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
-                  <span className="text-heading-2 font-heading-2 text-default-font mb-2">
-                    {isSearchMode ? 'No products found' : 'No products available'}
-                  </span>
-                  <span className="text-body font-body text-subtext-color">
-                    {isSearchMode 
-                      ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
-                      : 'Check back later for fresh local products'
-                    }
-                  </span>
-                  {isSearchMode && (
-                    <Button onClick={clearSearch} className="mt-4">
-                      Browse All Products
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className={`w-full ${
-                  viewMode === "grid" 
-                    ? "grid gap-4 grid-cols-1 lg:grid-cols-2" 
-                    : "flex flex-col gap-4"
-                }`}>
-                  {currentProducts.map((product) => (
-                    <ProductCard 
-                      key={product.id} 
-                      product={product} 
-                      isListView={viewMode === "list"} 
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            {/* Pagination */}
-            <PaginationControls />
-            
-            {/* Footer */}
-            <Footer />
-          </div>
-        </div>
-
-        {/* Right Side - Map (50% width, COMPLETELY FROZEN) */}
-        <div className="w-1/2 h-full relative">
-          <Map className="h-full w-full z-0" />
+      {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
+<div className="hidden xl:flex w-full h-full" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
+  {/* Left Side - Products (2/3 width, scrollable content) */}
+  <div className="w-2/3 h-full flex flex-col bg-default-background">
+    {/* Controls Bar - Fixed at top */}
+    <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+      <div className="flex items-center gap-4">
+        <Button
+          variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+          icon={<FeatherFilter />}
+          onClick={() => setShowDesktopFilters(true)}
+          className="rounded-full"
+        >
+          Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+        </Button>
+        
+        <div className="flex flex-col gap-1">
+          <span className="text-heading-3 font-heading-3 text-default-font">
+            {totalProducts} {isSearchMode ? 'search results' : 'local products'}
+            {isSearchMode && currentSearchQuery && (
+              <span className="text-body font-body text-subtext-color ml-2">
+                for "{currentSearchQuery}"
+              </span>
+            )}
+          </span>
+          {isSearchMode && (
+            <button
+              onClick={clearSearch}
+              className="text-caption font-caption text-brand-600 hover:text-brand-700 text-left"
+            >
+              ← Back to all products
+            </button>
+          )}
         </div>
       </div>
+      
+      <div className="flex items-center gap-2">
+        <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
+          <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
+          <ToggleGroup.Item icon={<FeatherList />} value="list" />
+        </ToggleGroup>
+        
+        <SubframeCore.DropdownMenu.Root>
+          <SubframeCore.DropdownMenu.Trigger asChild={true}>
+            <Button
+              variant="neutral-tertiary"
+              iconRight={<FeatherChevronDown />}
+              size="small"
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+            >
+              Sort
+            </Button>
+          </SubframeCore.DropdownMenu.Trigger>
+          <SubframeCore.DropdownMenu.Portal>
+            <SubframeCore.DropdownMenu.Content
+              side="bottom"
+              align="end"
+              sideOffset={12}
+              className="z-[100]"
+              asChild={true}
+            >
+              <DropdownMenu>
+                <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
+                  Nearest to Me
+                </DropdownMenu.DropdownItem>
+                <DropdownMenu.DropdownItem icon={<FeatherStar />}>
+                  Top Rated
+                </DropdownMenu.DropdownItem>
+                <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
+                  Most Purchased
+                </DropdownMenu.DropdownItem>
+                <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                  Price - Low to High
+                </DropdownMenu.DropdownItem>
+                <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                  Price - High to Low
+                </DropdownMenu.DropdownItem>
+              </DropdownMenu>
+            </SubframeCore.DropdownMenu.Content>
+          </SubframeCore.DropdownMenu.Portal>
+        </SubframeCore.DropdownMenu.Root>
+      </div>
+    </div>
+
+    {/* Scrollable Content Area */}
+    <div className="flex-1 overflow-y-auto">
+      <div className="px-6 py-6">
+        {currentProducts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center py-16">
+            <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
+            <span className="text-heading-2 font-heading-2 text-default-font mb-2">
+              {isSearchMode ? 'No products found' : 'No products available'}
+            </span>
+            <span className="text-body font-body text-subtext-color">
+              {isSearchMode 
+                ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
+                : 'Check back later for fresh local products'
+              }
+            </span>
+            {isSearchMode && (
+              <Button onClick={clearSearch} className="mt-4">
+                Browse All Products
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className={`w-full ${
+            viewMode === "grid" 
+              ? "grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
+              : "flex flex-col gap-4"
+          }`}>
+            {currentProducts.map((product) => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                isListView={viewMode === "list"} 
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {/* Pagination */}
+      <div className="px-6 pb-6">
+        <PaginationControls />
+      </div>
+      
+      {/* Footer */}
+      <Footer />
+    </div>
+  </div>
+
+  {/* Right Side - Map (1/3 width, COMPLETELY FROZEN) */}
+  <div className="w-1/3 h-full relative">
+    <Map className="h-full w-full z-0" />
+  </div>
+</div>
 
       {/* Mobile & Tablet Layout - NO GAPS */}
       <div 
