@@ -147,9 +147,18 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
               />
             </div>
 
-            {/* Right Actions - Only Location Button */}
-            <div className="flex items-center justify-end">
+            {/* Right Actions - Location and Cart */}
+            <div className="flex items-center justify-end gap-2">
               <LocationButton className="flex-shrink-0" />
+              <div className="flex-shrink-0">
+                <IconButton
+                  variant="brand-primary"
+                  icon={<FeatherShoppingCart />}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                    // Add your cart logic here
+                  }}
+                />
+              </div>
             </div>
           </nav>
         </div>
