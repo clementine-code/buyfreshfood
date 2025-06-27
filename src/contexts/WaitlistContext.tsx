@@ -1,8 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import type { LocationData } from '../services/locationService';
-import { checkIfUserIsWaitlisted } from '../utils/waitlistUtils';
 
 interface WaitlistEntry {
   id: string;
@@ -51,7 +50,6 @@ interface WaitlistContextType {
   // Waitlist status management
   setWaitlistedEntry: (entry: WaitlistEntry) => void;
   clearWaitlistedEntry: () => void;
-  checkUserWaitlistStatus: (email: string, location: string) => Promise<boolean>;
 }
 
 const WaitlistContext = createContext<WaitlistContextType | undefined>(undefined);
@@ -75,7 +73,7 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WaitlistState>(initialState);
 
   // Load waitlisted entry from localStorage on mount
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -219,24 +217,6 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const checkUserWaitlistStatus = async (email: string, location: string): Promise<boolean> => {
-    try {
-      const isWaitlisted = await checkIfUserIsWaitlisted(email, location);
-      
-      if (isWaitlisted) {
-        setState(prev => ({
-          ...prev,
-          isUserWaitlisted: true
-        }));
-      }
-      
-      return isWaitlisted;
-    } catch (error) {
-      console.error('Error checking waitlist status:', error);
-      return false;
-    }
-  };
-
   const contextValue: WaitlistContextType = {
     state,
     openWaitlistFlow,
@@ -247,8 +227,7 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     showSuccessView,
     resetToForm,
     setWaitlistedEntry,
-    clearWaitlistedEntry,
-    checkUserWaitlistStatus
+    clearWaitlistedEntry
   };
 
   return (

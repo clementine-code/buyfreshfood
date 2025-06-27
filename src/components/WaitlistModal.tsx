@@ -11,14 +11,7 @@ import { Button } from "@/ui/components/Button";
 import { FeatherExternalLink, FeatherMapPin, FeatherEdit3 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
-import { 
-  submitWaitlist, 
-  parseLocation, 
-  getTrackedBehavior, 
-  getPrecheckedInterests, 
-  getPrefilledProductInterest,
-  trackUserBehavior
-} from "../utils/waitlistUtils";
+import { submitWaitlist } from "../utils/waitlistUtils";
 import { locationService, type LocationData } from "../services/locationService";
 import { useNavigate } from "react-router-dom";
 
@@ -51,24 +44,19 @@ const WaitlistModal: React.FC = () => {
         setLocationInput(state.currentLocationData.formattedAddress || 
                         `${state.currentLocationData.city}, ${state.currentLocationData.state}`);
       }
-
-      // Pre-fill form based on tracked behavior
-      const trackedBehavior = getTrackedBehavior();
-      const prechecked = getPrecheckedInterests(trackedBehavior);
-      const prefilledProducts = getPrefilledProductInterest(trackedBehavior);
       
-      setInterests(prechecked);
-      setProductInterests(prefilledProducts);
+      // Reset form fields
+      setEmail("");
+      setInterests({
+        buying: false,
+        selling: false,
+        updates: false
+      });
+      setProductInterests("");
       setError("");
       setIsEditingLocation(false);
-      
-      // Track modal open
-      trackUserBehavior('opened_waitlist_modal', {
-        type: state.modalType,
-        location: state.currentLocationData?.formattedAddress
-      }, locationState);
     }
-  }, [state.isWaitlistModalOpen, state.isSuccessView, state.modalType, state.currentLocationData]);
+  }, [state.isWaitlistModalOpen, state.isSuccessView, state.currentLocationData]);
 
   const handleLocationEdit = () => {
     setIsEditingLocation(true);
@@ -140,14 +128,6 @@ const WaitlistModal: React.FC = () => {
       const result = await submitWaitlist(formData);
 
       if (result.success) {
-        // Track successful submission
-        await trackUserBehavior('submitted_waitlist', {
-          type: state.modalType,
-          interests: selectedInterests,
-          location: formData.location,
-          queuePosition: result.queuePosition
-        }, locationState);
-
         showSuccessView(result.queuePosition, result.data);
       } else {
         setError(result.error || 'Failed to join waitlist. Please try again.');
@@ -166,10 +146,6 @@ const WaitlistModal: React.FC = () => {
   };
 
   const handleMaybeLater = () => {
-    trackUserBehavior('dismissed_waitlist_modal', {
-      type: state.modalType,
-      location: currentLocationData?.formattedAddress
-    }, locationState);
     closeAllModals();
   };
 

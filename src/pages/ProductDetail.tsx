@@ -26,7 +26,6 @@ import { getProductById, addProductReview, type Product, type ProductReview } fr
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
-import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 import Footer from "../components/Footer";
 
 function ProductDetail() {
@@ -63,22 +62,11 @@ function ProductDetail() {
         
         if (supabaseProduct && !supabaseError) {
           setProduct(supabaseProduct);
-          // Track product detail view
-          trackUserBehavior('viewed_product_detail', {
-            productId: id,
-            productName: supabaseProduct.name,
-            seller: supabaseProduct.seller?.name
-          }, locationState);
         } else {
           // Fallback to food search service
           const foodItem = await foodSearchService.getFoodItemById(id);
           if (foodItem) {
             setProduct(foodItem);
-            trackUserBehavior('viewed_product_detail', {
-              productId: id,
-              productName: foodItem.name,
-              seller: foodItem.seller
-            }, locationState);
           } else {
             setError('Product not found');
           }
@@ -92,18 +80,10 @@ function ProductDetail() {
     };
 
     loadProduct();
-  }, [id, locationState]);
+  }, [id]);
 
   const handleAddToCart = async () => {
     if (!product) return;
-
-    // Track the attempt
-    trackUserBehavior('attempted_add_to_cart_detail', {
-      productId: product.id,
-      productName: product.name,
-      quantity
-    }, locationState);
-    storeLocalBehavior('attempted_add_to_cart', { productName: product.name });
 
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
@@ -121,11 +101,6 @@ function ProductDetail() {
   const handleSaveForLater = async () => {
     if (!product) return;
 
-    trackUserBehavior('attempted_save_for_later_detail', {
-      productId: product.id,
-      productName: product.name
-    }, locationState);
-
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
@@ -141,12 +116,6 @@ function ProductDetail() {
 
   const handleContactSeller = async () => {
     if (!product) return;
-
-    trackUserBehavior('attempted_contact_seller', {
-      productId: product.id,
-      productName: product.name,
-      seller: 'seller' in product ? product.seller?.name : product.seller
-    }, locationState);
 
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';

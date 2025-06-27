@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/ui/components/Badge";
 import { Button } from "@/ui/components/Button";
@@ -11,24 +11,13 @@ import { FeatherDollarSign } from "@subframe/core";
 import Footer from "../components/Footer";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
-import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Sell() {
   const navigate = useNavigate();
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
 
-  // Track page visit
-  useEffect(() => {
-    trackUserBehavior('visited_sell_page', {}, locationState);
-    storeLocalBehavior('visited_sell_page');
-  }, [locationState]);
-
   const handleStartSellingClick = async () => {
-    // Track the attempt
-    trackUserBehavior('clicked_start_selling', {}, locationState);
-    storeLocalBehavior('attempted_start_selling');
-
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     

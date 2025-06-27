@@ -34,7 +34,6 @@ import { getProducts, getCategories, getSellers, type Product } from "../lib/sup
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
-import { trackUserBehavior, storeLocalBehavior } from "../utils/waitlistUtils";
 
 function Shop() {
   const [searchParams] = useSearchParams();
@@ -66,54 +65,35 @@ function Shop() {
   const itemsPerPage = 50;
 
   // Scroll direction for mobile filter bar
-const [scrollDirection, setScrollDirection] = useState('up');
+  const [scrollDirection, setScrollDirection] = useState('up');
 
   const handlePageScroll = (event) => {
-  // Only run on mobile
-  if (window.innerWidth >= 1280) return;
-  
-  // Get scroll position from multiple sources
-  const windowScrollY = window.scrollY;
-  const documentScrollTop = document.documentElement.scrollTop;
-  const bodyScrollTop = document.body.scrollTop;
-  const eventTargetScroll = event.target.scrollTop;
-  
-  console.log('📱 All scroll values:', {
-    window: windowScrollY,
-    document: documentScrollTop,
-    body: bodyScrollTop,
-    eventTarget: eventTargetScroll,
-    target: event.target.tagName
-  });
-  
-  // Use the event target's scroll position if it's the scrolling container
-  const currentY = eventTargetScroll || windowScrollY || documentScrollTop || bodyScrollTop;
-  
-  console.log('📱 Using scroll position:', currentY);
-  
-  if (currentY <= 50) {
-    console.log('🔝 Top area - showing filter');
-    setScrollDirection('up');
-  } else if (currentY > (event.target.lastScrollY || 0) + 30) {
-    console.log('⬇️ Scrolling down - hiding filter');
-    setScrollDirection('down');
-  } else if (currentY < (event.target.lastScrollY || 0) - 30) {
-    console.log('⬆️ Scrolling up - showing filter');
-    setScrollDirection('up');
-  }
-  
-  event.target.lastScrollY = currentY;
-}; // <-- FUNCTION ENDS HERE with semicolon
+    // Only run on mobile
+    if (window.innerWidth >= 1280) return;
+    
+    // Get scroll position from multiple sources
+    const windowScrollY = window.scrollY;
+    const documentScrollTop = document.documentElement.scrollTop;
+    const bodyScrollTop = document.body.scrollTop;
+    const eventTargetScroll = event.target.scrollTop;
+    
+    // Use the event target's scroll position if it's the scrolling container
+    const currentY = eventTargetScroll || windowScrollY || documentScrollTop || bodyScrollTop;
+    
+    if (currentY <= 50) {
+      setScrollDirection('up');
+    } else if (currentY > (event.target.lastScrollY || 0) + 30) {
+      setScrollDirection('down');
+    } else if (currentY < (event.target.lastScrollY || 0) - 30) {
+      setScrollDirection('up');
+    }
+    
+    event.target.lastScrollY = currentY;
+  };
 
   // Waitlist integration
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
-
-  // Track page visit with error handling
-  useEffect(() => {
-    trackUserBehavior('visited_shop_page', {}, locationState);
-    storeLocalBehavior('visited_shop_page');
-  }, [locationState]);
 
   // Load data from Supabase and handle URL search params
   useEffect(() => {
@@ -234,14 +214,6 @@ const [scrollDirection, setScrollDirection] = useState('up');
 
   // Handle Add to Cart with waitlist logic
   const handleAddToCart = async (product: any) => {
-    // Track the attempt
-    trackUserBehavior('attempted_add_to_cart', {
-      productId: product.id,
-      productName: product.name,
-      price: product.price
-    }, locationState);
-    storeLocalBehavior('attempted_add_to_cart', { productName: product.name });
-
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
@@ -257,11 +229,6 @@ const [scrollDirection, setScrollDirection] = useState('up');
 
   // Handle Save for Later with waitlist logic
   const handleSaveForLater = async (product: any) => {
-    trackUserBehavior('attempted_save_for_later', {
-      productId: product.id,
-      productName: product.name
-    }, locationState);
-
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
@@ -273,23 +240,6 @@ const [scrollDirection, setScrollDirection] = useState('up');
       zipCode: locationState.zipCode || '',
       formattedAddress: locationState.location || ''
     } : undefined);
-  };
-
-  // Track product views
-  const trackProductView = (product: any) => {
-    trackUserBehavior('viewed_product', {
-      productId: product.id,
-      productName: product.name,
-      category: product.category?.name || product.category,
-      seller: product.seller?.name || product.seller
-    }, locationState);
-
-    // Store for pre-filling waitlist
-    const existing = JSON.parse(localStorage.getItem('fresh_food_behavior') || '{}');
-    const viewedProducts = existing.viewed_products || [];
-    viewedProducts.push({ id: product.id, name: product.name });
-    existing.viewed_products = viewedProducts.slice(-5); // Keep last 5
-    localStorage.setItem('fresh_food_behavior', JSON.stringify(existing));
   };
 
   // Check if any filters are applied
@@ -314,59 +264,49 @@ const [scrollDirection, setScrollDirection] = useState('up');
   }, [isSearchMode, appliedFilters]);
 
   // Mobile scroll detection for filter bar
-useEffect(() => {
-  // Skip on desktop
-  if (window.innerWidth >= 1280) return;
+  useEffect(() => {
+    // Skip on desktop
+    if (window.innerWidth >= 1280) return;
 
-  let lastScrollY = window.scrollY;
-  let ticking = false;
+    let lastScrollY = window.scrollY;
+    let ticking = false;
 
-  const updateScrollDirection = () => {
-    const currentScrollY = window.scrollY;
-    const scrollDifference = Math.abs(currentScrollY - lastScrollY);
-    
-    // Debug logging to see what's happening
-    console.log('📊 Scroll Debug:', {
-      current: currentScrollY,
-      last: lastScrollY,
-      difference: scrollDifference,
-      direction: currentScrollY > lastScrollY ? 'down' : 'up'
-    });
-    
-    // Only change direction if we've scrolled enough
-    if (scrollDifference > 15) {
-      const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+    const updateScrollDirection = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
       
-      // Update if direction changed
-      if (direction !== scrollDirection) {
-        console.log('✅ Setting direction to:', direction);
-        setScrollDirection(direction);
+      // Only change direction if we've scrolled enough
+      if (scrollDifference > 15) {
+        const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+        
+        // Update if direction changed
+        if (direction !== scrollDirection) {
+          setScrollDirection(direction);
+        }
       }
-    }
+      
+      // Always show filter bar when near top
+      if (currentScrollY <= 80) {
+        if (scrollDirection !== 'up') {
+          setScrollDirection('up');
+        }
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScrollDirection);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
     
-    // Always show filter bar when near top
-    if (currentScrollY <= 80) {
-      if (scrollDirection !== 'up') {
-        console.log('🔝 Near top - setting to up');
-        setScrollDirection('up');
-      }
-    }
-
-    lastScrollY = currentScrollY;
-    ticking = false;
-  };
-
-  const onScroll = () => {
-    if (!ticking) {
-      requestAnimationFrame(updateScrollDirection);
-      ticking = true;
-    }
-  };
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-  
-  return () => window.removeEventListener('scroll', onScroll);
-}, [scrollDirection]);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [scrollDirection]);
 
   const getBadgeVariant = (tag: string) => {
     if (tag.includes('organic') || tag.includes('pesticide-free')) return 'success';
@@ -401,17 +341,13 @@ useEffect(() => {
     // Handle both Product and FoodItem types
     const displayProduct = product.seller ? product : convertFoodItemToProduct(product);
     
-    // Track view when card is rendered
-    React.useEffect(() => {
-      trackProductView(displayProduct);
-    }, []);
-    
     if (isListView) {
       return (
         <div className="flex items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
           <img
             className="h-20 w-20 md:h-24 md:w-24 flex-none rounded-md object-cover"
             src={displayProduct.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
+            alt={displayProduct.name}
           />
           <div className="flex flex-1 flex-col gap-2 min-w-0">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
@@ -480,6 +416,7 @@ useEffect(() => {
           <img
             className="h-48 w-full flex-none rounded-md object-cover"
             src={displayProduct.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
+            alt={displayProduct.name}
           />
           <div className="flex w-full flex-col items-start gap-2">
             <div className="flex items-center gap-2 flex-wrap">
@@ -652,155 +589,155 @@ useEffect(() => {
       )}
 
       {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-<div className="hidden xl:flex w-full h-screen fixed top-0 left-0 right-0" style={{paddingTop: isOfflineMode ? '120px' : '80px', zIndex: 10}}>
-  {/* Left Side - Products (2/3 width, scrollable content) */}
-  <div className="w-2/3 h-full flex flex-col bg-default-background">
-    {/* Controls Bar - Fixed at top */}
-    <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
-      <div className="flex items-center gap-4">
-        <Button
-          variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
-          icon={<FeatherFilter />}
-          onClick={() => setShowDesktopFilters(true)}
-          className="rounded-full"
-        >
-          Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
-        </Button>
-        
-        <div className="flex flex-col gap-1">
-          <span className="text-heading-3 font-heading-3 text-default-font">
-            {totalProducts} {isSearchMode ? 'search results' : 'local products'}
-            {isSearchMode && currentSearchQuery && (
-              <span className="text-body font-body text-subtext-color ml-2">
-                for "{currentSearchQuery}"
-              </span>
-            )}
-          </span>
-          {isSearchMode && (
-            <button
-              onClick={clearSearch}
-              className="text-caption font-caption text-brand-600 hover:text-brand-700 text-left"
-            >
-              ← Back to all products
-            </button>
-          )}
+      <div className="hidden xl:flex w-full h-screen fixed top-0 left-0 right-0" style={{paddingTop: isOfflineMode ? '120px' : '80px', zIndex: 10}}>
+        {/* Left Side - Products (2/3 width, scrollable content) */}
+        <div className="w-2/3 h-full flex flex-col bg-default-background">
+          {/* Controls Bar - Fixed at top */}
+          <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-neutral-200 shadow-sm">
+            <div className="flex items-center gap-4">
+              <Button
+                variant={hasFiltersApplied ? "brand-primary" : "neutral-secondary"}
+                icon={<FeatherFilter />}
+                onClick={() => setShowDesktopFilters(true)}
+                className="rounded-full"
+              >
+                Filters {hasFiltersApplied && `(${Object.values(appliedFilters).flat().length})`}
+              </Button>
+              
+              <div className="flex flex-col gap-1">
+                <span className="text-heading-3 font-heading-3 text-default-font">
+                  {totalProducts} {isSearchMode ? 'search results' : 'local products'}
+                  {isSearchMode && currentSearchQuery && (
+                    <span className="text-body font-body text-subtext-color ml-2">
+                      for "{currentSearchQuery}"
+                    </span>
+                  )}
+                </span>
+                {isSearchMode && (
+                  <button
+                    onClick={clearSearch}
+                    className="text-caption font-caption text-brand-600 hover:text-brand-700 text-left"
+                  >
+                    ← Back to all products
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
+                <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
+                <ToggleGroup.Item icon={<FeatherList />} value="list" />
+              </ToggleGroup>
+              
+              <SubframeCore.DropdownMenu.Root>
+                <SubframeCore.DropdownMenu.Trigger asChild={true}>
+                  <Button
+                    variant="neutral-tertiary"
+                    iconRight={<FeatherChevronDown />}
+                    size="small"
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  >
+                    Sort
+                  </Button>
+                </SubframeCore.DropdownMenu.Trigger>
+                <SubframeCore.DropdownMenu.Portal>
+                  <SubframeCore.DropdownMenu.Content
+                    side="bottom"
+                    align="end"
+                    sideOffset={12}
+                    className="z-[100]"
+                    asChild={true}
+                  >
+                    <DropdownMenu>
+                      <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
+                        Nearest to Me
+                      </DropdownMenu.DropdownItem>
+                      <DropdownMenu.DropdownItem icon={<FeatherStar />}>
+                        Top Rated
+                      </DropdownMenu.DropdownItem>
+                      <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
+                        Most Purchased
+                      </DropdownMenu.DropdownItem>
+                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                        Price - Low to High
+                      </DropdownMenu.DropdownItem>
+                      <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
+                        Price - High to Low
+                      </DropdownMenu.DropdownItem>
+                    </DropdownMenu>
+                  </SubframeCore.DropdownMenu.Content>
+                </SubframeCore.DropdownMenu.Portal>
+              </SubframeCore.DropdownMenu.Root>
+            </div>
+          </div>
+
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-6 py-6">
+              {currentProducts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                  <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
+                  <span className="text-heading-2 font-heading-2 text-default-font mb-2">
+                    {isSearchMode ? 'No products found' : 'No products available'}
+                  </span>
+                  <span className="text-body font-body text-subtext-color">
+                    {isSearchMode 
+                      ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
+                      : 'Check back later for fresh local products'
+                    }
+                  </span>
+                  {isSearchMode && (
+                    <Button onClick={clearSearch} className="mt-4">
+                      Browse All Products
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className={`w-full ${
+                  viewMode === "grid" 
+                    ? "grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
+                    : "flex flex-col gap-4"
+                }`}>
+                  {currentProducts.map((product) => (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product} 
+                      isListView={viewMode === "list"} 
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Pagination */}
+            <div className="px-6 pb-6">
+              <PaginationControls />
+            </div>
+            
+            {/* Footer */}
+            <Footer />
+          </div>
+        </div>
+
+        {/* Right Side - Map (1/3 width, COMPLETELY FROZEN) */}
+        <div className="w-1/3 h-full relative">
+          <Map className="h-full w-full z-0" />
         </div>
       </div>
-      
-      <div className="flex items-center gap-2">
-        <ToggleGroup value={viewMode} onValueChange={(value: string) => setViewMode(value || "grid")}>
-          <ToggleGroup.Item icon={<FeatherGrid />} value="grid" />
-          <ToggleGroup.Item icon={<FeatherList />} value="list" />
-        </ToggleGroup>
-        
-        <SubframeCore.DropdownMenu.Root>
-          <SubframeCore.DropdownMenu.Trigger asChild={true}>
-            <Button
-              variant="neutral-tertiary"
-              iconRight={<FeatherChevronDown />}
-              size="small"
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-            >
-              Sort
-            </Button>
-          </SubframeCore.DropdownMenu.Trigger>
-          <SubframeCore.DropdownMenu.Portal>
-            <SubframeCore.DropdownMenu.Content
-              side="bottom"
-              align="end"
-              sideOffset={12}
-              className="z-[100]"
-              asChild={true}
-            >
-              <DropdownMenu>
-                <DropdownMenu.DropdownItem icon={<FeatherMapPin />}>
-                  Nearest to Me
-                </DropdownMenu.DropdownItem>
-                <DropdownMenu.DropdownItem icon={<FeatherStar />}>
-                  Top Rated
-                </DropdownMenu.DropdownItem>
-                <DropdownMenu.DropdownItem icon={<FeatherShoppingCart />}>
-                  Most Purchased
-                </DropdownMenu.DropdownItem>
-                <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                  Price - Low to High
-                </DropdownMenu.DropdownItem>
-                <DropdownMenu.DropdownItem icon={<FeatherDollarSign />}>
-                  Price - High to Low
-                </DropdownMenu.DropdownItem>
-              </DropdownMenu>
-            </SubframeCore.DropdownMenu.Content>
-          </SubframeCore.DropdownMenu.Portal>
-        </SubframeCore.DropdownMenu.Root>
-      </div>
-    </div>
-
-    {/* Scrollable Content Area */}
-    <div className="flex-1 overflow-y-auto">
-      <div className="px-6 py-6">
-        {currentProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-16">
-            <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
-            <span className="text-heading-2 font-heading-2 text-default-font mb-2">
-              {isSearchMode ? 'No products found' : 'No products available'}
-            </span>
-            <span className="text-body font-body text-subtext-color">
-              {isSearchMode 
-                ? `No results found for "${currentSearchQuery}". Try different search terms or browse our categories.`
-                : 'Check back later for fresh local products'
-              }
-            </span>
-            {isSearchMode && (
-              <Button onClick={clearSearch} className="mt-4">
-                Browse All Products
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className={`w-full ${
-            viewMode === "grid" 
-              ? "grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" 
-              : "flex flex-col gap-4"
-          }`}>
-            {currentProducts.map((product) => (
-              <ProductCard 
-                key={product.id} 
-                product={product} 
-                isListView={viewMode === "list"} 
-              />
-            ))}
-          </div>
-        )}
-      </div>
-      
-      {/* Pagination */}
-      <div className="px-6 pb-6">
-        <PaginationControls />
-      </div>
-      
-      {/* Footer */}
-      <Footer />
-    </div>
-  </div>
-
-  {/* Right Side - Map (1/3 width, COMPLETELY FROZEN) */}
-  <div className="w-1/3 h-full relative">
-    <Map className="h-full w-full z-0" />
-  </div>
-</div>
 
       {/* Mobile & Tablet Layout - NO GAPS */}
       <div 
-  className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative mobile-shop-content ${isOfflineMode ? 'offline-mode' : ''} ${scrollDirection === 'down' ? 'filter-hidden' : 'filter-visible'}`}
-  onScroll={handlePageScroll}
->
+        className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative mobile-shop-content ${isOfflineMode ? 'offline-mode' : ''} ${scrollDirection === 'down' ? 'filter-hidden' : 'filter-visible'}`}
+        onScroll={handlePageScroll}
+      >
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
         <div className={`sort-filter-bar xl:hidden w-full ${
-  (showMobileFilters || showMobileMap) ? 'hidden' : ''
-}`} style={{
-  transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
-  transition: 'transform 0.3s ease-in-out'
-}}>
+          (showMobileFilters || showMobileMap) ? 'hidden' : ''
+        }`} style={{
+          transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
+          transition: 'transform 0.3s ease-in-out'
+        }}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">

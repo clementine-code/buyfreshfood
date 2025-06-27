@@ -260,7 +260,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
         setError('Unable to detect your location. Please enter it manually.');
       }
     } catch (error) {
-      console.error('Error detecting location:', error);
+      console.error('Error getting current location:', error);
       if (error.message === 'Request timeout') {
         setError('Location detection timed out. Please enter your location manually.');
       } else {
