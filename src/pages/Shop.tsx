@@ -652,7 +652,7 @@ useEffect(() => {
       )}
 
       {/* Desktop Layout - Airbnb Style: FIXED HEIGHT, NO SCROLLBARS */}
-<div className="hidden xl:flex w-full h-full" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
+<div className="hidden xl:flex w-full h-screen" style={{paddingTop: isOfflineMode ? '120px' : '80px'}}>
   {/* Left Side - Products (2/3 width, scrollable content) */}
   <div className="w-2/3 h-full flex flex-col bg-default-background">
     {/* Controls Bar - Fixed at top */}
