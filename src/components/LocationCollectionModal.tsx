@@ -541,7 +541,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     ? '90vw' 
     : (inputRef.current ? inputRef.current.getBoundingClientRect().width + 32 : 400),
   maxWidth: window.innerWidth < 768 ? '400px' : '600px'
-}}}
+}}
   >
               {isLoadingSuggestions ? (
                 <div className="p-3">
