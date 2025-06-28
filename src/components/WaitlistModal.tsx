@@ -17,13 +17,14 @@ import { useNavigate } from "react-router-dom";
 
 const WaitlistModal: React.FC = () => {
   const { state, closeAllModals, showSuccessView, openLocationModal } = useWaitlistContext();
-  const { state: locationState } = useLocationContext();
+  const { state: locationState, setLocationData } = useLocationContext();
   const navigate = useNavigate();
 
   // Form state
   const [email, setEmail] = useState("");
   const [locationInput, setLocationInput] = useState("");
   const [currentLocationData, setCurrentLocationData] = useState<LocationData | null>(null);
+  const [previousLocationData, setPreviousLocationData] = useState<LocationData | null>(null);
   const [interests, setInterests] = useState({
     buying: false,
     selling: false,
@@ -38,11 +39,22 @@ const WaitlistModal: React.FC = () => {
   // Initialize form when modal opens
   useEffect(() => {
     if (state.isWaitlistModalOpen && !state.isSuccessView) {
-      // Set location data from context
-      if (state.currentLocationData) {
-        setCurrentLocationData(state.currentLocationData);
-        setLocationInput(state.currentLocationData.formattedAddress || 
-                        `${state.currentLocationData.city}, ${state.currentLocationData.state}`);
+      // Set location data from context or waitlist context
+      const locationData = state.currentLocationData || (locationState.isSet ? {
+        isNWA: locationState.isNWA,
+        city: locationState.city || '',
+        state: locationState.state || '',
+        zipCode: locationState.zipCode || '',
+        formattedAddress: locationState.location || '',
+        latitude: locationState.coordinates?.lat,
+        longitude: locationState.coordinates?.lng
+      } : null);
+
+      if (locationData) {
+        setCurrentLocationData(locationData);
+        setPreviousLocationData(locationData);
+        setLocationInput(locationData.formattedAddress || 
+                        `${locationData.city}, ${locationData.state}`);
       }
       
       // Reset form fields
@@ -56,7 +68,13 @@ const WaitlistModal: React.FC = () => {
       setError("");
       setIsEditingLocation(false);
     }
-  }, [state.isWaitlistModalOpen, state.isSuccessView, state.currentLocationData]);
+  }, [state.isWaitlistModalOpen, state.isSuccessView, state.currentLocationData, locationState]);
+
+  // Check if location market has changed
+  const hasLocationMarketChanged = (newLocation: LocationData, oldLocation: LocationData | null): boolean => {
+    if (!oldLocation) return true;
+    return newLocation.isNWA !== oldLocation.isNWA;
+  };
 
   const handleLocationEdit = () => {
     setIsEditingLocation(true);
@@ -77,10 +95,46 @@ const WaitlistModal: React.FC = () => {
       const locationData = await locationService.validateLocationInput(locationInput.trim());
       
       if (locationData) {
-        setCurrentLocationData(locationData);
-        setLocationInput(locationData.formattedAddress || 
-                        `${locationData.city}, ${locationData.state}`);
-        setIsEditingLocation(false);
+        console.log('🔄 Location validated:', locationData);
+        console.log('📍 Previous location:', previousLocationData);
+        
+        // Check if market has changed
+        const marketChanged = hasLocationMarketChanged(locationData, previousLocationData);
+        
+        console.log('🔄 Market changed:', marketChanged);
+        
+        if (marketChanged) {
+          // Market changed - need to update waitlist type and restart flow
+          console.log('🚀 Market changed, updating location and restarting waitlist flow');
+          
+          // Update location in context
+          setLocationData(locationData);
+          
+          // Close current waitlist modal
+          closeAllModals();
+          
+          // Determine new waitlist type
+          const newWaitlistType = locationData.isNWA ? 'early_access' : 'geographic';
+          
+          // Restart waitlist flow with new location and type
+          setTimeout(() => {
+            // Import and use the openWaitlistFlow function
+            const { openWaitlistFlow } = require('../contexts/WaitlistContext');
+            if (openWaitlistFlow) {
+              openWaitlistFlow(newWaitlistType, locationData);
+            }
+          }, 100);
+          
+          return;
+        } else {
+          // Same market - just update location data
+          console.log('✅ Same market, updating location data');
+          setCurrentLocationData(locationData);
+          setLocationInput(locationData.formattedAddress || 
+                          `${locationData.city}, ${locationData.state}`);
+          setLocationData(locationData);
+          setIsEditingLocation(false);
+        }
       } else {
         setError('Unable to validate location. Please try a different address.');
       }
@@ -249,7 +303,7 @@ const WaitlistModal: React.FC = () => {
             />
           </TextField>
           
-          {/* Location Field - Editable */}
+          {/* Location Field - Editable with Market Change Detection */}
           <div className="w-full">
             <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
               Location
@@ -314,6 +368,15 @@ const WaitlistModal: React.FC = () => {
                   >
                     Cancel
                   </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Market Change Warning */}
+            {isEditingLocation && (
+              <div className="mt-2 p-3 bg-warning-50 border border-warning-200 rounded-md">
+                <div className="text-caption font-caption text-warning-800">
+                  💡 <strong>Note:</strong> Changing to a different market area will restart your waitlist signup with the appropriate queue for that region.
                 </div>
               </div>
             )}
