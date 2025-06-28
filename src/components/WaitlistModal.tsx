@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { DialogLayout } from "@/ui/layouts/DialogLayout";
 import { IconWithBackground } from "@/ui/components/IconWithBackground";
 import { Badge } from "@/ui/components/Badge";
@@ -12,7 +12,7 @@ import { FeatherExternalLink, FeatherMapPin, FeatherEdit3 } from "@subframe/core
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
 import { submitWaitlist } from "../utils/waitlistUtils";
-import { locationService, type LocationData } from "../services/locationService";
+import { locationService, type LocationData, type LocationSuggestion } from "../services/locationService";
 import { useNavigate } from "react-router-dom";
 
 const WaitlistModal: React.FC = () => {
@@ -38,6 +38,18 @@ const WaitlistModal: React.FC = () => {
 
   // NEW: Location collection state
   const [showLocationInput, setShowLocationInput] = useState(false);
+
+  // NEW: Google Places API integration state
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
+  // Refs for suggestion handling
+  const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const preventBlurRef = useRef(false);
 
   // Initialize form when modal opens - UPDATED to handle location collection
   useEffect(() => {
@@ -87,8 +99,22 @@ const WaitlistModal: React.FC = () => {
       setProductInterests("");
       setError("");
       setIsEditingLocation(false);
+      
+      // Reset suggestion state
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
     }
   }, [state.isWaitlistModalOpen, state.isSuccessView, state.currentLocationData, state.collectLocationInModal, locationState]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   // Check if location market has changed
   const hasLocationMarketChanged = (newLocation: LocationData, oldLocation: LocationData | null): boolean => {
@@ -96,17 +122,168 @@ const WaitlistModal: React.FC = () => {
     return newLocation.isNWA !== oldLocation.isNWA;
   };
 
+  // NEW: Fetch location suggestions using Google Places API
+  const fetchLocationSuggestions = async (input: string) => {
+    if (input.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsLoadingSuggestions(true);
+    
+    try {
+      console.log('🔍 Fetching location suggestions for:', input);
+      const results = await locationService.getLocationSuggestions(input);
+      setSuggestions(results || []);
+      setShowSuggestions(results.length > 0);
+      setSelectedIndex(-1);
+    } catch (error) {
+      console.error('Error fetching location suggestions:', error);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  };
+
   const handleLocationEdit = () => {
     setIsEditingLocation(true);
     setShowLocationInput(true);
   };
 
+  // UPDATED: Handle location input changes with Google Places API integration
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocationInput(e.target.value);
+    const value = e.target.value;
+    setLocationInput(value);
     setError("");
+    setSelectedIndex(-1);
+
+    // Clear existing debounce
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Debounced search for suggestions
+    if (value.trim().length >= 2) {
+      debounceTimerRef.current = setTimeout(() => {
+        fetchLocationSuggestions(value.trim());
+      }, 300);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
   };
 
-  // NEW: Handle location validation for direct input
+  // NEW: Handle keyboard navigation for suggestions
+  const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleLocationValidation();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev > 0 ? prev - 1 : suggestions.length - 1
+        );
+        break;
+      
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+          handleSuggestionClick(suggestions[selectedIndex]);
+        } else {
+          handleLocationValidation();
+        }
+        break;
+      
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+        break;
+    }
+  };
+
+  // NEW: Handle suggestion clicks
+  const handleSuggestionClick = async (suggestion: LocationSuggestion) => {
+    preventBlurRef.current = true;
+    
+    setLocationInput(suggestion.description);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setIsLoadingSuggestions(true);
+
+    try {
+      console.log('🔍 Getting location details for suggestion:', suggestion);
+      const locationData = await locationService.getLocationDetails(suggestion.place_id, suggestion.coordinates);
+      
+      if (locationData) {
+        console.log('✅ Location validated from suggestion:', locationData);
+        
+        // Check if market has changed
+        const marketChanged = hasLocationMarketChanged(locationData, previousLocationData);
+        console.log('🔄 Market changed:', marketChanged);
+        
+        setCurrentLocationData(locationData);
+        setLocationInput(locationData.formattedAddress || 
+                        `${locationData.city}, ${locationData.state}`);
+        setShowLocationInput(false);
+        setIsEditingLocation(false);
+        
+        // Save to context immediately
+        setLocationData(locationData);
+        
+        if (marketChanged && previousLocationData) {
+          console.log('🚀 Market changed, but continuing with current flow');
+        }
+      } else {
+        setError('Unable to validate this location. Please try a different address.');
+      }
+    } catch (err) {
+      console.error('Error getting location details:', err);
+      setError('Failed to validate location. Please try again.');
+    } finally {
+      setIsLoadingSuggestions(false);
+      setTimeout(() => {
+        preventBlurRef.current = false;
+      }, 100);
+    }
+  };
+
+  // Handle input focus
+  const handleLocationFocus = () => {
+    if (suggestions.length > 0 && locationInput.length >= 2) {
+      setShowSuggestions(true);
+    }
+  };
+
+  // Handle input blur
+  const handleLocationBlur = () => {
+    if (preventBlurRef.current) {
+      return;
+    }
+    
+    setTimeout(() => {
+      if (!preventBlurRef.current) {
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+      }
+    }, 150);
+  };
+
+  // NEW: Handle location validation for direct input (when user doesn't select suggestion)
   const handleLocationValidation = async () => {
     if (!locationInput.trim()) return;
 
@@ -164,6 +341,8 @@ const WaitlistModal: React.FC = () => {
     }
     setIsEditingLocation(false);
     setError("");
+    setSuggestions([]);
+    setShowSuggestions(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -356,9 +535,9 @@ const WaitlistModal: React.FC = () => {
         {getBadgeFlow()}
 
         <form onSubmit={handleSubmit} className="flex w-full flex-col items-start gap-6">
-          {/* NEW: Location Input Section - Shows when needed */}
+          {/* UPDATED: Location Input Section with Google Places API suggestions */}
           {showLocationInput && (
-            <div className="w-full">
+            <div className="w-full relative">
               <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
                 Your Location
               </label>
@@ -370,18 +549,73 @@ const WaitlistModal: React.FC = () => {
                   helpText={error || "Enter your city, state, or zip code"}
                 >
                   <TextField.Input
+                    ref={inputRef}
                     value={locationInput}
                     onChange={handleLocationChange}
+                    onFocus={handleLocationFocus}
+                    onBlur={handleLocationBlur}
+                    onKeyDown={handleLocationKeyDown}
                     placeholder="Enter city, state, or zip code..."
-                    disabled={isValidatingLocation}
+                    disabled={isValidatingLocation || isLoadingSuggestions}
+                    autoComplete="off"
+                    spellCheck={false}
                   />
                 </TextField>
+
+                {/* Google Places API Suggestions Dropdown */}
+                {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
+                  <div 
+                    ref={suggestionsRef}
+                    className="absolute left-0 right-0 top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-[200px] overflow-y-auto"
+                  >
+                    {isLoadingSuggestions ? (
+                      <div className="p-3">
+                        <div className="flex items-center gap-2 text-subtext-color">
+                          <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-body font-body">Searching locations...</span>
+                        </div>
+                      </div>
+                    ) : (
+                      suggestions.map((suggestion, index) => (
+                        <button
+                          key={suggestion.place_id || index}
+                          type="button"
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            preventBlurRef.current = true;
+                          }}
+                          onMouseUp={() => {
+                            setTimeout(() => {
+                              preventBlurRef.current = false;
+                            }, 100);
+                          }}
+                          onMouseEnter={() => setSelectedIndex(index)}
+                          className={`w-full text-left px-3 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
+                            index === selectedIndex ? 'bg-brand-50' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate text-default-font">{suggestion.main_text}</div>
+                              {suggestion.secondary_text && (
+                                <div className="text-sm text-subtext-color truncate">{suggestion.secondary_text}</div>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   <Button
                     type="button"
                     size="small"
                     onClick={handleLocationSave}
-                    disabled={!locationInput.trim() || isValidatingLocation}
+                    disabled={!locationInput.trim() || isValidatingLocation || isLoadingSuggestions}
                     loading={isValidatingLocation}
                   >
                     {isValidatingLocation ? 'Validating...' : 'Validate Location'}
@@ -392,7 +626,7 @@ const WaitlistModal: React.FC = () => {
                       variant="neutral-secondary"
                       size="small"
                       onClick={handleLocationCancel}
-                      disabled={isValidatingLocation}
+                      disabled={isValidatingLocation || isLoadingSuggestions}
                     >
                       Cancel
                     </Button>
