@@ -29,10 +29,10 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
         onClick={onClose}
       />
       
-      {/* Modal */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-md mx-4">
+      {/* Modal - FIXED: Added max-width and better mobile sizing */}
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-md">
         <div 
-          className="bg-white rounded-lg shadow-xl overflow-hidden"
+          className="bg-white rounded-lg shadow-xl overflow-hidden mx-4 mobile:mx-2 mobile:max-w-[calc(100vw-16px)]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -68,15 +68,15 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
               </p>
             </div>
 
-            {/* Location Display */}
+            {/* Location Display - FIXED: Better mobile sizing */}
             <div className="bg-success-50 rounded-lg p-4">
               <div className="flex items-center gap-3 justify-center">
                 <FeatherMapPin className="w-5 h-5 text-success-600 flex-shrink-0" />
-                <div>
+                <div className="flex-1 min-w-0">
                   <div className="text-body-bold font-body-bold text-success-800">
                     Current Waitlist Location
                   </div>
-                  <div className="text-body font-body text-success-700">
+                  <div className="text-body font-body text-success-700 break-words">
                     {waitlistedLocation}
                   </div>
                 </div>
