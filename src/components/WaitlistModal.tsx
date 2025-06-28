@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { DialogLayout } from "@/ui/layouts/DialogLayout";
 import { IconWithBackground } from "@/ui/components/IconWithBackground";
 import { Badge } from "@/ui/components/Badge";
 import { FeatherArrowRight } from "@subframe/core";
 import { TextField } from "@/ui/components/TextField";
 import { CheckboxCard } from "@/ui/components/CheckboxCard";
 import { Button } from "@/ui/components/Button";
-import { FeatherExternalLink, FeatherMapPin, FeatherEdit3, FeatherLocate } from "@subframe/core";
+import { FeatherExternalLink, FeatherMapPin, FeatherEdit3, FeatherLocate, FeatherX } from "@subframe/core";
+import { IconButton } from "@/ui/components/IconButton";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
 import { submitWaitlist } from "../utils/waitlistUtils";
@@ -432,61 +432,58 @@ const WaitlistModal: React.FC = () => {
     closeAllModals();
   };
 
+  const handleClickOutside = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      closeAllModals();
+    }
+  };
+
   if (!state.isWaitlistModalOpen) return null;
 
-  // Success View
+  // Success View - FIXED MODAL STRUCTURE
   if (state.isSuccessView) {
     const isGeographic = state.modalType === 'geographic';
     const cityName = currentLocationData?.city || 'your area';
     
     return (
       <div 
-  className="fixed inset-0 bg-black/50 flex items-center justify-center"
-  style={{
-    zIndex: 999999,
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0
-  }}
-  onClick={(e) => {
-    if (e.target === e.currentTarget) {
-      closeAllModals();
-    }
-  }}
->
-        <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-default-background px-6 py-12">
-          <div className="flex w-full max-w-[576px] flex-col items-center gap-6">
-            <IconWithBackground variant="success" size="x-large" />
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-heading-2 font-heading-2 text-default-font text-center">
-                {isGeographic 
-                  ? `You're #${state.queueNumber} in line for ${cityName}!`
-                  : "You're on the early access list!"
-                }
-              </span>
-              <span className="text-body font-body text-subtext-color text-center">
-                {isGeographic
-                  ? "We'll notify you as soon as we launch in your area"
-                  : "We'll notify you when ordering goes live"
-                }
-              </span>
+        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+        style={{ zIndex: 999999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+        onClick={handleClickOutside}
+      >
+        <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl">
+          <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-default-background px-6 py-12">
+            <div className="flex w-full max-w-[576px] flex-col items-center gap-6">
+              <IconWithBackground variant="success" size="x-large" />
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-heading-2 font-heading-2 text-default-font text-center">
+                  {isGeographic 
+                    ? `You're #${state.queueNumber} in line for ${cityName}!`
+                    : "You're on the early access list!"
+                  }
+                </span>
+                <span className="text-body font-body text-subtext-color text-center">
+                  {isGeographic
+                    ? "We'll notify you as soon as we launch in your area"
+                    : "We'll notify you when ordering goes live"
+                  }
+                </span>
+              </div>
+              <Button
+                className="h-10 w-full flex-none"
+                size="large"
+                onClick={handleBrowseClick}
+              >
+                Browse Marketplace
+              </Button>
             </div>
-            <Button
-              className="h-10 w-full flex-none"
-              size="large"
-              onClick={handleBrowseClick}
-            >
-              Browse Marketplace
-            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Form View - Dynamic messaging based on location state
+  // Form View - FIXED MODAL STRUCTURE
   const isGeographic = state.modalType === 'geographic';
   const cityName = currentLocationData?.city || 'your area';
   const hasLocation = !!currentLocationData;
@@ -571,275 +568,275 @@ const WaitlistModal: React.FC = () => {
 
   return (
     <div 
-  className="fixed inset-0 bg-black/50 flex items-center justify-center"
-  style={{
-    zIndex: 999999,
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0
-  }}
-  onClick={(e) => {
-    if (e.target === e.currentTarget) {
-      closeAllModals();
-    }
-  }}
->
-      <div className="flex h-full w-full max-w-[576px] flex-col items-start gap-8 bg-default-background px-8 py-8 mobile:flex-col mobile:flex-nowrap mobile:gap-8">
-        <div className="flex w-full flex-col items-start gap-4">
-          <span className="text-heading-1 font-heading-1 text-default-font">
-            {getTitle()}
-          </span>
-          <span className="text-body font-body text-subtext-color">
-            {getDescription()}
-          </span>
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+      style={{ zIndex: 999999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+      onClick={handleClickOutside}
+    >
+      <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl">
+        {/* Close Button */}
+        <div className="flex justify-end p-4 pb-0">
+          <IconButton
+            variant="neutral-tertiary"
+            icon={<FeatherX />}
+            onClick={closeAllModals}
+          />
         </div>
-        
-        {getBadgeFlow()}
 
-        <form onSubmit={handleSubmit} className="flex w-full flex-col items-start gap-6">
-          {/* FIXED: Location Input Section - Exact same design as LocationCollectionModal */}
-          {showLocationInput && (
-            <div className="w-full relative">
-              <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
-                Location
-              </label>
-              
-              <div className="flex items-end justify-end gap-2 relative">
-                <TextField 
-                  className="h-auto grow shrink-0 basis-0" 
-                  label="" 
-                  helpText="" 
-                  error={!!error}
-                  icon={<FeatherMapPin />}
-                >
-                  <TextField.Input 
-                    ref={inputRef}
-                    placeholder="Enter city, state, or zip code..."
-                    value={locationInput}
-                    onChange={handleLocationChange}
-                    onFocus={handleLocationFocus}
-                    onBlur={handleLocationBlur}
-                    onKeyDown={handleLocationKeyDown}
-                    autoComplete="off"
-                    spellCheck={false}
-                    disabled={isValidatingLocation || isDetectingLocation}
-                  />
-                </TextField>
+        <div className="flex h-full w-full flex-col items-start gap-8 bg-default-background px-8 py-4 pb-8">
+          <div className="flex w-full flex-col items-start gap-4">
+            <span className="text-heading-1 font-heading-1 text-default-font">
+              {getTitle()}
+            </span>
+            <span className="text-body font-body text-subtext-color">
+              {getDescription()}
+            </span>
+          </div>
+          
+          {getBadgeFlow()}
 
-                {/* Find My Location Button - Same as LocationCollectionModal */}
-                <button
-                  type="button"
-                  onClick={handleDetectCurrentLocation}
-                  disabled={isDetectingLocation || isValidatingLocation || isLoadingSuggestions}
-                  className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Use current location"
-                >
-                  <FeatherLocate className={`w-4 h-4 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
-                </button>
-
-                {/* Suggestions Dropdown - Exact same positioning as LocationCollectionModal */}
-                {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
-                  <div 
-                    ref={suggestionsRef}
-                    className="absolute left-0 right-0 top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-[200px] overflow-y-auto"
-                    style={{ width: 'calc(100% - 52px)' }} // Account for action button
+          <form onSubmit={handleSubmit} className="flex w-full flex-col items-start gap-6">
+            {/* FIXED: Location Input Section - Exact same design as LocationCollectionModal */}
+            {showLocationInput && (
+              <div className="w-full relative">
+                <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
+                  Location
+                </label>
+                
+                <div className="flex items-end justify-end gap-2 relative">
+                  <TextField 
+                    className="h-auto grow shrink-0 basis-0" 
+                    label="" 
+                    helpText="" 
+                    error={!!error}
+                    icon={<FeatherMapPin />}
                   >
-                    {isLoadingSuggestions ? (
-                      <div className="p-3">
-                        <div className="flex items-center gap-2 text-subtext-color">
-                          <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-body font-body">Searching locations...</span>
-                        </div>
-                      </div>
-                    ) : (
-                      suggestions.map((suggestion, index) => (
-                        <button
-                          key={suggestion.place_id || index}
-                          type="button"
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            preventBlurRef.current = true;
-                          }}
-                          onMouseUp={() => {
-                            setTimeout(() => {
-                              preventBlurRef.current = false;
-                            }, 100);
-                          }}
-                          onMouseEnter={() => setSelectedIndex(index)}
-                          className={`w-full text-left px-3 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
-                            index === selectedIndex ? 'bg-brand-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate text-default-font">{suggestion.main_text}</div>
-                              {suggestion.secondary_text && (
-                                <div className="text-sm text-subtext-color truncate">{suggestion.secondary_text}</div>
-                              )}
-                            </div>
+                    <TextField.Input 
+                      ref={inputRef}
+                      placeholder="Enter city, state, or zip code..."
+                      value={locationInput}
+                      onChange={handleLocationChange}
+                      onFocus={handleLocationFocus}
+                      onBlur={handleLocationBlur}
+                      onKeyDown={handleLocationKeyDown}
+                      autoComplete="off"
+                      spellCheck={false}
+                      disabled={isValidatingLocation || isDetectingLocation}
+                    />
+                  </TextField>
+
+                  {/* Find My Location Button - Same as LocationCollectionModal */}
+                  <button
+                    type="button"
+                    onClick={handleDetectCurrentLocation}
+                    disabled={isDetectingLocation || isValidatingLocation || isLoadingSuggestions}
+                    className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Use current location"
+                  >
+                    <FeatherLocate className={`w-4 h-4 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
+                  </button>
+
+                  {/* Suggestions Dropdown - Exact same positioning as LocationCollectionModal */}
+                  {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
+                    <div 
+                      ref={suggestionsRef}
+                      className="absolute left-0 right-0 top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-[200px] overflow-y-auto"
+                      style={{ width: 'calc(100% - 52px)' }} // Account for action button
+                    >
+                      {isLoadingSuggestions ? (
+                        <div className="p-3">
+                          <div className="flex items-center gap-2 text-subtext-color">
+                            <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-body font-body">Searching locations...</span>
                           </div>
-                        </button>
-                      ))
-                    )}
+                        </div>
+                      ) : (
+                        suggestions.map((suggestion, index) => (
+                          <button
+                            key={suggestion.place_id || index}
+                            type="button"
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              preventBlurRef.current = true;
+                            }}
+                            onMouseUp={() => {
+                              setTimeout(() => {
+                                preventBlurRef.current = false;
+                              }, 100);
+                            }}
+                            onMouseEnter={() => setSelectedIndex(index)}
+                            className={`w-full text-left px-3 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
+                              index === selectedIndex ? 'bg-brand-50' : ''
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium truncate text-default-font">{suggestion.main_text}</div>
+                                {suggestion.secondary_text && (
+                                  <div className="text-sm text-subtext-color truncate">{suggestion.secondary_text}</div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Error message */}
+                {error && (
+                  <div className="mt-2 text-caption font-caption text-error-700">
+                    {error}
+                  </div>
+                )}
+
+                {/* Loading State */}
+                {(isValidatingLocation || isDetectingLocation) && (
+                  <div className="flex w-full items-center justify-center gap-2 py-4">
+                    <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-body font-body text-subtext-color">
+                      {isValidatingLocation ? 'Validating location...' : 
+                       isDetectingLocation ? 'Detecting your location...' : 
+                       'Loading...'}
+                    </span>
                   </div>
                 )}
               </div>
+            )}
 
-              {/* Error message */}
-              {error && (
-                <div className="mt-2 text-caption font-caption text-error-700">
-                  {error}
+            {/* Existing Location Display - Shows when location is set */}
+            {!showLocationInput && currentLocationData && (
+              <div className="w-full">
+                <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
+                  Location
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-3 px-3 py-2 bg-neutral-100 border border-neutral-200 rounded-md">
+                    <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
+                    <span className="text-body font-body text-default-font flex-1 truncate">
+                      {locationInput}
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="neutral-secondary"
+                    size="small"
+                    icon={<FeatherEdit3 />}
+                    onClick={handleLocationEdit}
+                  >
+                    Edit
+                  </Button>
                 </div>
-              )}
-
-              {/* Loading State */}
-              {(isValidatingLocation || isDetectingLocation) && (
-                <div className="flex w-full items-center justify-center gap-2 py-4">
-                  <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-body font-body text-subtext-color">
-                    {isValidatingLocation ? 'Validating location...' : 
-                     isDetectingLocation ? 'Detecting your location...' : 
-                     'Loading...'}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Existing Location Display - Shows when location is set */}
-          {!showLocationInput && currentLocationData && (
-            <div className="w-full">
-              <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
-                Location
-              </label>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 flex items-center gap-3 px-3 py-2 bg-neutral-100 border border-neutral-200 rounded-md">
-                  <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
-                  <span className="text-body font-body text-default-font flex-1 truncate">
-                    {locationInput}
-                  </span>
-                </div>
-                <Button
-                  type="button"
-                  variant="neutral-secondary"
-                  size="small"
-                  icon={<FeatherEdit3 />}
-                  onClick={handleLocationEdit}
-                >
-                  Edit
-                </Button>
               </div>
-            </div>
-          )}
+            )}
 
-          <TextField
-            className="h-auto w-full flex-none"
-            variant="filled"
-            label="Email address"
-            helpText=""
-            error={!!error && !error.includes('location')}
-          >
-            <TextField.Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </TextField>
-          
-          <div className="flex w-full flex-col items-start gap-2">
-            <span className="text-body-bold font-body-bold text-default-font">
-              I'm interested in:
+            <TextField
+              className="h-auto w-full flex-none"
+              variant="filled"
+              label="Email address"
+              helpText=""
+              error={!!error && !error.includes('location')}
+            >
+              <TextField.Input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </TextField>
+            
+            <div className="flex w-full flex-col items-start gap-2">
+              <span className="text-body-bold font-body-bold text-default-font">
+                I'm interested in:
+              </span>
+              <CheckboxCard
+                checked={interests.buying}
+                onCheckedChange={(checked) => setInterests(prev => ({ ...prev, buying: checked }))}
+              >
+                <span className="text-body font-body text-default-font">
+                  Buying fresh food
+                </span>
+              </CheckboxCard>
+              <CheckboxCard
+                checked={interests.selling}
+                onCheckedChange={(checked) => setInterests(prev => ({ ...prev, selling: checked }))}
+              >
+                <span className="text-body font-body text-default-font">
+                  Selling from my garden/farm
+                </span>
+              </CheckboxCard>
+              <CheckboxCard
+                checked={interests.updates}
+                onCheckedChange={(checked) => setInterests(prev => ({ ...prev, updates: checked }))}
+              >
+                <span className="text-body font-body text-default-font">
+                  Just staying updated
+                </span>
+              </CheckboxCard>
+            </div>
+            
+            <TextField
+              className="h-auto w-full flex-none"
+              variant="filled"
+              label="What would you most like to find?"
+              helpText="Examples: Fresh eggs, local honey, heirloom tomatoes"
+            >
+              <TextField.Input
+                placeholder="Tell us what you're looking for..."
+                value={productInterests}
+                onChange={(e) => setProductInterests(e.target.value)}
+              />
+            </TextField>
+
+            {error && !error.includes('location') && (
+              <div className="w-full p-3 bg-error-50 border border-error-200 rounded-md">
+                <span className="text-caption font-caption text-error-700">{error}</span>
+              </div>
+            )}
+
+            <div className="flex w-full flex-col items-center gap-4">
+              <Button
+                type="submit"
+                className="h-12 w-full flex-none"
+                size="large"
+                disabled={!email.trim() || !currentLocationData || isSubmitting || showLocationInput}
+                loading={isSubmitting}
+              >
+                {isSubmitting 
+                  ? "Joining..." 
+                  : hasLocation && currentLocationData?.isNWA
+                    ? "Join Early Access List"
+                    : hasLocation
+                      ? `Join Waitlist for ${cityName}`
+                      : "Join Waitlist"
+                }
+              </Button>
+              <Button
+                type="button"
+                variant="neutral-tertiary"
+                onClick={handleMaybeLater}
+                disabled={isSubmitting}
+              >
+                Maybe later
+              </Button>
+            </div>
+          </form>
+
+          <div className="flex w-full flex-col items-center gap-2 border-t border-solid border-neutral-border pt-6">
+            <span className="text-caption font-caption text-subtext-color">
+              Browse our Northwest Arkansas marketplace while you wait
             </span>
-            <CheckboxCard
-              checked={interests.buying}
-              onCheckedChange={(checked) => setInterests(prev => ({ ...prev, buying: checked }))}
-            >
-              <span className="text-body font-body text-default-font">
-                Buying fresh food
-              </span>
-            </CheckboxCard>
-            <CheckboxCard
-              checked={interests.selling}
-              onCheckedChange={(checked) => setInterests(prev => ({ ...prev, selling: checked }))}
-            >
-              <span className="text-body font-body text-default-font">
-                Selling from my garden/farm
-              </span>
-            </CheckboxCard>
-            <CheckboxCard
-              checked={interests.updates}
-              onCheckedChange={(checked) => setInterests(prev => ({ ...prev, updates: checked }))}
-            >
-              <span className="text-body font-body text-default-font">
-                Just staying updated
-              </span>
-            </CheckboxCard>
-          </div>
-          
-          <TextField
-            className="h-auto w-full flex-none"
-            variant="filled"
-            label="What would you most like to find?"
-            helpText="Examples: Fresh eggs, local honey, heirloom tomatoes"
-          >
-            <TextField.Input
-              placeholder="Tell us what you're looking for..."
-              value={productInterests}
-              onChange={(e) => setProductInterests(e.target.value)}
-            />
-          </TextField>
-
-          {error && !error.includes('location') && (
-            <div className="w-full p-3 bg-error-50 border border-error-200 rounded-md">
-              <span className="text-caption font-caption text-error-700">{error}</span>
-            </div>
-          )}
-
-          <div className="flex w-full flex-col items-center gap-4">
             <Button
-              type="submit"
-              className="h-12 w-full flex-none"
-              size="large"
-              disabled={!email.trim() || !currentLocationData || isSubmitting || showLocationInput}
-              loading={isSubmitting}
+              variant="brand-secondary"
+              icon={<FeatherExternalLink />}
+              onClick={handleBrowseClick}
             >
-              {isSubmitting 
-                ? "Joining..." 
-                : hasLocation && currentLocationData?.isNWA
-                  ? "Join Early Access List"
-                  : hasLocation
-                    ? `Join Waitlist for ${cityName}`
-                    : "Join Waitlist"
-              }
-            </Button>
-            <Button
-              type="button"
-              variant="neutral-tertiary"
-              onClick={handleMaybeLater}
-              disabled={isSubmitting}
-            >
-              Maybe later
+              Shop
             </Button>
           </div>
-        </form>
-
-        <div className="flex w-full flex-col items-center gap-2 border-t border-solid border-neutral-border pt-6">
-          <span className="text-caption font-caption text-subtext-color">
-            Browse our Northwest Arkansas marketplace while you wait
-          </span>
-          <Button
-            variant="brand-secondary"
-            icon={<FeatherExternalLink />}
-            onClick={handleBrowseClick}
-          >
-            Shop
-          </Button>
         </div>
       </div>
     </div>
