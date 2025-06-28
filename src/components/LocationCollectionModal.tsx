@@ -529,12 +529,16 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           )}
 
           {/* Suggestions Dropdown */}
-          {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && modalState !== 'saved' && (
-            <div 
-              ref={suggestionsRef}
-              className="fixed bg-white border border-neutral-200 rounded-md shadow-lg z-[10000] max-h-[200px] overflow-y-auto"
-              style={{ width: 'calc(100% - 52px)' }} // Account for action button
-            >
+          {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
+  <div 
+    ref={suggestionsRef}
+    className="fixed bg-white border border-neutral-200 rounded-md shadow-lg z-[10000] max-h-[200px] overflow-y-auto"
+    style={{
+      top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 4 : 0,
+      left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
+      width: inputRef.current ? inputRef.current.getBoundingClientRect().width - 52 : 'auto'
+    }}
+  >
               {isLoadingSuggestions ? (
                 <div className="p-3">
                   <div className="flex items-center gap-2 text-subtext-color">
