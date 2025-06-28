@@ -535,13 +535,13 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
   top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 4 : 0,
   left: window.innerWidth < 768 
     ? '50%' 
-    : (inputRef.current ? inputRef.current.getBoundingClientRect().left - 12 : 0),
+    : (inputRef.current ? inputRef.current.getBoundingClientRect().left - 16 : 0),
   transform: window.innerWidth < 768 ? 'translateX(-50%)' : 'none',
   width: window.innerWidth < 768 
     ? '90vw' 
-    : (inputRef.current ? inputRef.current.getBoundingClientRect().width + 24 : 400),
-  maxWidth: window.innerWidth < 768 ? '400px' : '500px'
-}}
+    : (inputRef.current ? inputRef.current.getBoundingClientRect().width + 32 : 400),
+  maxWidth: window.innerWidth < 768 ? '400px' : '600px'
+}}}
   >
               {isLoadingSuggestions ? (
                 <div className="p-3">
