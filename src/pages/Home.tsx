@@ -24,6 +24,7 @@ import { FeatherFacebook } from "@subframe/core";
 import { FeatherInstagram } from "@subframe/core";
 import { FeatherXTwitter } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
+import { FeatherHeart } from "@subframe/core";
 
 function Home() {
   const navigate = useNavigate();
