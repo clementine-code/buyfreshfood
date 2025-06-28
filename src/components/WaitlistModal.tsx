@@ -40,19 +40,19 @@ const WaitlistModal: React.FC = () => {
   // NEW: Location collection state
   const [showLocationInput, setShowLocationInput] = useState(false);
 
-  // NEW: Google Places API integration state
+  // FIXED: Google Places API integration state - using same pattern as LocationCollectionModal
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
-  // Refs for suggestion handling
+  // Refs for suggestion handling - same as LocationCollectionModal
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
   const preventBlurRef = useRef(false);
 
-  // Initialize form when modal opens - UPDATED to handle location collection
+  // Initialize form when modal opens
   useEffect(() => {
     if (state.isWaitlistModalOpen && !state.isSuccessView) {
       console.log('🎯 Initializing waitlist modal:', {
@@ -124,7 +124,7 @@ const WaitlistModal: React.FC = () => {
     return newLocation.isNWA !== oldLocation.isNWA;
   };
 
-  // NEW: Fetch location suggestions using Google Places API
+  // FIXED: Fetch location suggestions - same pattern as LocationCollectionModal
   const fetchLocationSuggestions = async (input: string) => {
     if (input.length < 2) {
       setSuggestions([]);
@@ -154,7 +154,7 @@ const WaitlistModal: React.FC = () => {
     setShowLocationInput(true);
   };
 
-  // UPDATED: Handle location input changes with Google Places API integration
+  // FIXED: Handle location input changes - same debouncing as LocationCollectionModal
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setLocationInput(value);
@@ -166,18 +166,19 @@ const WaitlistModal: React.FC = () => {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Debounced search for suggestions
-    if (value.trim().length >= 2) {
+    // FIXED: Only show suggestions when input is focused and longer debounce
+    if (value.trim().length >= 2 && document.activeElement === inputRef.current) {
+      setShowSuggestions(true);
       debounceTimerRef.current = setTimeout(() => {
         fetchLocationSuggestions(value.trim());
-      }, 300);
+      }, 800); // Longer debounce to prevent getting stuck
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
     }
   };
 
-  // NEW: Handle keyboard navigation for suggestions
+  // Handle keyboard navigation for suggestions - same as LocationCollectionModal
   const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showSuggestions || suggestions.length === 0) {
       if (e.key === 'Enter') {
@@ -218,14 +219,14 @@ const WaitlistModal: React.FC = () => {
     }
   };
 
-  // NEW: Handle suggestion clicks
+  // Handle suggestion clicks - same pattern as LocationCollectionModal
   const handleSuggestionClick = async (suggestion: LocationSuggestion) => {
     preventBlurRef.current = true;
     
     setLocationInput(suggestion.description);
     setSuggestions([]);
     setShowSuggestions(false);
-    setIsLoadingSuggestions(true);
+    setIsValidatingLocation(true);
 
     try {
       console.log('🔍 Getting location details for suggestion:', suggestion);
@@ -257,21 +258,21 @@ const WaitlistModal: React.FC = () => {
       console.error('Error getting location details:', err);
       setError('Failed to validate location. Please try again.');
     } finally {
-      setIsLoadingSuggestions(false);
+      setIsValidatingLocation(false);
       setTimeout(() => {
         preventBlurRef.current = false;
       }, 100);
     }
   };
 
-  // Handle input focus
+  // Handle input focus - same as LocationCollectionModal
   const handleLocationFocus = () => {
     if (suggestions.length > 0 && locationInput.length >= 2) {
       setShowSuggestions(true);
     }
   };
 
-  // Handle input blur
+  // Handle input blur - same conservative pattern as LocationCollectionModal
   const handleLocationBlur = () => {
     if (preventBlurRef.current) {
       return;
@@ -285,7 +286,7 @@ const WaitlistModal: React.FC = () => {
     }, 150);
   };
 
-  // NEW: Handle location validation for direct input (when user doesn't select suggestion)
+  // Handle location validation for direct input
   const handleLocationValidation = async () => {
     if (!locationInput.trim()) return;
 
@@ -313,7 +314,6 @@ const WaitlistModal: React.FC = () => {
         setLocationData(locationData);
         
         if (marketChanged && previousLocationData) {
-          // Market changed - show notification but continue with current flow
           console.log('🚀 Market changed, but continuing with current flow');
         }
       } else {
@@ -327,7 +327,7 @@ const WaitlistModal: React.FC = () => {
     }
   };
 
-  // NEW: Handle current location detection
+  // Handle current location detection - same as LocationCollectionModal
   const handleDetectCurrentLocation = async () => {
     setIsDetectingLocation(true);
     setError("");
@@ -365,10 +365,6 @@ const WaitlistModal: React.FC = () => {
     } finally {
       setIsDetectingLocation(false);
     }
-  };
-
-  const handleLocationSave = async () => {
-    await handleLocationValidation();
   };
 
   const handleLocationCancel = () => {
@@ -436,10 +432,6 @@ const WaitlistModal: React.FC = () => {
     closeAllModals();
   };
 
-  const handleChangeLocation = () => {
-    openLocationModal();
-  };
-
   if (!state.isWaitlistModalOpen) return null;
 
   // Success View
@@ -479,7 +471,7 @@ const WaitlistModal: React.FC = () => {
     );
   }
 
-  // Form View - UPDATED with dynamic messaging
+  // Form View - Dynamic messaging based on location state
   const isGeographic = state.modalType === 'geographic';
   const cityName = currentLocationData?.city || 'your area';
   const hasLocation = !!currentLocationData;
@@ -577,49 +569,52 @@ const WaitlistModal: React.FC = () => {
         {getBadgeFlow()}
 
         <form onSubmit={handleSubmit} className="flex w-full flex-col items-start gap-6">
-          {/* UPDATED: Location Input Section with Google Places API suggestions and Find Location button */}
+          {/* FIXED: Location Input Section - Exact same design as LocationCollectionModal */}
           {showLocationInput && (
             <div className="w-full relative">
               <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
-                Your Location
+                Location
               </label>
-              <div className="space-y-2">
-                <TextField
-                  variant="filled"
-                  icon={<FeatherMapPin />}
-                  iconRight={
-                    <button
-                      type="button"
-                      onClick={handleDetectCurrentLocation}
-                      disabled={isDetectingLocation || isValidatingLocation || isLoadingSuggestions}
-                      className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Find my location"
-                    >
-                      <FeatherLocate className={`w-4 h-4 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
-                    </button>
-                  }
+              
+              <div className="flex items-end justify-end gap-2 relative">
+                <TextField 
+                  className="h-auto grow shrink-0 basis-0" 
+                  label="" 
+                  helpText="" 
                   error={!!error}
-                  helpText={error || "Enter your city, state, or zip code"}
+                  icon={<FeatherMapPin />}
                 >
-                  <TextField.Input
+                  <TextField.Input 
                     ref={inputRef}
+                    placeholder="Enter city, state, or zip code..."
                     value={locationInput}
                     onChange={handleLocationChange}
                     onFocus={handleLocationFocus}
                     onBlur={handleLocationBlur}
                     onKeyDown={handleLocationKeyDown}
-                    placeholder="Enter city, state, or zip code..."
-                    disabled={isValidatingLocation || isLoadingSuggestions || isDetectingLocation}
                     autoComplete="off"
                     spellCheck={false}
+                    disabled={isValidatingLocation || isDetectingLocation}
                   />
                 </TextField>
 
-                {/* Google Places API Suggestions Dropdown */}
+                {/* Find My Location Button - Same as LocationCollectionModal */}
+                <button
+                  type="button"
+                  onClick={handleDetectCurrentLocation}
+                  disabled={isDetectingLocation || isValidatingLocation || isLoadingSuggestions}
+                  className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Use current location"
+                >
+                  <FeatherLocate className={`w-4 h-4 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
+                </button>
+
+                {/* Suggestions Dropdown - Exact same positioning as LocationCollectionModal */}
                 {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
                   <div 
                     ref={suggestionsRef}
                     className="absolute left-0 right-0 top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-[200px] overflow-y-auto"
+                    style={{ width: 'calc(100% - 52px)' }} // Account for action button
                   >
                     {isLoadingSuggestions ? (
                       <div className="p-3">
@@ -662,34 +657,30 @@ const WaitlistModal: React.FC = () => {
                     )}
                   </div>
                 )}
-
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="small"
-                    onClick={handleLocationSave}
-                    disabled={!locationInput.trim() || isValidatingLocation || isLoadingSuggestions || isDetectingLocation}
-                    loading={isValidatingLocation}
-                  >
-                    {isValidatingLocation ? 'Validating...' : 'Validate Location'}
-                  </Button>
-                  {currentLocationData && (
-                    <Button
-                      type="button"
-                      variant="neutral-secondary"
-                      size="small"
-                      onClick={handleLocationCancel}
-                      disabled={isValidatingLocation || isLoadingSuggestions || isDetectingLocation}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </div>
               </div>
+
+              {/* Error message */}
+              {error && (
+                <div className="mt-2 text-caption font-caption text-error-700">
+                  {error}
+                </div>
+              )}
+
+              {/* Loading State */}
+              {(isValidatingLocation || isDetectingLocation) && (
+                <div className="flex w-full items-center justify-center gap-2 py-4">
+                  <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-body font-body text-subtext-color">
+                    {isValidatingLocation ? 'Validating location...' : 
+                     isDetectingLocation ? 'Detecting your location...' : 
+                     'Loading...'}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
-          {/* UPDATED: Existing Location Display - Shows when location is set (removed Change button) */}
+          {/* Existing Location Display - Shows when location is set */}
           {!showLocationInput && currentLocationData && (
             <div className="w-full">
               <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
