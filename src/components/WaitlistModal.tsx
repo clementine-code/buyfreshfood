@@ -509,20 +509,22 @@ const WaitlistModal: React.FC = () => {
     return "Join our waitlist to be first in line when we launch in your area. Get access to farm-fresh produce and local goods at better prices.";
   };
 
+  // FIXED: Mobile-responsive badge flow with proper text wrapping
   const getBadgeFlow = () => {
     if (!hasLocation) {
       return (
         <div className="flex w-full flex-col items-center gap-4">
-          <div className="flex w-full items-center justify-center gap-4">
-            <Badge variant="success">
-              Launching in Northwest Arkansas first!
+          {/* FIXED: Mobile-responsive badge container with wrapping */}
+          <div className="flex w-full items-center justify-center gap-2 mobile:flex-col mobile:gap-3">
+            <Badge variant="success" className="mobile:text-xs">
+              <span className="mobile:text-xs">Launching in Northwest Arkansas first!</span>
             </Badge>
-            <FeatherArrowRight className="text-body font-body text-subtext-color" />
-            <Badge variant="warning">
-              Coming to your area soon!
+            <FeatherArrowRight className="text-body font-body text-subtext-color mobile:rotate-90 mobile:w-4 mobile:h-4" />
+            <Badge variant="warning" className="mobile:text-xs">
+              <span className="mobile:text-xs">Coming to your area soon!</span>
             </Badge>
           </div>
-          <span className="text-caption font-caption text-subtext-color">
+          <span className="text-caption font-caption text-subtext-color text-center mobile:text-xs">
             Enter your location to see when we're coming to you
           </span>
         </div>
@@ -532,16 +534,16 @@ const WaitlistModal: React.FC = () => {
     if (currentLocationData?.isNWA) {
       return (
         <div className="flex w-full flex-col items-center gap-4">
-          <div className="flex w-full items-center justify-center gap-4">
-            <Badge variant="success">
-              Launching in Northwest Arkansas first!
+          <div className="flex w-full items-center justify-center gap-2 mobile:flex-col mobile:gap-3">
+            <Badge variant="success" className="mobile:text-xs">
+              <span className="mobile:text-xs">Launching in Northwest Arkansas first!</span>
             </Badge>
-            <FeatherArrowRight className="text-body font-body text-subtext-color" />
-            <Badge variant="success">
-              Early access launching soon!
+            <FeatherArrowRight className="text-body font-body text-subtext-color mobile:rotate-90 mobile:w-4 mobile:h-4" />
+            <Badge variant="success" className="mobile:text-xs">
+              <span className="mobile:text-xs">Early access launching soon!</span>
             </Badge>
           </div>
-          <span className="text-caption font-caption text-subtext-color">
+          <span className="text-caption font-caption text-subtext-color text-center mobile:text-xs">
             Get early access in Northwest Arkansas
           </span>
         </div>
@@ -550,16 +552,16 @@ const WaitlistModal: React.FC = () => {
 
     return (
       <div className="flex w-full flex-col items-center gap-4">
-        <div className="flex w-full items-center justify-center gap-4">
-          <Badge variant="success">
-            Launching in Northwest Arkansas first!
+        <div className="flex w-full items-center justify-center gap-2 mobile:flex-col mobile:gap-3">
+          <Badge variant="success" className="mobile:text-xs">
+            <span className="mobile:text-xs">Launching in Northwest Arkansas first!</span>
           </Badge>
-          <FeatherArrowRight className="text-body font-body text-subtext-color" />
-          <Badge variant="warning">
-            Coming to {cityName} soon!
+          <FeatherArrowRight className="text-body font-body text-subtext-color mobile:rotate-90 mobile:w-4 mobile:h-4" />
+          <Badge variant="warning" className="mobile:text-xs">
+            <span className="mobile:text-xs">Coming to {cityName} soon!</span>
           </Badge>
         </div>
-        <span className="text-caption font-caption text-subtext-color">
+        <span className="text-caption font-caption text-subtext-color text-center mobile:text-xs">
           Join others bringing this to {cityName}
         </span>
       </div>
@@ -587,7 +589,7 @@ const WaitlistModal: React.FC = () => {
             <span className="text-heading-1 font-heading-1 text-default-font mobile:text-heading-2">
               {getTitle()}
             </span>
-            <span className="text-body font-body text-subtext-color">
+            <span className="text-body font-body text-subtext-color mobile:text-sm">
               {getDescription()}
             </span>
           </div>
@@ -610,6 +612,7 @@ const WaitlistModal: React.FC = () => {
                     error={!!error}
                     icon={<FeatherMapPin />}
                   >
+                    {/* FIXED: Mobile-responsive text size */}
                     <TextField.Input 
                       ref={inputRef}
                       placeholder="Enter city, state, or zip code..."
@@ -621,6 +624,7 @@ const WaitlistModal: React.FC = () => {
                       autoComplete="off"
                       spellCheck={false}
                       disabled={isValidatingLocation || isDetectingLocation}
+                      className="mobile:text-sm"
                     />
                   </TextField>
 
@@ -715,7 +719,7 @@ const WaitlistModal: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <div className="flex-1 flex items-center gap-3 px-3 py-2 bg-neutral-100 border border-neutral-200 rounded-md">
                     <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
-                    <span className="text-body font-body text-default-font flex-1 truncate">
+                    <span className="text-body font-body text-default-font flex-1 truncate mobile:text-sm">
                       {locationInput}
                     </span>
                   </div>
@@ -745,18 +749,19 @@ const WaitlistModal: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="mobile:text-sm"
               />
             </TextField>
             
             <div className="flex w-full flex-col items-start gap-2">
-              <span className="text-body-bold font-body-bold text-default-font">
+              <span className="text-body-bold font-body-bold text-default-font mobile:text-sm">
                 I'm interested in:
               </span>
               <CheckboxCard
                 checked={interests.buying}
                 onCheckedChange={(checked) => setInterests(prev => ({ ...prev, buying: checked }))}
               >
-                <span className="text-body font-body text-default-font">
+                <span className="text-body font-body text-default-font mobile:text-sm">
                   Buying fresh food
                 </span>
               </CheckboxCard>
@@ -764,7 +769,7 @@ const WaitlistModal: React.FC = () => {
                 checked={interests.selling}
                 onCheckedChange={(checked) => setInterests(prev => ({ ...prev, selling: checked }))}
               >
-                <span className="text-body font-body text-default-font">
+                <span className="text-body font-body text-default-font mobile:text-sm">
                   Selling from my garden/farm
                 </span>
               </CheckboxCard>
@@ -772,7 +777,7 @@ const WaitlistModal: React.FC = () => {
                 checked={interests.updates}
                 onCheckedChange={(checked) => setInterests(prev => ({ ...prev, updates: checked }))}
               >
-                <span className="text-body font-body text-default-font">
+                <span className="text-body font-body text-default-font mobile:text-sm">
                   Just staying updated
                 </span>
               </CheckboxCard>
@@ -788,6 +793,7 @@ const WaitlistModal: React.FC = () => {
                 placeholder="Tell us what you're looking for..."
                 value={productInterests}
                 onChange={(e) => setProductInterests(e.target.value)}
+                className="mobile:text-sm"
               />
             </TextField>
 
@@ -826,7 +832,7 @@ const WaitlistModal: React.FC = () => {
           </form>
 
           <div className="flex w-full flex-col items-center gap-2 border-t border-solid border-neutral-border pt-6">
-            <span className="text-caption font-caption text-subtext-color">
+            <span className="text-caption font-caption text-subtext-color mobile:text-xs text-center">
               Browse our Northwest Arkansas marketplace while you wait
             </span>
             <Button
