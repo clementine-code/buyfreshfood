@@ -91,17 +91,6 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               Sign In
             </Button>
             
-            <Button 
-              variant="brand-primary" 
-              icon={<FeatherShoppingCart />}
-              className="w-full justify-start"
-              onClick={() => {
-                onClose();
-                // Add your cart logic here
-              }}
-            >
-              Cart
-            </Button>
           </div>
         </div>
 
