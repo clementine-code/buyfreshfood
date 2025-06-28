@@ -531,15 +531,13 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           {/* Suggestions Dropdown */}
           {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
   <div 
+    ref={suggestionsRef}
+    className="fixed bg-white border border-neutral-200 rounded-md shadow-lg z-[10000] max-h-[200px] overflow-y-auto"
     style={{
-  top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 4 : 0,
-  left: window.innerWidth < 768 ? '50%' : inputRef.current?.getBoundingClientRect().left || 0,
-  transform: window.innerWidth < 768 ? 'translateX(-50%)' : 'none',
-  width: window.innerWidth < 768 
-    ? '90vw' 
-    : Math.max(400, inputRef.current ? inputRef.current.getBoundingClientRect().width : 400),
-  maxWidth: window.innerWidth < 768 ? '400px' : '500px'
-}}
+      top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 4 : 0,
+      left: inputRef.current ? inputRef.current.getBoundingClientRect().left : 0,
+      width: inputRef.current ? inputRef.current.getBoundingClientRect().width - 52 : 'auto'
+    }}
   >
               {isLoadingSuggestions ? (
                 <div className="p-3">
