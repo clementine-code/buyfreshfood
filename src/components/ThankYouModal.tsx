@@ -96,7 +96,7 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
               onClick={onJoinDifferentLocation}
               className="w-full"
             >
-              Join Waitlist for Different Location
+              Join Waitlist for Different Email or Location
             </Button>
             <Button
               variant="neutral-secondary"
