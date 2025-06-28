@@ -440,6 +440,7 @@ const WaitlistModal: React.FC = () => {
     const cityName = currentLocationData?.city || 'your area';
     
     return (
+      <div className="fixed inset-0 z-[9999]">
       <DialogLayout open={true} onOpenChange={closeAllModals}>
         <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-default-background px-6 py-12">
           <div className="flex w-full max-w-[576px] flex-col items-center gap-6">
@@ -468,6 +469,7 @@ const WaitlistModal: React.FC = () => {
           </div>
         </div>
       </DialogLayout>
+      <div className="fixed inset-0 z-[9999]">
     );
   }
 
@@ -555,6 +557,7 @@ const WaitlistModal: React.FC = () => {
   };
 
   return (
+    <div className="fixed inset-0 z-[9999]">
     <DialogLayout open={true} onOpenChange={closeAllModals}>
       <div className="flex h-full w-full max-w-[576px] flex-col items-start gap-8 bg-default-background px-8 py-8 mobile:flex-col mobile:flex-nowrap mobile:gap-8">
         <div className="flex w-full flex-col items-start gap-4">
@@ -813,6 +816,7 @@ const WaitlistModal: React.FC = () => {
         </div>
       </div>
     </DialogLayout>
+    </div>
   );
 };
 
