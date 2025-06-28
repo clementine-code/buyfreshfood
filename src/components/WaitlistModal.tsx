@@ -8,7 +8,7 @@ import { FeatherArrowRight } from "@subframe/core";
 import { TextField } from "@/ui/components/TextField";
 import { CheckboxCard } from "@/ui/components/CheckboxCard";
 import { Button } from "@/ui/components/Button";
-import { FeatherExternalLink, FeatherMapPin, FeatherEdit3 } from "@subframe/core";
+import { FeatherExternalLink, FeatherMapPin, FeatherEdit3, FeatherLocate } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
 import { submitWaitlist } from "../utils/waitlistUtils";
@@ -35,6 +35,7 @@ const WaitlistModal: React.FC = () => {
   const [error, setError] = useState("");
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isValidatingLocation, setIsValidatingLocation] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   // NEW: Location collection state
   const [showLocationInput, setShowLocationInput] = useState(false);
@@ -99,6 +100,7 @@ const WaitlistModal: React.FC = () => {
       setProductInterests("");
       setError("");
       setIsEditingLocation(false);
+      setIsDetectingLocation(false);
       
       // Reset suggestion state
       setSuggestions([]);
@@ -325,6 +327,46 @@ const WaitlistModal: React.FC = () => {
     }
   };
 
+  // NEW: Handle current location detection
+  const handleDetectCurrentLocation = async () => {
+    setIsDetectingLocation(true);
+    setError("");
+
+    try {
+      console.log('📍 Detecting current location...');
+      const locationData = await locationService.getCurrentLocation();
+      
+      if (locationData) {
+        console.log('✅ Current location detected:', locationData);
+        
+        const displayText = locationData.formattedAddress || `${locationData.city}, ${locationData.state}`;
+        setLocationInput(displayText);
+        
+        // Check if market has changed
+        const marketChanged = hasLocationMarketChanged(locationData, previousLocationData);
+        console.log('🔄 Market changed:', marketChanged);
+        
+        setCurrentLocationData(locationData);
+        setShowLocationInput(false);
+        setIsEditingLocation(false);
+        
+        // Save to context immediately
+        setLocationData(locationData);
+        
+        if (marketChanged && previousLocationData) {
+          console.log('🚀 Market changed, but continuing with current flow');
+        }
+      } else {
+        setError('Unable to detect your location. Please enter your location manually.');
+      }
+    } catch (err) {
+      console.error('Error detecting current location:', err);
+      setError('Location access denied. Please enter your location manually.');
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  };
+
   const handleLocationSave = async () => {
     await handleLocationValidation();
   };
@@ -535,7 +577,7 @@ const WaitlistModal: React.FC = () => {
         {getBadgeFlow()}
 
         <form onSubmit={handleSubmit} className="flex w-full flex-col items-start gap-6">
-          {/* UPDATED: Location Input Section with Google Places API suggestions */}
+          {/* UPDATED: Location Input Section with Google Places API suggestions and Find Location button */}
           {showLocationInput && (
             <div className="w-full relative">
               <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
@@ -545,6 +587,17 @@ const WaitlistModal: React.FC = () => {
                 <TextField
                   variant="filled"
                   icon={<FeatherMapPin />}
+                  iconRight={
+                    <button
+                      type="button"
+                      onClick={handleDetectCurrentLocation}
+                      disabled={isDetectingLocation || isValidatingLocation || isLoadingSuggestions}
+                      className="flex items-center justify-center hover:bg-neutral-100 rounded p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Find my location"
+                    >
+                      <FeatherLocate className={`w-4 h-4 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
+                    </button>
+                  }
                   error={!!error}
                   helpText={error || "Enter your city, state, or zip code"}
                 >
@@ -556,7 +609,7 @@ const WaitlistModal: React.FC = () => {
                     onBlur={handleLocationBlur}
                     onKeyDown={handleLocationKeyDown}
                     placeholder="Enter city, state, or zip code..."
-                    disabled={isValidatingLocation || isLoadingSuggestions}
+                    disabled={isValidatingLocation || isLoadingSuggestions || isDetectingLocation}
                     autoComplete="off"
                     spellCheck={false}
                   />
@@ -615,7 +668,7 @@ const WaitlistModal: React.FC = () => {
                     type="button"
                     size="small"
                     onClick={handleLocationSave}
-                    disabled={!locationInput.trim() || isValidatingLocation || isLoadingSuggestions}
+                    disabled={!locationInput.trim() || isValidatingLocation || isLoadingSuggestions || isDetectingLocation}
                     loading={isValidatingLocation}
                   >
                     {isValidatingLocation ? 'Validating...' : 'Validate Location'}
@@ -626,7 +679,7 @@ const WaitlistModal: React.FC = () => {
                       variant="neutral-secondary"
                       size="small"
                       onClick={handleLocationCancel}
-                      disabled={isValidatingLocation || isLoadingSuggestions}
+                      disabled={isValidatingLocation || isLoadingSuggestions || isDetectingLocation}
                     >
                       Cancel
                     </Button>
@@ -636,7 +689,7 @@ const WaitlistModal: React.FC = () => {
             </div>
           )}
 
-          {/* Existing Location Display - Shows when location is set */}
+          {/* UPDATED: Existing Location Display - Shows when location is set (removed Change button) */}
           {!showLocationInput && currentLocationData && (
             <div className="w-full">
               <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
@@ -657,14 +710,6 @@ const WaitlistModal: React.FC = () => {
                   onClick={handleLocationEdit}
                 >
                   Edit
-                </Button>
-                <Button
-                  type="button"
-                  variant="neutral-tertiary"
-                  size="small"
-                  onClick={handleChangeLocation}
-                >
-                  Change
                 </Button>
               </div>
             </div>
