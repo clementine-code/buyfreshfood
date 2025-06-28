@@ -59,13 +59,13 @@ function Home() {
       </span>
     </div>
     
-    {/* Updated Button Layout - Two Button Vertical Stack */}
-    <div className="flex flex-col items-center gap-4 w-full max-w-[320px] mobile:max-w-[280px]">
+    {/* Updated Button Layout - Side by Side on Desktop, Stacked on Mobile */}
+    <div className="flex flex-col md:flex-row items-center gap-4 w-full max-w-[600px] mobile:max-w-[280px]">
       <Button
         size="large"
         icon={<FeatherCarrot />}
         onClick={handleShopClick}
-        className="w-full h-12"
+        className="w-full md:flex-1 h-12"
       >
         Shop For Fresh Local Food
       </Button>
@@ -75,7 +75,7 @@ function Home() {
         size="large"
         icon={<FeatherHeart />}
         onClick={handleJoinWaitlistClick}
-        className="w-full h-12"
+        className="w-full md:flex-1 h-12"
       >
         Join our Waitlist
       </Button>
