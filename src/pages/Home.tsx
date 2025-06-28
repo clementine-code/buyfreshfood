@@ -37,8 +37,8 @@ function Home() {
     // Track user behavior (you can implement analytics later)
     console.log('🎯 User clicked join waitlist from hero');
     
-    // Open waitlist flow - always start with geographic since we want to collect location
-    await openWaitlistFlow('geographic');
+    // Open waitlist flow with location collection in modal
+    await openWaitlistFlow('geographic', undefined, { collectLocationInModal: true });
   };
 
   return (

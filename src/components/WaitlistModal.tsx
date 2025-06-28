@@ -36,9 +36,22 @@ const WaitlistModal: React.FC = () => {
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isValidatingLocation, setIsValidatingLocation] = useState(false);
 
-  // Initialize form when modal opens
+  // NEW: Location collection state
+  const [showLocationInput, setShowLocationInput] = useState(false);
+
+  // Initialize form when modal opens - UPDATED to handle location collection
   useEffect(() => {
     if (state.isWaitlistModalOpen && !state.isSuccessView) {
+      console.log('🎯 Initializing waitlist modal:', {
+        collectLocationInModal: state.collectLocationInModal,
+        currentLocationData: state.currentLocationData,
+        locationState: locationState.isSet
+      });
+
+      // Determine if we need to show location input
+      const needsLocationCollection = state.collectLocationInModal || !state.currentLocationData;
+      setShowLocationInput(needsLocationCollection);
+
       // Set location data from context or waitlist context
       const locationData = state.currentLocationData || (locationState.isSet ? {
         isNWA: locationState.isNWA,
@@ -55,6 +68,13 @@ const WaitlistModal: React.FC = () => {
         setPreviousLocationData(locationData);
         setLocationInput(locationData.formattedAddress || 
                         `${locationData.city}, ${locationData.state}`);
+        setShowLocationInput(false); // We have location data, don't show input
+      } else {
+        // No location data - clear everything and show input
+        setCurrentLocationData(null);
+        setPreviousLocationData(null);
+        setLocationInput("");
+        setShowLocationInput(true);
       }
       
       // Reset form fields
@@ -68,7 +88,7 @@ const WaitlistModal: React.FC = () => {
       setError("");
       setIsEditingLocation(false);
     }
-  }, [state.isWaitlistModalOpen, state.isSuccessView, state.currentLocationData, locationState]);
+  }, [state.isWaitlistModalOpen, state.isSuccessView, state.currentLocationData, state.collectLocationInModal, locationState]);
 
   // Check if location market has changed
   const hasLocationMarketChanged = (newLocation: LocationData, oldLocation: LocationData | null): boolean => {
@@ -78,6 +98,7 @@ const WaitlistModal: React.FC = () => {
 
   const handleLocationEdit = () => {
     setIsEditingLocation(true);
+    setShowLocationInput(true);
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,55 +106,36 @@ const WaitlistModal: React.FC = () => {
     setError("");
   };
 
-  const handleLocationSave = async () => {
+  // NEW: Handle location validation for direct input
+  const handleLocationValidation = async () => {
     if (!locationInput.trim()) return;
 
     setIsValidatingLocation(true);
     setError("");
 
     try {
+      console.log('🔍 Validating location input:', locationInput);
       const locationData = await locationService.validateLocationInput(locationInput.trim());
       
       if (locationData) {
-        console.log('🔄 Location validated:', locationData);
-        console.log('📍 Previous location:', previousLocationData);
+        console.log('✅ Location validated:', locationData);
         
         // Check if market has changed
         const marketChanged = hasLocationMarketChanged(locationData, previousLocationData);
-        
         console.log('🔄 Market changed:', marketChanged);
         
-        if (marketChanged) {
-          // Market changed - need to update waitlist type and restart flow
-          console.log('🚀 Market changed, updating location and restarting waitlist flow');
-          
-          // Update location in context
-          setLocationData(locationData);
-          
-          // Close current waitlist modal
-          closeAllModals();
-          
-          // Determine new waitlist type
-          const newWaitlistType = locationData.isNWA ? 'early_access' : 'geographic';
-          
-          // Restart waitlist flow with new location and type
-          setTimeout(() => {
-            // Import and use the openWaitlistFlow function
-            const { openWaitlistFlow } = require('../contexts/WaitlistContext');
-            if (openWaitlistFlow) {
-              openWaitlistFlow(newWaitlistType, locationData);
-            }
-          }, 100);
-          
-          return;
-        } else {
-          // Same market - just update location data
-          console.log('✅ Same market, updating location data');
-          setCurrentLocationData(locationData);
-          setLocationInput(locationData.formattedAddress || 
-                          `${locationData.city}, ${locationData.state}`);
-          setLocationData(locationData);
-          setIsEditingLocation(false);
+        setCurrentLocationData(locationData);
+        setLocationInput(locationData.formattedAddress || 
+                        `${locationData.city}, ${locationData.state}`);
+        setShowLocationInput(false);
+        setIsEditingLocation(false);
+        
+        // Save to context immediately
+        setLocationData(locationData);
+        
+        if (marketChanged && previousLocationData) {
+          // Market changed - show notification but continue with current flow
+          console.log('🚀 Market changed, but continuing with current flow');
         }
       } else {
         setError('Unable to validate location. Please try a different address.');
@@ -146,11 +148,19 @@ const WaitlistModal: React.FC = () => {
     }
   };
 
+  const handleLocationSave = async () => {
+    await handleLocationValidation();
+  };
+
   const handleLocationCancel = () => {
     // Restore original location
     if (currentLocationData) {
       setLocationInput(currentLocationData.formattedAddress || 
                       `${currentLocationData.city}, ${currentLocationData.state}`);
+      setShowLocationInput(false);
+    } else {
+      setLocationInput("");
+      setShowLocationInput(true);
     }
     setIsEditingLocation(false);
     setError("");
@@ -182,6 +192,8 @@ const WaitlistModal: React.FC = () => {
       const result = await submitWaitlist(formData);
 
       if (result.success) {
+        // Save location to context if not already saved
+        setLocationData(currentLocationData);
         showSuccessView(result.queuePosition, result.data);
       } else {
         setError(result.error || 'Failed to join waitlist. Please try again.');
@@ -246,28 +258,35 @@ const WaitlistModal: React.FC = () => {
     );
   }
 
-  // Form View
+  // Form View - UPDATED with dynamic messaging
   const isGeographic = state.modalType === 'geographic';
-  const cityName = currentLocationData?.city || 'your city';
+  const cityName = currentLocationData?.city || 'your area';
+  const hasLocation = !!currentLocationData;
 
-  return (
-    <DialogLayout open={true} onOpenChange={closeAllModals}>
-      <div className="flex h-full w-full max-w-[576px] flex-col items-start gap-8 bg-default-background px-8 py-8 mobile:flex-col mobile:flex-nowrap mobile:gap-8">
-        <div className="flex w-full flex-col items-start gap-4">
-          <span className="text-heading-1 font-heading-1 text-default-font">
-            {isGeographic 
-              ? `🥕 Expand BuyFresh.Food marketplace to ${cityName}!`
-              : "🚀 BuyFresh.Food is coming to Northwest Arkansas first!"
-            }
-          </span>
-          <span className="text-body font-body text-subtext-color">
-            {isGeographic
-              ? "Join our waitlist to be first in line when we launch in your area. Get access to farm-fresh produce and local goods at better prices."
-              : "We're launching in Northwest Arkansas first! Join our early access list to be among the first to order when we go live."
-            }
-          </span>
-        </div>
-        
+  // Dynamic title and description based on location state
+  const getTitle = () => {
+    if (!hasLocation) {
+      return "🥕 Fresh Local Food is expanding!";
+    }
+    if (currentLocationData?.isNWA) {
+      return `🚀 BuyFresh.Food is coming to Northwest Arkansas first!`;
+    }
+    return `🥕 Expand BuyFresh.Food marketplace to ${cityName}!`;
+  };
+
+  const getDescription = () => {
+    if (!hasLocation) {
+      return "Join our waitlist to be first in line when we launch in your area. Get access to farm-fresh produce and local goods at better prices.";
+    }
+    if (currentLocationData?.isNWA) {
+      return "We're launching in Northwest Arkansas first! Join our early access list to be among the first to order when we go live.";
+    }
+    return "Join our waitlist to be first in line when we launch in your area. Get access to farm-fresh produce and local goods at better prices.";
+  };
+
+  const getBadgeFlow = () => {
+    if (!hasLocation) {
+      return (
         <div className="flex w-full flex-col items-center gap-4">
           <div className="flex w-full items-center justify-center gap-4">
             <Badge variant="success">
@@ -275,41 +294,120 @@ const WaitlistModal: React.FC = () => {
             </Badge>
             <FeatherArrowRight className="text-body font-body text-subtext-color" />
             <Badge variant="warning">
-              {isGeographic ? `Coming to ${cityName} Soon!` : "Early access launching soon!"}
+              Coming to your area soon!
             </Badge>
           </div>
           <span className="text-caption font-caption text-subtext-color">
-            {isGeographic 
-              ? `Join others bringing this to ${cityName}`
-              : "Get early access in Northwest Arkansas"
-            }
+            Enter your location to see when we're coming to you
           </span>
         </div>
+      );
+    }
+
+    if (currentLocationData?.isNWA) {
+      return (
+        <div className="flex w-full flex-col items-center gap-4">
+          <div className="flex w-full items-center justify-center gap-4">
+            <Badge variant="success">
+              Launching in Northwest Arkansas first!
+            </Badge>
+            <FeatherArrowRight className="text-body font-body text-subtext-color" />
+            <Badge variant="success">
+              Early access launching soon!
+            </Badge>
+          </div>
+          <span className="text-caption font-caption text-subtext-color">
+            Get early access in Northwest Arkansas
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex w-full flex-col items-center gap-4">
+        <div className="flex w-full items-center justify-center gap-4">
+          <Badge variant="success">
+            Launching in Northwest Arkansas first!
+          </Badge>
+          <FeatherArrowRight className="text-body font-body text-subtext-color" />
+          <Badge variant="warning">
+            Coming to {cityName} soon!
+          </Badge>
+        </div>
+        <span className="text-caption font-caption text-subtext-color">
+          Join others bringing this to {cityName}
+        </span>
+      </div>
+    );
+  };
+
+  return (
+    <DialogLayout open={true} onOpenChange={closeAllModals}>
+      <div className="flex h-full w-full max-w-[576px] flex-col items-start gap-8 bg-default-background px-8 py-8 mobile:flex-col mobile:flex-nowrap mobile:gap-8">
+        <div className="flex w-full flex-col items-start gap-4">
+          <span className="text-heading-1 font-heading-1 text-default-font">
+            {getTitle()}
+          </span>
+          <span className="text-body font-body text-subtext-color">
+            {getDescription()}
+          </span>
+        </div>
+        
+        {getBadgeFlow()}
 
         <form onSubmit={handleSubmit} className="flex w-full flex-col items-start gap-6">
-          <TextField
-            className="h-auto w-full flex-none"
-            variant="filled"
-            label="Email address"
-            helpText=""
-            error={!!error}
-          >
-            <TextField.Input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </TextField>
-          
-          {/* Location Field - Editable with Market Change Detection */}
-          <div className="w-full">
-            <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
-              Location
-            </label>
-            
-            {!isEditingLocation ? (
+          {/* NEW: Location Input Section - Shows when needed */}
+          {showLocationInput && (
+            <div className="w-full">
+              <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
+                Your Location
+              </label>
+              <div className="space-y-2">
+                <TextField
+                  variant="filled"
+                  icon={<FeatherMapPin />}
+                  error={!!error}
+                  helpText={error || "Enter your city, state, or zip code"}
+                >
+                  <TextField.Input
+                    value={locationInput}
+                    onChange={handleLocationChange}
+                    placeholder="Enter city, state, or zip code..."
+                    disabled={isValidatingLocation}
+                  />
+                </TextField>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="small"
+                    onClick={handleLocationSave}
+                    disabled={!locationInput.trim() || isValidatingLocation}
+                    loading={isValidatingLocation}
+                  >
+                    {isValidatingLocation ? 'Validating...' : 'Validate Location'}
+                  </Button>
+                  {currentLocationData && (
+                    <Button
+                      type="button"
+                      variant="neutral-secondary"
+                      size="small"
+                      onClick={handleLocationCancel}
+                      disabled={isValidatingLocation}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Existing Location Display - Shows when location is set */}
+          {!showLocationInput && currentLocationData && (
+            <div className="w-full">
+              <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
+                Location
+              </label>
               <div className="flex items-center gap-2">
                 <div className="flex-1 flex items-center gap-3 px-3 py-2 bg-neutral-100 border border-neutral-200 rounded-md">
                   <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
@@ -335,52 +433,24 @@ const WaitlistModal: React.FC = () => {
                   Change
                 </Button>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <TextField
-                  variant="filled"
-                  icon={<FeatherMapPin />}
-                  error={!!error}
-                >
-                  <TextField.Input
-                    value={locationInput}
-                    onChange={handleLocationChange}
-                    placeholder="Enter city, state, or zip code..."
-                    disabled={isValidatingLocation}
-                  />
-                </TextField>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="small"
-                    onClick={handleLocationSave}
-                    disabled={!locationInput.trim() || isValidatingLocation}
-                    loading={isValidatingLocation}
-                  >
-                    {isValidatingLocation ? 'Validating...' : 'Save'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="neutral-secondary"
-                    size="small"
-                    onClick={handleLocationCancel}
-                    disabled={isValidatingLocation}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
+          )}
 
-            {/* Market Change Warning */}
-            {isEditingLocation && (
-              <div className="mt-2 p-3 bg-warning-50 border border-warning-200 rounded-md">
-                <div className="text-caption font-caption text-warning-800">
-                  💡 <strong>Note:</strong> Changing to a different market area will restart your waitlist signup with the appropriate queue for that region.
-                </div>
-              </div>
-            )}
-          </div>
+          <TextField
+            className="h-auto w-full flex-none"
+            variant="filled"
+            label="Email address"
+            helpText=""
+            error={!!error && !error.includes('location')}
+          >
+            <TextField.Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </TextField>
           
           <div className="flex w-full flex-col items-start gap-2">
             <span className="text-body-bold font-body-bold text-default-font">
@@ -425,7 +495,7 @@ const WaitlistModal: React.FC = () => {
             />
           </TextField>
 
-          {error && (
+          {error && !error.includes('location') && (
             <div className="w-full p-3 bg-error-50 border border-error-200 rounded-md">
               <span className="text-caption font-caption text-error-700">{error}</span>
             </div>
@@ -436,14 +506,16 @@ const WaitlistModal: React.FC = () => {
               type="submit"
               className="h-12 w-full flex-none"
               size="large"
-              disabled={!email.trim() || !currentLocationData || isSubmitting || isEditingLocation}
+              disabled={!email.trim() || !currentLocationData || isSubmitting || showLocationInput}
               loading={isSubmitting}
             >
               {isSubmitting 
                 ? "Joining..." 
-                : isGeographic 
-                  ? `Join Waitlist for ${cityName}`
-                  : "Join Early Access List"
+                : hasLocation && currentLocationData?.isNWA
+                  ? "Join Early Access List"
+                  : hasLocation
+                    ? `Join Waitlist for ${cityName}`
+                    : "Join Waitlist"
               }
             </Button>
             <Button

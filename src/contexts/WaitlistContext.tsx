@@ -29,13 +29,16 @@ interface WaitlistState {
   // User waitlist status
   isUserWaitlisted: boolean;
   waitlistedEntry: WaitlistEntry | null;
+  
+  // New: Options for modal behavior
+  collectLocationInModal: boolean;
 }
 
 interface WaitlistContextType {
   state: WaitlistState;
   
-  // Main flow orchestrator
-  openWaitlistFlow: (type: 'geographic' | 'early_access', locationData?: LocationData) => Promise<void>;
+  // Main flow orchestrator - UPDATED with options parameter
+  openWaitlistFlow: (type: 'geographic' | 'early_access', locationData?: LocationData, options?: { collectLocationInModal?: boolean }) => Promise<void>;
   
   // Modal controls
   closeAllModals: () => void;
@@ -66,7 +69,8 @@ const initialState: WaitlistState = {
   queueNumber: null,
   submissionData: null,
   isUserWaitlisted: false,
-  waitlistedEntry: null
+  waitlistedEntry: null,
+  collectLocationInModal: false
 };
 
 export function WaitlistProvider({ children }: { children: ReactNode }) {
@@ -89,9 +93,9 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Main flow orchestrator - this is the entry point for all waitlist interactions
-  const openWaitlistFlow = async (type: 'geographic' | 'early_access', locationData?: LocationData) => {
-    console.log('🚀 Opening waitlist flow:', type, locationData);
+  // Main flow orchestrator - UPDATED to handle options
+  const openWaitlistFlow = async (type: 'geographic' | 'early_access', locationData?: LocationData, options?: { collectLocationInModal?: boolean }) => {
+    console.log('🚀 Opening waitlist flow:', type, locationData, options);
 
     // If we have a waitlisted entry and it matches the current context, show thank you modal
     if (state.waitlistedEntry) {
@@ -106,15 +110,27 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Store the type for later use
-    setState(prev => ({ ...prev, modalType: type }));
+    // Store the type and options for later use
+    setState(prev => ({ 
+      ...prev, 
+      modalType: type,
+      collectLocationInModal: options?.collectLocationInModal || false
+    }));
 
-    // If we have location data, go directly to waitlist modal
-    if (locationData) {
-      openWaitlistModal(locationData);
+    // If we should collect location in modal OR no location data provided, go directly to waitlist modal
+    if (options?.collectLocationInModal || !locationData) {
+      console.log('📍 Opening waitlist modal for location collection');
+      setState(prev => ({
+        ...prev,
+        isLocationModalOpen: false,
+        isWaitlistModalOpen: true,
+        isThankYouModalOpen: false,
+        isSuccessView: false,
+        currentLocationData: locationData || null
+      }));
     } else {
-      // Otherwise, start with location collection
-      openLocationModal();
+      // We have location data, go directly to waitlist modal
+      openWaitlistModal(locationData);
     }
   };
 
@@ -160,7 +176,8 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
       modalType: null,
       currentLocationData: null,
       queueNumber: null,
-      submissionData: null
+      submissionData: null,
+      collectLocationInModal: false
     }));
   };
 
