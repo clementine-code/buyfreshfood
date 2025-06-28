@@ -456,10 +456,10 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
 
   return (
     <DialogLayout 
-      open={open} 
-      onOpenChange={onOpenChange}
-      className="z-[9999]"
-    >
+  open={open} 
+  onOpenChange={onOpenChange}
+  className="z-[9999] m-4" // This adds 16px margin on all sides
+>
       <div className="flex w-full flex-col items-start gap-4 bg-white px-6 py-6">
         {/* Header */}
         <div className="flex w-full items-center justify-between">
