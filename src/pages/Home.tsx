@@ -1,10 +1,3 @@
-// COMPLETE FIX for both gap and mobile card issues
-
-// ISSUE 1: The gap is coming from DefaultPageLayout adding pt-20
-// ISSUE 2: Mobile cards are too wide and need better responsive design
-
-// SOLUTION: Update your Home.tsx with these specific changes:
-
 "use client";
 
 import React from "react";
@@ -24,10 +17,13 @@ import { FeatherFacebook } from "@subframe/core";
 import { FeatherInstagram } from "@subframe/core";
 import { FeatherXTwitter } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
-import { FeatherHeart } from "@subframe/core";
+import { useLocationContext } from "../contexts/LocationContext";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
 
 function Home() {
   const navigate = useNavigate();
+  const { state: locationState } = useLocationContext();
+  const { openWaitlistFlow } = useWaitlistContext();
 
   const handleShopClick = () => {
     navigate('/shop');
@@ -35,6 +31,14 @@ function Home() {
 
   const handleSellClick = () => {
     navigate('/sell');
+  };
+
+  const handleJoinWaitlistClick = async () => {
+    // Track user behavior (you can implement analytics later)
+    console.log('🎯 User clicked join waitlist from hero');
+    
+    // Open waitlist flow - always start with geographic since we want to collect location
+    await openWaitlistFlow('geographic');
   };
 
   return (
@@ -54,14 +58,28 @@ function Home() {
         Connect with local farmers and gardeners for the freshest produce, eggs, and more - right in your neighborhood.
       </span>
     </div>
-    <Button
-      size="large"
-      icon={<FeatherCarrot />}
-      onClick={handleShopClick}
-      className="mobile:w-full mobile:max-w-[280px]"
-    >
-      Shop For Fresh Local Food
-    </Button>
+    
+    {/* Updated Button Layout - Two Button Vertical Stack */}
+    <div className="flex flex-col items-center gap-4 w-full max-w-[320px] mobile:max-w-[280px]">
+      <Button
+        size="large"
+        icon={<FeatherCarrot />}
+        onClick={handleShopClick}
+        className="w-full h-12"
+      >
+        Shop For Fresh Local Food
+      </Button>
+      
+      <Button
+        variant="brand-secondary"
+        size="large"
+        icon={<FeatherHeart />}
+        onClick={handleJoinWaitlistClick}
+        className="w-full h-12"
+      >
+        Join our Waitlist
+      </Button>
+    </div>
   </div>
   
   {/* Background Image - FIXED positioning */}
@@ -216,11 +234,3 @@ function Home() {
 }
 
 export default Home;
-
-// KEY FIXES:
-// 1. Added -mt-20 to counteract DefaultPageLayout's pt-20
-// 2. Changed cards to flex-col on mobile and grid on md+
-// 3. Reduced padding on mobile (px-4 instead of px-6)
-// 4. Better typography scaling for mobile
-// 5. Improved spacing and gaps for mobile
-// 6. Made buttons consistent height (h-12)
