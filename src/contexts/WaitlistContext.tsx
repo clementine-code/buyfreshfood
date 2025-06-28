@@ -53,6 +53,9 @@ interface WaitlistContextType {
   // Waitlist status management
   setWaitlistedEntry: (entry: WaitlistEntry) => void;
   clearWaitlistedEntry: () => void;
+  
+  // NEW: Direct waitlist form opener
+  reopenWaitlistForm: () => void;
 }
 
 const WaitlistContext = createContext<WaitlistContextType | undefined>(undefined);
@@ -234,6 +237,21 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // NEW: Direct waitlist form opener - bypasses thank you modal
+  const reopenWaitlistForm = () => {
+    console.log('🔄 Reopening waitlist form directly');
+    setState(prev => ({
+      ...prev,
+      isLocationModalOpen: false,
+      isWaitlistModalOpen: true,
+      isThankYouModalOpen: false,
+      isSuccessView: false,
+      modalType: 'geographic', // Default to geographic
+      collectLocationInModal: true, // Always collect location when reopening
+      currentLocationData: null // Clear current location to allow new entry
+    }));
+  };
+
   const contextValue: WaitlistContextType = {
     state,
     openWaitlistFlow,
@@ -244,7 +262,8 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     showSuccessView,
     resetToForm,
     setWaitlistedEntry,
-    clearWaitlistedEntry
+    clearWaitlistedEntry,
+    reopenWaitlistForm
   };
 
   return (

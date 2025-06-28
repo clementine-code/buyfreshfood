@@ -17,21 +17,23 @@ import Waitlist from "./pages/Waitlist";
 import ProductDetail from "./pages/ProductDetail";
 
 function WaitlistModals() {
-  const { state, closeAllModals, openWaitlistModal, openLocationModal } = useWaitlistContext();
+  const { state, closeAllModals, openWaitlistModal, openLocationModal, reopenWaitlistForm } = useWaitlistContext();
 
   const handleLocationConfirm = (locationData: any) => {
     openWaitlistModal(locationData);
   };
 
+  // FIXED: Use reopenWaitlistForm instead of openLocationModal
   const handleJoinDifferentLocation = () => {
-    openLocationModal();
+    console.log('🔄 User wants to join with different email/location');
+    reopenWaitlistForm();
   };
 
   return (
     <>
       <LocationCollectionModal
-        isOpen={state.isLocationModalOpen}
-        onClose={closeAllModals}
+        open={state.isLocationModalOpen}
+        onOpenChange={closeAllModals}
         onConfirm={handleLocationConfirm}
       />
       
