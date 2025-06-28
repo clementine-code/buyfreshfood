@@ -17,6 +17,7 @@ import {
   FeatherTrash
 } from "@subframe/core";
 import { useLocationContext } from "../contexts/LocationContext";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { locationService, type LocationData, type LocationSuggestion } from "../services/locationService";
 
 interface LocationCollectionModalProps {
@@ -36,6 +37,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
 }) => {
   // Get current location from context
   const { state: locationState, setLocationData, clearLocation } = useLocationContext();
+  const { openWaitlistFlow } = useWaitlistContext();
   
   // State management
   const [inputValue, setInputValue] = useState('');
@@ -48,6 +50,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
   const [error, setError] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [modalState, setModalState] = useState<'empty' | 'loading' | 'launching' | 'coming-soon' | 'error' | 'saved' | 'editing'>('empty');
+  const [previousLocationData, setPreviousLocationData] = useState<LocationData | null>(null);
 
   // Refs
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +64,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
       if (locationState.isSet && locationState.location) {
         // We have a saved location - show it in saved state
         setInputValue(locationState.location);
-        setValidatedLocation({
+        const currentLocationData = {
           isNWA: locationState.isNWA,
           city: locationState.city || '',
           state: locationState.state || '',
@@ -69,12 +72,15 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           formattedAddress: locationState.location,
           latitude: locationState.coordinates?.lat,
           longitude: locationState.coordinates?.lng
-        });
+        };
+        setValidatedLocation(currentLocationData);
+        setPreviousLocationData(currentLocationData);
         setModalState('saved');
       } else {
         // No saved location - start fresh
         setInputValue('');
         setValidatedLocation(null);
+        setPreviousLocationData(null);
         setModalState('empty');
       }
       
@@ -294,21 +300,44 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     validateLocation(suggestion);
   };
 
-  const handleSave = () => {
+  // NEW: Check if location market has changed
+  const hasLocationMarketChanged = (newLocation: LocationData, oldLocation: LocationData | null): boolean => {
+    if (!oldLocation) return true;
+    return newLocation.isNWA !== oldLocation.isNWA;
+  };
+
+  // NEW: Handle save location with waitlist logic
+  const handleSaveLocation = async () => {
     if (validatedLocation) {
       // Update location in context
       setLocationData(validatedLocation);
       
-      // Call onConfirm if provided (for waitlist flow)
+      // Check if market has changed
+      const marketChanged = hasLocationMarketChanged(validatedLocation, previousLocationData);
+      
+      if (marketChanged) {
+        // Market changed - show waitlist for new area
+        const waitlistType = validatedLocation.isNWA ? 'early_access' : 'geographic';
+        
+        // Close this modal first
+        onOpenChange(false);
+        
+        // Then open waitlist flow
+        setTimeout(() => {
+          openWaitlistFlow(waitlistType, validatedLocation);
+        }, 100);
+      } else {
+        // Same market - just save and close
+        setModalState('saved');
+        setTimeout(() => {
+          onOpenChange(false);
+        }, 1000);
+      }
+      
+      // Call onConfirm if provided
       if (onConfirm) {
         onConfirm(validatedLocation);
       }
-      
-      // Show saved state briefly, then close
-      setModalState('saved');
-      setTimeout(() => {
-        onOpenChange(false);
-      }, 1000);
     }
   };
 
@@ -328,6 +357,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
   const handleDelete = () => {
     setInputValue('');
     setValidatedLocation(null);
+    setPreviousLocationData(null);
     clearLocation();
     setModalState('empty');
     clearError();
@@ -418,7 +448,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
       );
     }
 
-    // Default state buttons
+    // Default state buttons - UPDATED BUTTON TEXT
     return (
       <div className="flex w-full items-end justify-end gap-2">
         <Button 
@@ -428,12 +458,11 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           Cancel
         </Button>
         <Button 
-          onClick={handleSave}
+          onClick={handleSaveLocation}
           disabled={!isFormValid}
           loading={isValidating}
         >
-          {mode === 'edit' ? 'Update Location' : 
-           forWaitlist ? 'Join Waitlist' : 'Continue'}
+          {isValidating ? 'Saving...' : 'Save Location'}
         </Button>
       </div>
     );
@@ -456,10 +485,10 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
 
   return (
     <DialogLayout 
-  open={open} 
-  onOpenChange={onOpenChange}
-  className="z-[9999]"
->
+      open={open} 
+      onOpenChange={onOpenChange}
+      className="z-[9999]"
+    >
       <div className="flex w-full flex-col items-start gap-4 bg-white px-6 py-6">
         {/* Header */}
         <div className="flex w-full items-center justify-between">
@@ -530,21 +559,21 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
 
           {/* Suggestions Dropdown */}
           {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
-  <div 
-    ref={suggestionsRef}
-    className="fixed bg-white border border-neutral-200 rounded-md shadow-lg z-[10000] max-h-[200px] overflow-y-auto"
-    style={{
-  top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 4 : 0,
-  left: window.innerWidth < 768 
-    ? '50%' 
-    : (inputRef.current ? inputRef.current.getBoundingClientRect().left - 16 : 0),
-  transform: window.innerWidth < 768 ? 'translateX(-50%)' : 'none',
-  width: window.innerWidth < 768 
-    ? '90vw' 
-    : (inputRef.current ? inputRef.current.getBoundingClientRect().width + 32 : 400),
-  maxWidth: window.innerWidth < 768 ? '400px' : '600px'
-}}
-  >
+            <div 
+              ref={suggestionsRef}
+              className="fixed bg-white border border-neutral-200 rounded-md shadow-lg z-[10000] max-h-[200px] overflow-y-auto"
+              style={{
+                top: inputRef.current ? inputRef.current.getBoundingClientRect().bottom + 4 : 0,
+                left: window.innerWidth < 768 
+                  ? '50%' 
+                  : (inputRef.current ? inputRef.current.getBoundingClientRect().left - 16 : 0),
+                transform: window.innerWidth < 768 ? 'translateX(-50%)' : 'none',
+                width: window.innerWidth < 768 
+                  ? '90vw' 
+                  : (inputRef.current ? inputRef.current.getBoundingClientRect().width + 32 : 400),
+                maxWidth: window.innerWidth < 768 ? '400px' : '600px'
+              }}
+            >
               {isLoadingSuggestions ? (
                 <div className="p-3">
                   <div className="flex items-center gap-2 text-subtext-color">
