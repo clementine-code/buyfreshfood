@@ -248,3 +248,29 @@ html, body {
     font-size: 16px !important;
   }
 }
+
+.hide-scrollbar-until-hover {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar-until-hover::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hide-scrollbar-until-hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hide-scrollbar-until-hover::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.hide-scrollbar-until-hover:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.hide-scrollbar-until-hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
