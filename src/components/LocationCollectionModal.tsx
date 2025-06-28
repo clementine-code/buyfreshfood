@@ -322,25 +322,33 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     setIsSaving(true);
     
     try {
-      // Update location in context
+      console.log('💾 Saving location:', validatedLocation);
+      
+      // 1. Save location to LocationContext
       setLocationData(validatedLocation);
       
-      // Check if market has changed
+      // 2. Determine waitlist type based on location
+      const waitlistType = validatedLocation.isNWA ? 'early_access' : 'geographic';
+      
+      // 3. Check if market has changed
       const marketChanged = hasLocationMarketChanged(validatedLocation, previousLocationData);
       
+      console.log('🔄 Market changed:', marketChanged, 'Waitlist type:', waitlistType);
+      
       if (marketChanged) {
-        // Market changed - show waitlist for new area
-        const waitlistType = validatedLocation.isNWA ? 'early_access' : 'geographic';
+        // Market changed - open appropriate waitlist flow
+        console.log('🚀 Opening waitlist flow for new market');
         
         // Close this modal first
         onOpenChange(false);
         
-        // Then open waitlist flow
+        // Then open waitlist flow with a small delay
         setTimeout(() => {
           openWaitlistFlow(waitlistType, validatedLocation);
         }, 100);
       } else {
         // Same market - just save and close
+        console.log('✅ Same market, just saving and closing');
         setModalState('saved');
         setTimeout(() => {
           onOpenChange(false);
@@ -352,6 +360,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
         onConfirm(validatedLocation);
       }
     } catch (error) {
+      console.error('❌ Error saving location:', error);
       handleError(error, 'saving location');
     } finally {
       setIsSaving(false);
