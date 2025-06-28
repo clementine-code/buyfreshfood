@@ -10,6 +10,8 @@ import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import LocationSearch from "../components/LocationSearch";
 import Footer from "../components/Footer";
 import { type LocationData } from "../services/locationService";
+import { submitWaitlist } from "../utils/waitlistUtils";
+
 
 function Waitlist() {
   const [email, setEmail] = useState("");
@@ -26,17 +28,39 @@ function Waitlist() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !selectedLocation) return;
+  e.preventDefault();
+  if (!email.trim() || !selectedLocation) return;
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
+  
+  try {
+    const formData = {
+      email: email.trim(),
+      location: selectedLocation.formattedAddress || `${selectedLocation.city}, ${selectedLocation.state}`,
+      city: selectedLocation.city,
+      state: selectedLocation.state,
+      zipCode: selectedLocation.zipCode,
+      interests: [], // Empty array since this form doesn't collect interests
+      productInterests: '', // Empty since this form doesn't collect this
+      waitlistType: selectedLocation.isNWA ? 'early_access' : 'geographic'
+    };
+
+    const result = await submitWaitlist(formData);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsSubmitted(true);
+    if (result.success) {
+      setIsSubmitted(true);
+    } else {
+      console.error('Waitlist submission failed:', result.error);
+      // You might want to show an error message to the user
+      alert('Failed to join waitlist. Please try again.');
+    }
+  } catch (error) {
+    console.error('Error submitting waitlist:', error);
+    alert('Failed to join waitlist. Please try again.');
+  } finally {
     setIsSubmitting(false);
-  };
+  }
+};
 
   const isValidEmail = email.includes('@') && email.includes('.');
   const canSubmit = isValidEmail && selectedLocation && !isSubmitting;
