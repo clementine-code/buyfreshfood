@@ -163,7 +163,7 @@ class LocationService {
 
       const data = await this.makeBackendRequest('places-autocomplete', {
         input,
-        types: '(cities)',
+        types: 'geocode',
         componentRestrictions: { country: 'us' }
       });
 
