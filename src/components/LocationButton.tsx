@@ -24,7 +24,7 @@ export const LocationButton: React.FC<LocationButtonProps> = ({ className, onCli
       icon={<FeatherMapPin />}
       onClick={handleLocationClick}
       className={className}
-      variant={state.location ? "neutral-secondary" : "neutral-primary"}
+      variant={state.location ? "neutral-primary" : "neutral-secondary"}
       title={state.location ? `Location: ${state.location}` : "Set your location"}
     />
   );
