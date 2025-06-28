@@ -20,7 +20,7 @@ const WaitlistModal: React.FC = () => {
   const { state: locationState, setLocationData } = useLocationContext();
   const navigate = useNavigate();
 
-  // Form state
+  // Form state - UPDATED: Email is now persistent across location changes
   const [email, setEmail] = useState("");
   const [locationInput, setLocationInput] = useState("");
   const [currentLocationData, setCurrentLocationData] = useState<LocationData | null>(null);
@@ -52,7 +52,7 @@ const WaitlistModal: React.FC = () => {
   const debounceTimerRef = useRef<NodeJS.Timeout>();
   const preventBlurRef = useRef(false);
 
-  // Initialize form when modal opens
+  // UPDATED: Initialize form when modal opens - PRESERVE EMAIL
   useEffect(() => {
     if (state.isWaitlistModalOpen && !state.isSuccessView) {
       console.log('🎯 Initializing waitlist modal:', {
@@ -90,8 +90,13 @@ const WaitlistModal: React.FC = () => {
         setShowLocationInput(true);
       }
       
-      // Reset form fields
-      setEmail("");
+      // UPDATED: Only reset form fields if this is a fresh modal open (not location updates)
+      // Preserve email across location changes
+      if (!email) {
+        setEmail("");
+      }
+      
+      // Reset other form fields only on fresh open
       setInterests({
         buying: false,
         selling: false,
@@ -383,6 +388,7 @@ const WaitlistModal: React.FC = () => {
     setShowSuggestions(false);
   };
 
+  // UPDATED: Form validation - only require email and location
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !currentLocationData || isSubmitting) return;
@@ -597,6 +603,24 @@ const WaitlistModal: React.FC = () => {
           {getBadgeFlow()}
 
           <form onSubmit={handleSubmit} className="flex w-full flex-col items-start gap-6">
+            {/* UPDATED: Email field moved to top - PRIORITY FIELD */}
+            <TextField
+              className="h-auto w-full flex-none"
+              variant="filled"
+              label="Email address"
+              helpText=""
+              error={!!error && !error.includes('location')}
+            >
+              <TextField.Input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="mobile:text-sm"
+              />
+            </TextField>
+
             {/* FIXED: Location Input Section - Exact same design as LocationCollectionModal */}
             {showLocationInput && (
               <div className="w-full relative">
@@ -733,27 +757,11 @@ const WaitlistModal: React.FC = () => {
                 </div>
               </div>
             )}
-
-            <TextField
-              className="h-auto w-full flex-none"
-              variant="filled"
-              label="Email address"
-              helpText=""
-              error={!!error && !error.includes('location')}
-            >
-              <TextField.Input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mobile:text-sm"
-              />
-            </TextField>
             
+            {/* UPDATED: Interests section with optional label */}
             <div className="flex w-full flex-col items-start gap-2">
               <span className="text-body-bold font-body-bold text-default-font mobile:text-sm">
-                I'm interested in:
+                I'm interested in: <span className="text-caption font-caption text-subtext-color">(optional)</span>
               </span>
               <CheckboxCard
                 checked={interests.buying}
@@ -781,10 +789,11 @@ const WaitlistModal: React.FC = () => {
               </CheckboxCard>
             </div>
             
+            {/* UPDATED: Product interests with optional label */}
             <TextField
               className="h-auto w-full flex-none"
               variant="filled"
-              label="What would you most like to find?"
+              label="What would you most like to find? (optional)"
               helpText="Examples: Fresh eggs, local honey, heirloom tomatoes"
             >
               <TextField.Input
@@ -802,6 +811,7 @@ const WaitlistModal: React.FC = () => {
             )}
 
             <div className="flex w-full flex-col items-center gap-4">
+              {/* UPDATED: Form validation - only require email and location */}
               <Button
                 type="submit"
                 className="h-12 w-full flex-none"
