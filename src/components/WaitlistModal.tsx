@@ -451,7 +451,7 @@ const WaitlistModal: React.FC = () => {
         style={{ zIndex: 999999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         onClick={handleClickOutside}
       >
-        <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl hide-scrollbar">
+        <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-default-background px-6 py-12">
             <div className="flex w-full max-w-[576px] flex-col items-center gap-6">
               <IconWithBackground variant="success" size="x-large" />
@@ -572,7 +572,7 @@ const WaitlistModal: React.FC = () => {
       style={{ zIndex: 999999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
       onClick={handleClickOutside}
     >
-      <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl hide-scrollbar">
+      <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {/* Close Button */}
         <div className="flex justify-end p-4 pb-0">
           <IconButton
