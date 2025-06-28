@@ -31,7 +31,7 @@ serve(async (req) => {
       )
     }
 
-    const { input, types = '(cities)', componentRestrictions = { country: 'us' } }: AutocompleteRequest = await req.json()
+    const { input, types = 'geocode', componentRestrictions = { country: 'us' } }: AutocompleteRequest = await req.json()
 
     if (!input || input.length < 2) {
       return new Response(
