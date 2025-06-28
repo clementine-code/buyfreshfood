@@ -79,7 +79,8 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
 
           {/* Auth and Cart Actions */}
           <div className="mt-8 space-y-3">
-            <Button  
+            <Button 
+              variant="brand-tertiary" 
               icon={<FeatherUser />}
               className="w-full justify-start"
               onClick={() => {
