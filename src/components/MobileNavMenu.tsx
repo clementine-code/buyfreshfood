@@ -80,8 +80,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
           {/* Auth and Cart Actions */}
           <div className="mt-8 space-y-3">
             <Button 
-              variant="brand-secondary" 
-              icon={<FeatherUser />}
+\              icon={<FeatherUser />}
               className="w-full justify-start"
               onClick={() => {
                 onClose();
