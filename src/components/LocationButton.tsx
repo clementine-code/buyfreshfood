@@ -4,18 +4,19 @@ import React from "react";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMapPin } from "@subframe/core";
 import { useLocationContext } from "../contexts/LocationContext";
-import { useWaitlistContext } from "../contexts/WaitlistContext";
 
 interface LocationButtonProps {
   className?: string;
+  onClick?: () => void;
 }
 
-export const LocationButton: React.FC<LocationButtonProps> = ({ className }) => {
+export const LocationButton: React.FC<LocationButtonProps> = ({ className, onClick }) => {
   const { state } = useLocationContext();
-  const { openLocationModal } = useWaitlistContext();
 
   const handleLocationClick = () => {
-    openLocationModal();
+    if (onClick) {
+      onClick();
+    }
   };
 
   return (

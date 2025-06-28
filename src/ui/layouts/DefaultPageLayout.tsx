@@ -12,6 +12,7 @@ import { FeatherMenu } from "@subframe/core";
 import LocationButton from "../../components/LocationButton";
 import MobileNavMenu from "../../components/MobileNavMenu";
 import FoodSearchField from "../../components/FoodSearchField";
+import LocationCollectionModal from "../../components/LocationCollectionModal";
 import { type FoodSearchSuggestion } from "../../services/foodSearchService";
 
 interface DefaultPageLayoutRootProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -28,6 +29,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const location = useLocation();
     const navigate = useNavigate();
     const [showMobileNav, setShowMobileNav] = useState(false);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
     const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
       console.log('Selected food item:', suggestion);
@@ -57,6 +59,10 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
       console.log('Food search submitted:', query);
       // Navigate to search results page
       navigate(`/shop?search=${encodeURIComponent(query)}`);
+    };
+
+    const handleLocationButtonClick = () => {
+      setIsLocationModalOpen(true);
     };
 
     return (
@@ -113,7 +119,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
             }
             rightSlot={
               <>
-                <LocationButton className="flex-shrink-0" />
+                <LocationButton className="flex-shrink-0" onClick={handleLocationButtonClick} />
                 <Button variant="brand-secondary" icon={<FeatherUser />}>
                   Sign In
                 </Button>
@@ -149,7 +155,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
 
             {/* Right Actions - Location and Cart */}
             <div className="flex items-center justify-end gap-2">
-              <LocationButton className="flex-shrink-0" />
+              <LocationButton className="flex-shrink-0" onClick={handleLocationButtonClick} />
               <div className="flex-shrink-0">
                 <IconButton
                   variant="brand-primary"
@@ -167,6 +173,13 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         <MobileNavMenu
           isOpen={showMobileNav}
           onClose={() => setShowMobileNav(false)}
+        />
+
+        {/* Location Modal */}
+        <LocationCollectionModal
+          open={isLocationModalOpen}
+          onOpenChange={setIsLocationModalOpen}
+          mode="create"
         />
 
         {/* Main Content - Conditional overflow based on marketplace mode */}
