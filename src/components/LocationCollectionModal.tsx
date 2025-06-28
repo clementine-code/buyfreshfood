@@ -532,7 +532,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && modalState !== 'saved' && (
             <div 
               ref={suggestionsRef}
-              className="absolute left-0 right-0 top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg z-[9999] max-h-[200px] overflow-y-auto"
+              className="fixed bg-white border border-neutral-200 rounded-md shadow-lg z-[10000] max-h-[200px] overflow-y-auto"
               style={{ width: 'calc(100% - 52px)' }} // Account for action button
             >
               {isLoadingSuggestions ? (
