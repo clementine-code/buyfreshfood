@@ -569,7 +569,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
             />
           </TextField>
 
-          {/* Action buttons based on state - EDIT/DELETE FOR SAVED */}
+          {/* Action buttons based on state */}
           {modalState === 'saved' ? (
             <>
               <IconButton 
@@ -593,6 +593,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
               loading={isDetectingLocation}
               disabled={isDetectingLocation || isValidating || modalState === 'saved'}
               title="Use current location"
+              className="rounded-full"
             />
           )}
 
@@ -633,7 +634,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
                     <div className="flex items-center gap-3">
                       <FeatherMapPin className="w-4 h-4 text-subtext-color flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate text-default-font">{suggestion.main_text}</div>
+                        <div className="font-medium truncate">{suggestion.main_text}</div>
                         {suggestion.secondary_text && (
                           <div className="text-sm text-subtext-color truncate">{suggestion.secondary_text}</div>
                         )}

@@ -628,12 +628,12 @@ const WaitlistModal: React.FC = () => {
                     />
                   </TextField>
 
-                  {/* Find My Location Button - Same as LocationCollectionModal */}
+                  {/* UPDATED: Find My Location Button with circle background */}
                   <button
                     type="button"
                     onClick={handleDetectCurrentLocation}
                     disabled={isDetectingLocation || isValidatingLocation || isLoadingSuggestions}
-                    className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Use current location"
                   >
                     <FeatherLocate className={`w-4 h-4 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
@@ -723,15 +723,13 @@ const WaitlistModal: React.FC = () => {
                       {locationInput}
                     </span>
                   </div>
-                  <Button
-                    type="button"
+                  {/* UPDATED: Edit button with proper positioning */}
+                  <IconButton
                     variant="neutral-secondary"
-                    size="small"
                     icon={<FeatherEdit3 />}
                     onClick={handleLocationEdit}
-                  >
-                    Edit
-                  </Button>
+                    title="Edit location"
+                  />
                 </div>
               </div>
             )}
