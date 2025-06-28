@@ -87,7 +87,49 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     }
   }, [open, locationState, mode]);
 
-  // Fetch location suggestions
+  // Enhanced error handling function
+  const handleError = useCallback((error: any, context: string) => {
+    console.error(`Error in ${context}:`, error);
+    
+    let errorMessage = 'An unexpected error occurred. Please try again.';
+    
+    // Handle different types of errors
+    if (error?.message) {
+      if (error.message.includes('Network') || error.message.includes('fetch')) {
+        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timed out. Please try again.';
+      } else if (error.message.includes('Location access denied')) {
+        errorMessage = 'Location access denied. Please enter your location manually.';
+      } else if (error.message.includes('Unable to get location details')) {
+        errorMessage = 'Unable to validate this location. Please try a different address.';
+      } else if (error.message.includes('API configuration error')) {
+        errorMessage = 'Location service temporarily unavailable. Please try again later.';
+      } else {
+        errorMessage = error.message;
+      }
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    
+    setError(errorMessage);
+    setModalState('error');
+    setIsLoadingSuggestions(false);
+    setIsValidating(false);
+    setIsDetectingLocation(false);
+  }, []);
+
+  // Clear error when user starts typing
+  const clearError = useCallback(() => {
+    if (error) {
+      setError('');
+      if (modalState === 'error') {
+        setModalState('empty');
+      }
+    }
+  }, [error, modalState]);
+
+  // Fetch location suggestions with error handling
   const fetchSuggestions = useCallback(async (input: string) => {
     if (input.length < 2) {
       setSuggestions([]);
@@ -95,26 +137,26 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     }
 
     setIsLoadingSuggestions(true);
+    clearError();
     
     try {
       const results = await locationService.getLocationSuggestions(input);
       setSuggestions(results || []);
       setShowSuggestions(results.length > 0);
     } catch (error) {
-      console.error('Error fetching suggestions:', error);
+      handleError(error, 'fetching location suggestions');
       setSuggestions([]);
       setShowSuggestions(false);
-      setError('Unable to search locations. Please try again.');
     } finally {
       setIsLoadingSuggestions(false);
     }
-  }, []);
+  }, [handleError, clearError]);
 
-  // Validate location from place ID
+  // Validate location from place ID with error handling
   const validateLocation = async (suggestion: LocationSuggestion) => {
     setIsValidating(true);
     setModalState('loading');
-    setError('');
+    clearError();
     
     try {
       const locationData = await locationService.getLocationDetails(suggestion.place_id, suggestion.coordinates);
@@ -130,24 +172,21 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           setModalState('coming-soon');
         }
       } else {
-        setError('Unable to validate location. Please try again.');
-        setModalState('error');
+        handleError(new Error('Unable to validate this location. Please try a different address.'), 'validating location');
       }
       
     } catch (error) {
-      console.error('Error validating location:', error);
-      setError('Unable to validate location. Please try again.');
-      setModalState('error');
+      handleError(error, 'validating location');
     } finally {
       setIsValidating(false);
     }
   };
 
-  // Detect current location
+  // Detect current location with enhanced error handling
   const detectCurrentLocation = async () => {
     setIsDetectingLocation(true);
     setModalState('loading');
-    setError('');
+    clearError();
     
     try {
       const locationData = await locationService.getCurrentLocation();
@@ -157,13 +196,10 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
         setValidatedLocation(locationData);
         setModalState(locationData.isNWA ? 'launching' : 'coming-soon');
       } else {
-        setError('Unable to determine your location. Please enter manually.');
-        setModalState('error');
+        handleError(new Error('Unable to determine your location. Please enter your location manually.'), 'detecting current location');
       }
     } catch (error) {
-      console.error('Error getting current location:', error);
-      setError('Unable to access your location. Please enter manually.');
-      setModalState('error');
+      handleError(error, 'detecting current location');
     } finally {
       setIsDetectingLocation(false);
     }
@@ -174,9 +210,8 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     const value = e.target.value;
     setInputValue(value);
     setValidatedLocation(null);
-    setError('');
+    clearError(); // Clear error when user starts typing
     setSelectedIndex(-1);
-    setModalState('empty');
     
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -190,6 +225,9 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     } else {
       setShowSuggestions(false);
       setSuggestions([]);
+      if (modalState !== 'error') {
+        setModalState('empty');
+      }
     }
   };
 
@@ -268,6 +306,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
 
   const handleEdit = () => {
     setModalState('empty');
+    clearError();
     inputRef.current?.focus();
   };
 
@@ -275,6 +314,13 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     setInputValue('');
     setValidatedLocation(null);
     clearLocation();
+    setModalState('empty');
+    clearError();
+    inputRef.current?.focus();
+  };
+
+  const handleRetry = () => {
+    clearError();
     setModalState('empty');
     inputRef.current?.focus();
   };
@@ -297,11 +343,9 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
         );
       case 'error':
         return (
-          <Alert
-            variant="error"
-            title="Location Error"
-            description={error || 'Unable to find location. Please try again.'}
-          />
+          <Badge variant="error" icon={<FeatherAlertCircle />}>
+            {error || 'Unable to find location. Please try again.'}
+          </Badge>
         );
       case 'saved':
         return (
@@ -333,6 +377,25 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
             onClick={handleDelete}
           >
             Remove
+          </Button>
+        </div>
+      );
+    }
+
+    if (modalState === 'error') {
+      return (
+        <div className="flex w-full items-end justify-end gap-2">
+          <Button 
+            variant="neutral-tertiary" 
+            onClick={handleCancel}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleRetry}
+            icon={<FeatherAlertCircle />}
+          >
+            Try Again
           </Button>
         </div>
       );
@@ -371,10 +434,10 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
 
   return (
     <DialogLayout 
-  open={open} 
-  onOpenChange={onOpenChange}
-  className="z-[9999]"
->
+      open={open} 
+      onOpenChange={onOpenChange}
+      className="z-[9999]"
+    >
       <div className="flex w-full flex-col items-start gap-4 bg-white px-6 py-6">
         {/* Header */}
         <div className="flex w-full items-center justify-between">
