@@ -70,7 +70,7 @@ export const submitWaitlist = async (formData: WaitlistFormData) => {
 
     const queuePosition = await getQueuePosition(formData.city, formData.waitlistType);
     
-    console.log('✅ Waitlist submission successful:',  data);
+    console.log('✅ Waitlist submission successful:', data);
     return { success: true, queuePosition, data };
 
   } catch (error) {
