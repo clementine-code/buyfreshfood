@@ -447,11 +447,11 @@ const WaitlistModal: React.FC = () => {
     
     return (
       <div 
-        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+        className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 mobile:p-1 overflow-y-auto"
         style={{ zIndex: 999999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         onClick={handleClickOutside}
       >
-        <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl hide-scrollbar-until-hover">
+        <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl hide-scrollbar-until-hover mx-4 mobile:mx-2 mobile:max-w-[calc(100vw-16px)]">
           <div className="flex h-full w-full flex-col items-center gap-8 rounded-md bg-default-background px-6 py-12">
             <div className="flex w-full max-w-[576px] flex-col items-center gap-6">
               <IconWithBackground variant="success" size="x-large" />
@@ -568,11 +568,11 @@ const WaitlistModal: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 mobile:p-1 overflow-y-auto"
       style={{ zIndex: 999999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
       onClick={handleClickOutside}
     >
-      <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl hide-scrollbar-until-hover">
+      <div className="bg-white rounded-lg max-w-[576px] w-full max-h-[90vh] overflow-y-auto shadow-xl hide-scrollbar-until-hover mx-4 mobile:mx-2 mobile:max-w-[calc(100vw-16px)]">
         {/* Close Button */}
         <div className="flex justify-end p-4 pb-0">
           <IconButton
@@ -582,9 +582,9 @@ const WaitlistModal: React.FC = () => {
           />
         </div>
 
-        <div className="flex h-full w-full flex-col items-start gap-8 bg-default-background px-8 py-4 pb-8">
+        <div className="flex h-full w-full flex-col items-start gap-8 bg-default-background px-8 py-4 pb-8 mobile:px-4 mobile:py-6 mobile:gap-6">
           <div className="flex w-full flex-col items-start gap-4">
-            <span className="text-heading-1 font-heading-1 text-default-font">
+            <span className="text-heading-1 font-heading-1 text-default-font mobile:text-heading-2">
               {getTitle()}
             </span>
             <span className="text-body font-body text-subtext-color">
