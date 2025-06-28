@@ -51,19 +51,19 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [modalState, setModalState] = useState<'empty' | 'loading' | 'launching' | 'coming-soon' | 'error' | 'saved' | 'editing'>('empty');
   const [previousLocationData, setPreviousLocationData] = useState<LocationData | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Refs
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
 
-  // Initialize form when modal opens
+  // Initialize form when modal opens - UPDATED TO LOAD SAVED LOCATION
   useEffect(() => {
     if (open) {
       // Check if we have a saved location
       if (locationState.isSet && locationState.location) {
-        // We have a saved location - show it in saved state
-        setInputValue(locationState.location);
+        // Load saved location data
         const currentLocationData = {
           isNWA: locationState.isNWA,
           city: locationState.city || '',
@@ -73,6 +73,8 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           latitude: locationState.coordinates?.lat,
           longitude: locationState.coordinates?.lng
         };
+        
+        setInputValue(locationState.location);
         setValidatedLocation(currentLocationData);
         setPreviousLocationData(currentLocationData);
         setModalState('saved');
@@ -88,6 +90,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
       setSuggestions([]);
       setShowSuggestions(false);
       setSelectedIndex(-1);
+      setIsSaving(false);
       
       // Focus input after modal animation (only if not in saved state)
       if (!locationState.isSet) {
@@ -128,6 +131,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     setIsLoadingSuggestions(false);
     setIsValidating(false);
     setIsDetectingLocation(false);
+    setIsSaving(false);
   }, []);
 
   // Clear error when user starts typing
@@ -228,8 +232,13 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     const value = e.target.value;
     setInputValue(value);
     setValidatedLocation(null);
-    clearError(); // Clear error when user starts typing
+    clearError();
     setSelectedIndex(-1);
+    
+    // If we're editing a saved location, switch to editing state
+    if (modalState === 'saved') {
+      setModalState('editing');
+    }
     
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -300,15 +309,19 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     validateLocation(suggestion);
   };
 
-  // NEW: Check if location market has changed
+  // Check if location market has changed
   const hasLocationMarketChanged = (newLocation: LocationData, oldLocation: LocationData | null): boolean => {
     if (!oldLocation) return true;
     return newLocation.isNWA !== oldLocation.isNWA;
   };
 
-  // NEW: Handle save location with waitlist logic
+  // Handle save location with waitlist logic - UPDATED
   const handleSaveLocation = async () => {
-    if (validatedLocation) {
+    if (!validatedLocation) return;
+    
+    setIsSaving(true);
+    
+    try {
       // Update location in context
       setLocationData(validatedLocation);
       
@@ -338,6 +351,10 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
       if (onConfirm) {
         onConfirm(validatedLocation);
       }
+    } catch (error) {
+      handleError(error, 'saving location');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -345,6 +362,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     onOpenChange(false);
   };
 
+  // EDIT FUNCTIONALITY - NEW
   const handleEdit = () => {
     setModalState('editing');
     clearError();
@@ -354,6 +372,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     }, 100);
   };
 
+  // DELETE FUNCTIONALITY - NEW
   const handleDelete = () => {
     setInputValue('');
     setValidatedLocation(null);
@@ -372,6 +391,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
     inputRef.current?.focus();
   };
 
+  // UPDATED STATUS BADGE - Shows appropriate message for saved locations
   const getStatusBadge = () => {
     switch (modalState) {
       case 'loading':
@@ -395,21 +415,31 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           </Badge>
         );
       case 'saved':
-        return (
-          <Badge variant="success" icon={<FeatherCheckCircle />}>
-            Location saved successfully!
-          </Badge>
-        );
+        // Show appropriate message for saved location
+        if (validatedLocation?.isNWA) {
+          return (
+            <Badge variant="success" icon={<FeatherCheckCircle />}>
+              Launching in Northwest Arkansas first!
+            </Badge>
+          );
+        } else {
+          return (
+            <Badge variant="warning" icon={<FeatherClock />}>
+              Coming to your city soon...
+            </Badge>
+          );
+        }
       default:
         return null;
     }
   };
 
+  // UPDATED BUTTONS - Different buttons for different states
   const getButtons = () => {
-    const isFormValid = validatedLocation && !isValidating && !isLoadingSuggestions;
+    const isFormValid = validatedLocation && !isValidating && !isLoadingSuggestions && !isSaving;
     
     // Saved state with edit/delete options
-    if (modalState === 'saved' && !isValidating && !isLoadingSuggestions) {
+    if (modalState === 'saved' && !isValidating && !isLoadingSuggestions && !isSaving) {
       return (
         <div className="flex w-full items-end justify-end gap-2">
           <Button 
@@ -448,7 +478,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
       );
     }
 
-    // Default state buttons - UPDATED BUTTON TEXT
+    // Default state buttons - SAVE BUTTON
     return (
       <div className="flex w-full items-end justify-end gap-2">
         <Button 
@@ -460,9 +490,9 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
         <Button 
           onClick={handleSaveLocation}
           disabled={!isFormValid}
-          loading={isValidating}
+          loading={isSaving}
         >
-          {isValidating ? 'Saving...' : 'Save Location'}
+          {isSaving ? 'Saving...' : 'Save Location'}
         </Button>
       </div>
     );
@@ -530,7 +560,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
             />
           </TextField>
 
-          {/* Action buttons based on state */}
+          {/* Action buttons based on state - EDIT/DELETE FOR SAVED */}
           {modalState === 'saved' ? (
             <>
               <IconButton 
@@ -607,22 +637,23 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           )}
         </div>
 
-        {/* Status Badge/Alert */}
+        {/* Status Badge/Alert - SHOWS APPROPRIATE MESSAGE */}
         {getStatusBadge()}
 
         {/* Loading State */}
-        {(isValidating || isDetectingLocation) && (
+        {(isValidating || isDetectingLocation || isSaving) && (
           <div className="flex w-full items-center justify-center gap-2 py-4">
             <div className="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
             <span className="text-body font-body text-subtext-color">
-              {isValidating ? 'Validating location...' : 
+              {isSaving ? 'Saving location...' :
+               isValidating ? 'Validating location...' : 
                isDetectingLocation ? 'Detecting your location...' : 
                'Loading...'}
             </span>
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Buttons - UPDATED */}
         {getButtons()}
       </div>
     </DialogLayout>
