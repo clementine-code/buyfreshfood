@@ -469,7 +469,7 @@ const WaitlistModal: React.FC = () => {
           </div>
         </div>
       </DialogLayout>
-      <div className="fixed inset-0 z-[9999]">
+      </div>
     );
   }
 
