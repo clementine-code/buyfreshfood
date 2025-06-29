@@ -78,7 +78,7 @@ const TextFieldRoot = React.forwardRef<HTMLElement, TextFieldRootProps>(
         ) : null}
         <div
           className={SubframeUtils.twClassNames(
-            "flex h-8 w-full flex-none items-center gap-1 rounded-md border border-solid border-[#f0efedff] bg-default-background px-2 group-focus-within/be48ca43:border group-focus-within/be48ca43:border-solid group-focus-within/be48ca43:border-[#65d32aff]",
+            "flex h-8 w-full flex-none items-center gap-1 rounded-md border border-solid bg-default-background px-2 border-[#918878ff] group-focus-within/be48ca43:border group-focus-within/be48ca43:border-solid group-focus-within/be48ca43:border-[#65d32aff]",
             {
               "border border-solid border-neutral-100 bg-neutral-100 group-hover/be48ca43:border group-hover/be48ca43:border-solid group-hover/be48ca43:border-neutral-border group-focus-within/be48ca43:bg-default-background":
                 variant === "filled",
