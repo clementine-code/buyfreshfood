@@ -779,11 +779,16 @@ function Shop() {
       >
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
         <div className={`sort-filter-bar xl:hidden w-full ${
-          (showMobileFilters || showMobileMap) ? 'hidden' : ''
-        }`} style={{
-          transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
-          transition: 'transform 0.3s ease-in-out'
-        }}>
+  (showMobileFilters || showMobileMap) ? 'hidden' : ''
+}`} style={{
+  transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
+  transition: 'transform 0.3s ease-in-out',
+  position: 'sticky',
+  top: '80px',
+  backgroundColor: 'white',
+  zIndex: 60,
+  borderBottom: '1px solid #e5e7eb'
+}}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
@@ -855,7 +860,7 @@ function Shop() {
         </div>
 
         {/* Products Grid/List - Full width, scrollable content */}
-        <div className="w-full px-4 flex-1" style={{ marginTop: '80px' }}>
+        <div className="w-full px-4 flex-1">
           {currentProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
               <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
