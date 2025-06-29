@@ -7,6 +7,7 @@ import { Badge } from "@/ui/components/Badge";
 import { Avatar } from "@/ui/components/Avatar";
 import { Progress } from "@/ui/components/Progress";
 import { Accordion } from "@/ui/components/Accordion";
+import { Breadcrumbs } from "@/ui/components/Breadcrumbs";
 import { 
   FeatherLeaf, 
   FeatherShare, 
@@ -316,193 +317,184 @@ const ProductDetailNew: React.FC = () => {
 
   return (
     <DefaultPageLayout>
-      <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 py-2">
-        {/* Main Product Section */}
-        <div className="flex w-full flex-wrap items-start gap-8 lg:gap-12">
-          {/* Product Images */}
-          <div className="flex min-w-[240px] grow shrink-0 basis-0 flex-col items-start gap-4 md:max-w-[50%]">
-            <img
-              className="h-64 md:h-96 lg:h-112 w-full flex-none rounded-md object-cover"
-              src={product.images[selectedImage]}
-              alt={product.name}
-            />
-            <div className="flex w-full items-center gap-3 overflow-x-auto">
-              {product.images.map((image, index) => (
+      <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-12 py-2 mobile:flex-col mobile:flex-nowrap mobile:gap-4">
+        <div className="flex w-full items-center gap-6">
+          <Breadcrumbs className="h-auto grow shrink-0 basis-0">
+            <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
+            <Breadcrumbs.Divider />
+            <Breadcrumbs.Item active={true}>
+              Heirloom Tomatoes (Sarah&#39;s Family Farm)
+            </Breadcrumbs.Item>
+          </Breadcrumbs>
+          <IconButton
+            icon={<FeatherShare />}
+            onClick={handleShare}
+          />
+        </div>
+        <div className="flex w-full flex-col items-start justify-center gap-4">
+          <div className="flex w-full flex-wrap items-start gap-12">
+            <div className="flex min-w-[240px] grow shrink-0 basis-0 flex-col items-start gap-4">
+              <img
+                className="h-112 w-full flex-none rounded-md object-cover"
+                src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800"
+              />
+              <div className="flex w-full items-center gap-3">
                 <img
-                  key={index}
-                  className={`h-20 md:h-24 lg:h-32 w-20 md:w-24 lg:w-32 flex-none rounded-md object-cover cursor-pointer ${selectedImage === index ? 'ring-2 ring-brand-600' : ''}`}
-                  src={image}
-                  alt={`${product.name} view ${index + 1}`}
-                  onClick={() => setSelectedImage(index)}
+                  className="h-32 w-32 flex-none rounded-md object-cover"
+                  src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800"
                 />
-              ))}
-            </div>
-          </div>
-
-          {/* Product Details */}
-          <div className="flex min-w-[240px] grow shrink-0 basis-0 flex-col items-start gap-4">
-            <div className="flex w-full flex-col items-start gap-1">
-              <div className="flex w-full items-center justify-between">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {product.isOrganic && (
-                    <Badge variant="success" icon={<FeatherLeaf />}>
-                      Organic
-                    </Badge>
-                  )}
-                  {product.tags.map((tag, index) => (
-                    <Badge key={index} variant={index % 2 === 0 ? "warning" : "neutral"}>
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <IconButton
-                  icon={<FeatherShare />}
-                  onClick={handleShare}
-                  title="Share product"
+                <img
+                  className="h-32 w-32 flex-none rounded-md object-cover"
+                  src="https://images.unsplash.com/photo-1597362925123-77861d3fbac7"
+                />
+                <img
+                  className="h-32 w-32 flex-none rounded-md object-cover"
+                  src="https://images.unsplash.com/photo-1597362925552-5f2f3c7e2c97"
                 />
               </div>
-              <h1 className="text-heading-1 font-heading-1 text-default-font">
-                {product.name}
-              </h1>
-              <div className="flex items-center gap-1">
-                <div className="flex items-center">
-                  {renderStars(product.rating)}
-                  <span className="text-body-bold font-body-bold text-default-font ml-1">
-                    {product.rating.toFixed(1)}
+            </div>
+            <div className="flex min-w-[240px] grow shrink-0 basis-0 flex-col items-start gap-4">
+              <div className="flex w-full flex-col items-start gap-1">
+                <span className="text-heading-1 font-heading-1 text-default-font">
+                  Heirloom Tomatoes
+                </span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="success" icon={<FeatherLeaf />}>
+                    Organic
+                  </Badge>
+                  <Badge variant="warning">Picked Today</Badge>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="flex items-center">
+                    <FeatherStar className="text-body font-body text-default-font" />
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      4.7
+                    </span>
+                  </div>
+                  <span className="text-body font-body text-subtext-color">
+                    (22 reviews)
                   </span>
                 </div>
-                <span className="text-body font-body text-subtext-color">
-                  ({product.reviewCount} reviews)
+              </div>
+              <div className="flex w-full flex-col items-start gap-4">
+                <span className="text-body-bold font-body-bold text-default-font">
+                  About this product
+                </span>
+                <span className="text-body font-body text-default-font">
+                  Hand-picked this morning! Our heirloom tomatoes are grown
+                  naturally without pesticides. Perfect for salads, sandwiches, or
+                  just enjoying fresh off the vine. Multiple varieties available
+                  including Brandywine, Cherokee Purple, and Green Zebra.
                 </span>
               </div>
-            </div>
-
-            {/* Product Description */}
-            <div className="flex w-full flex-col items-start gap-4">
-              <span className="text-body-bold font-body-bold text-default-font">
-                About this product
-              </span>
-              <span className="text-body font-body text-default-font">
-                {product.description}
-              </span>
-            </div>
-
-            {/* Price and Quantity */}
-            <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-border bg-default-background px-4 py-4 shadow-sm">
-              <div className="flex w-full items-center gap-2">
-                <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2">
-                  <span className="line-clamp-1 w-full text-body-bold font-body-bold text-brand-700">
-                    Farm Fresh Price
-                  </span>
-                  <span className="text-heading-2 font-heading-2 text-default-font">
-                    ${product.price.toFixed(2)}/{product.unit}
-                  </span>
-                </div>
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-body-bold font-body-bold text-default-font">
-                    Quantity
-                  </span>
-                  <div className="flex w-full flex-col items-start gap-4">
-                    <div className="flex w-full items-center gap-2">
-                      <div className="flex items-center gap-2">
-                        <IconButton
-                          disabled={quantity <= 1}
-                          variant="neutral-primary"
-                          size="small"
-                          icon={<FeatherMinus />}
-                          onClick={decreaseQuantity}
-                        />
-                        <span className="text-body-bold font-body-bold text-default-font min-w-[20px] text-center">
-                          {quantity}
-                        </span>
-                        <IconButton
-                          variant="neutral-primary"
-                          size="small"
-                          icon={<FeatherPlus />}
-                          onClick={increaseQuantity}
-                        />
+              <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-[#f0efedff] bg-default-background px-4 py-4 shadow-sm">
+                <div className="flex w-full items-center gap-2">
+                  <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2">
+                    <span className="line-clamp-1 w-full text-body-bold font-body-bold text-brand-700">
+                      Farm Fresh Price
+                    </span>
+                    <span className="text-heading-2 font-heading-2 text-default-font">
+                      $4.99/lb
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      Quantity
+                    </span>
+                    <div className="flex w-full flex-col items-start gap-4">
+                      <div className="flex w-full items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <IconButton
+                            disabled={true}
+                            variant="neutral-primary"
+                            size="small"
+                            icon={<FeatherMinus />}
+                            onClick={(
+                              event: React.MouseEvent<HTMLButtonElement>
+                            ) => {}}
+                          />
+                          <span className="text-body-bold font-body-bold text-default-font">
+                            1
+                          </span>
+                          <IconButton
+                            variant="neutral-primary"
+                            size="small"
+                            onClick={(
+                              event: React.MouseEvent<HTMLButtonElement>
+                            ) => {}}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex w-full flex-col items-center gap-2">
-                <Button
-                  className="h-10 w-full flex-none"
-                  size="large"
-                  onClick={handleAddToCart}
-                >
-                  Add to cart
-                </Button>
-                <Button
-                  className="h-10 w-full flex-none"
-                  variant="brand-secondary"
-                  size="large"
-                  onClick={handleBuyNow}
-                >
-                  Buy now
-                </Button>
-              </div>
-            </div>
-
-            {/* Seller Information */}
-            <div className="flex w-full items-center gap-4 rounded-md border border-solid border-neutral-border bg-default-background px-6 py-6">
-              <Avatar
-                size="x-large"
-                image={product.seller.image}
-              >
-                {product.seller.name.charAt(0)}
-              </Avatar>
-              <div className="flex grow shrink-0 basis-0 flex-col items-start">
-                <div className="flex items-center gap-2">
-                  <span className="text-body-bold font-body-bold text-default-font">
-                    {product.seller.name}
-                  </span>
-                  {product.seller.verified && (
-                    <FeatherVerified className="text-body font-body text-brand-700" />
-                  )}
+                <div className="flex w-full flex-col items-center gap-2">
+                  <Button
+                    className="h-10 w-full flex-none"
+                    size="large"
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  >
+                    Add to cart
+                  </Button>
+                  <Button
+                    className="h-10 w-full flex-none"
+                    variant="brand-secondary"
+                    size="large"
+                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                  >
+                    Buy now
+                  </Button>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="flex items-center">
-                    {renderStars(product.seller.rating)}
-                    <span className="text-body-bold font-body-bold text-default-font ml-1">
-                      {product.seller.rating.toFixed(1)}
+              </div>
+              <div className="flex w-full items-center gap-4 rounded-md border border-solid border-[#f0efedff] bg-default-background px-6 py-6">
+                <Avatar
+                  size="x-large"
+                  image="https://images.unsplash.com/photo-1507914372368-b2b085b925a1"
+                >
+                  S
+                </Avatar>
+                <div className="flex grow shrink-0 basis-0 flex-col items-start">
+                  <div className="flex items-center gap-2">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      Sarah&#39;s Family Farm
+                    </span>
+                    <FeatherVerified className="text-body font-body text-brand-700" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center">
+                      <FeatherStar className="text-body font-body text-default-font" />
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        4.9
+                      </span>
+                    </div>
+                    <span className="text-body font-body text-subtext-color">
+                      (324 reviews)
                     </span>
                   </div>
-                  <span className="text-body font-body text-subtext-color">
-                    ({product.seller.reviewCount} reviews)
+                  <span className="text-caption font-caption text-subtext-color">
+                    2.3 miles away • Pickup Today
                   </span>
                 </div>
-                <span className="text-caption font-caption text-subtext-color">
-                  {product.seller.distance} • {product.seller.availability}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
                 <IconButton
                   variant="neutral-primary"
                   icon={<FeatherMessageCircle />}
-                  onClick={handleContactSeller}
-                  title="Message seller"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
                 <IconButton
                   variant="neutral-primary"
                   icon={<FeatherMail />}
-                  onClick={() => window.location.href = `mailto:${product.seller.contact.email}`}
-                  title="Email seller"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
                 <IconButton
                   variant="neutral-primary"
                   icon={<FeatherPhone />}
-                  onClick={() => window.location.href = `tel:${product.seller.contact.phone}`}
-                  title="Call seller"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
               </div>
             </div>
           </div>
         </div>
-
-        {/* Pickup Information */}
-        <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-border bg-default-background shadow-sm">
+        <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-[#f0efedff] bg-default-background shadow-sm">
           <Accordion
             trigger={
               <div className="flex w-full items-center gap-2 px-6 py-6">
@@ -514,7 +506,7 @@ const ProductDetailNew: React.FC = () => {
             }
             defaultOpen={true}
           >
-            <div className="flex w-full grow shrink-0 basis-0 flex-col items-start justify-center gap-4 border-t border-solid border-neutral-border px-6 py-6">
+            <div className="flex w-full grow shrink-0 basis-0 flex-col items-start justify-center gap-4 border-t border-solid border-[#f0efedff] px-6 py-6">
               <div className="flex items-center gap-4">
                 <FeatherTruck className="text-heading-2 font-heading-2 text-default-font" />
                 <div className="flex flex-col items-start">
@@ -522,7 +514,8 @@ const ProductDetailNew: React.FC = () => {
                     Pickup Details
                   </span>
                   <span className="text-body font-body text-default-font">
-                    {product.pickup.details}
+                    Drive-through pickup at farm entrance with no reservation
+                    required.
                   </span>
                 </div>
               </div>
@@ -533,8 +526,9 @@ const ProductDetailNew: React.FC = () => {
                     <span className="text-body-bold font-body-bold text-default-font">
                       Hours of Operation
                     </span>
-                    <span className="text-body font-body text-default-font whitespace-pre-line">
-                      {product.pickup.hours}
+                    <span className="text-body font-body text-default-font">
+                      Monday - Saturday: 8:00 AM - 6:00 PM Sunday: 10:00 AM - 4:00
+                      PM
                     </span>
                   </div>
                 </div>
@@ -545,13 +539,13 @@ const ProductDetailNew: React.FC = () => {
                       Farm Location
                     </span>
                     <span className="text-body font-body text-default-font">
-                      {product.pickup.location}
+                      123 Organic Way, Sunnyvale, CA 94086
                     </span>
                     <Button
                       variant="neutral-primary"
                       size="small"
                       icon={<FeatherMapPin />}
-                      onClick={handleGetDirections}
+                      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                     >
                       Directions
                     </Button>
@@ -564,26 +558,26 @@ const ProductDetailNew: React.FC = () => {
                       Contact
                     </span>
                     <span className="text-body font-body text-default-font">
-                      {product.seller.contact.phone} | {product.seller.contact.email}
+                      (408) 555-1234 | sarah@sarahsfamilyfarm.com
                     </span>
                     <div className="flex items-center gap-2">
                       <IconButton
                         variant="neutral-primary"
                         size="small"
                         icon={<FeatherMessageCircle />}
-                        onClick={handleContactSeller}
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                       />
                       <IconButton
                         variant="neutral-primary"
                         size="small"
                         icon={<FeatherMail />}
-                        onClick={() => window.location.href = `mailto:${product.seller.contact.email}`}
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                       />
                       <IconButton
                         variant="neutral-primary"
                         size="small"
                         icon={<FeatherPhone />}
-                        onClick={() => window.location.href = `tel:${product.seller.contact.phone}`}
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                       />
                     </div>
                   </div>
@@ -592,9 +586,7 @@ const ProductDetailNew: React.FC = () => {
             </div>
           </Accordion>
         </div>
-
-        {/* Product Reviews */}
-        <div className="flex w-full flex-col items-start justify-end gap-4 rounded-md border border-solid border-neutral-border bg-default-background shadow-sm">
+        <div className="flex w-full flex-col items-start justify-end gap-4 rounded-md border border-solid border-[#f0efedff] bg-default-background shadow-sm">
           <Accordion
             trigger={
               <div className="flex w-full items-center gap-2 px-6 py-6">
@@ -604,13 +596,13 @@ const ProductDetailNew: React.FC = () => {
                   </span>
                   <div className="flex items-center gap-1">
                     <div className="flex items-center">
-                      {renderStars(product.rating)}
-                      <span className="text-body-bold font-body-bold text-default-font ml-1">
-                        {product.rating.toFixed(1)}
+                      <FeatherStar className="text-body font-body text-default-font" />
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        4.7
                       </span>
                     </div>
                     <span className="text-body font-body text-subtext-color">
-                      ({product.reviewCount} reviews)
+                      (22 reviews)
                     </span>
                   </div>
                 </div>
@@ -619,79 +611,75 @@ const ProductDetailNew: React.FC = () => {
             }
             defaultOpen={true}
           >
-            <div className="flex w-full flex-col items-start gap-4 border-t border-solid border-neutral-border px-6 py-6">
-              <div className="flex w-full flex-wrap items-start gap-8 lg:gap-24">
-                {/* Review Highlights */}
+            <div className="flex w-full flex-col items-start gap-4 border-t border-solid border-[#f0efedff] px-6 py-6">
+              <div className="flex w-full flex-wrap items-start gap-24">
                 <div className="flex grow shrink-0 basis-0 flex-col items-start gap-4">
                   <span className="text-body-bold font-body-bold text-default-font">
                     Review Highlights
                   </span>
                   <div className="flex flex-wrap items-start gap-2">
-                    {product.reviews.highlights.map((highlight, index) => (
-                      <Badge key={index} variant="success">
-                        &quot;{highlight}&quot;
-                      </Badge>
-                    ))}
+                    <Badge variant="success">&quot;Incredibly fresh&quot;</Badge>
+                    <Badge variant="success">
+                      &quot;Better than store-bought&quot;
+                    </Badge>
+                    <Badge variant="success">&quot;Great value&quot;</Badge>
+                    <Badge variant="success">&quot;Will buy again&quot;</Badge>
                   </div>
                 </div>
-
-                {/* Rating Distribution */}
                 <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2">
                   <div className="flex w-full items-center gap-2">
                     <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
                       5
                     </span>
-                    <Progress value={product.reviews.ratings.five} />
-                    <span className="w-8 flex-none text-body font-body text-default-font">
-                      {product.reviews.ratings.five}%
+                    <Progress value={85} />
+                    <span className="w-4 flex-none text-body font-body text-default-font">
+                      90%
                     </span>
                   </div>
                   <div className="flex w-full items-center gap-2">
                     <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
                       4
                     </span>
-                    <Progress value={product.reviews.ratings.four} />
-                    <span className="w-8 flex-none text-body font-body text-default-font">
-                      {product.reviews.ratings.four}%
+                    <Progress value={12} />
+                    <span className="w-4 flex-none text-body font-body text-default-font">
+                      7%
                     </span>
                   </div>
                   <div className="flex w-full items-center gap-2">
                     <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
                       3
                     </span>
-                    <Progress value={product.reviews.ratings.three} />
-                    <span className="w-8 flex-none text-body font-body text-default-font">
-                      {product.reviews.ratings.three}%
+                    <Progress value={2} />
+                    <span className="w-4 flex-none text-body font-body text-default-font">
+                      2%
                     </span>
                   </div>
                   <div className="flex w-full items-center gap-2">
                     <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
                       2
                     </span>
-                    <Progress value={product.reviews.ratings.two} />
-                    <span className="w-8 flex-none text-body font-body text-default-font">
-                      {product.reviews.ratings.two}%
+                    <Progress value={1} />
+                    <span className="w-4 flex-none text-body font-body text-default-font">
+                      1%
                     </span>
                   </div>
                   <div className="flex w-full items-center gap-2">
                     <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
                       1
                     </span>
-                    <Progress value={product.reviews.ratings.one} />
-                    <span className="w-8 flex-none text-body font-body text-default-font">
-                      {product.reviews.ratings.one}%
+                    <Progress value={0} />
+                    <span className="w-4 flex-none text-body font-body text-default-font">
+                      0%
                     </span>
                   </div>
                 </div>
-
-                {/* Review Metrics */}
                 <div className="flex flex-col items-start gap-4">
                   <div className="flex w-full items-center gap-4">
                     <span className="w-24 flex-none text-body font-body text-default-font">
                       Freshness
                     </span>
                     <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
-                      {product.reviews.metrics.freshness.toFixed(1)}
+                      4.9
                     </span>
                   </div>
                   <div className="flex w-full items-center gap-4">
@@ -699,7 +687,7 @@ const ProductDetailNew: React.FC = () => {
                       Taste
                     </span>
                     <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
-                      {product.reviews.metrics.taste.toFixed(1)}
+                      4.8
                     </span>
                   </div>
                   <div className="flex w-full items-center gap-4">
@@ -707,88 +695,173 @@ const ProductDetailNew: React.FC = () => {
                       Value
                     </span>
                     <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
-                      {product.reviews.metrics.value.toFixed(1)}
+                      4.7
                     </span>
                   </div>
                 </div>
               </div>
-
-              {/* Review Items */}
-              <div className="flex w-full flex-col items-center gap-6 mt-4">
-                <div className="w-full items-start gap-6 grid grid-cols-1 md:grid-cols-2">
-                  {product.reviews.items.map((review, index) => (
-                    <div key={index} className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
-                      <div className="flex w-full items-center justify-between">
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          {review.name}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center">
-                          {renderStars(review.rating)}
-                        </div>
-                        <span className="text-caption font-caption text-subtext-color">
-                          {review.date}
-                        </span>
-                      </div>
-                      <span className="line-clamp-3 text-body font-body text-default-font">
-                        {review.comment}
+              <div className="flex w-full flex-col items-center gap-6">
+                <div className="w-full items-start gap-6 grid grid-cols-2">
+                  <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
+                    <div className="flex w-full items-center justify-between">
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        Emily K.
                       </span>
                     </div>
-                  ))}
+                    <div className="flex items-center gap-1">
+                      <div className="flex items-center">
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                      </div>
+                      <span className="text-caption font-caption text-subtext-color">
+                        3 days ago
+                      </span>
+                    </div>
+                    <span className="line-clamp-3 text-body font-body text-default-font">
+                      Absolutely love these farm-fresh tomatoes! The flavor is
+                      unbelievably rich and vibrant. You can truly taste the
+                      difference of locally grown, organic produce.
+                    </span>
+                  </div>
+                  <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
+                    <div className="flex w-full items-center justify-between">
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        David L.
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="flex items-center">
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                        <FeatherStar className="text-body font-body text-default-font" />
+                      </div>
+                      <span className="text-caption font-caption text-subtext-color">
+                        1 week ago
+                      </span>
+                    </div>
+                    <span className="line-clamp-3 text-body font-body text-default-font">
+                      Supporting local farmers has never tasted so good! These
+                      tomatoes are consistently fresh, juicy, and packed with
+                      incredible flavor. Highly recommend!
+                    </span>
+                  </div>
                 </div>
                 <Button
                   className="h-10 w-full flex-none"
                   variant="neutral-primary"
                   size="large"
-                  onClick={() => setShowAllReviews(!showAllReviews)}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 >
-                  {showAllReviews ? "Show less" : "Read more reviews"}
+                  Read more reviews
                 </Button>
               </div>
             </div>
           </Accordion>
         </div>
-
-        {/* Related Products */}
         <div className="flex w-full flex-col items-start gap-2">
           <span className="w-full text-heading-2 font-heading-2 text-default-font">
-            More from {product.seller.name}
+            More from Sarah&#39;s Family Farm
           </span>
-          <div className="w-full items-start gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {product.relatedProducts.map((relatedProduct, index) => (
-              <div 
-                key={index} 
-                className="flex grow shrink-0 basis-0 flex-col items-start gap-2 rounded-md border border-solid border-neutral-border bg-default-background px-4 py-4 shadow-sm"
-              >
-                <img
-                  className="h-48 w-full flex-none rounded-lg object-cover"
-                  src={relatedProduct.image}
-                  alt={relatedProduct.name}
-                />
-                <div className="flex w-full flex-col items-start gap-2">
+          <div className="w-full items-start gap-4 grid grid-cols-4">
+            <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2 rounded-md border border-solid border-[#f0efedff] bg-default-background px-6 py-6 shadow-sm">
+              <img
+                className="h-48 w-full flex-none rounded-lg object-cover"
+                src="https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800"
+              />
+              <div className="flex w-full flex-col items-start gap-2">
+                <span className="text-body-bold font-body-bold text-default-font">
+                  Rainbow Swiss Chard
+                </span>
+                <div className="flex w-full items-center justify-between">
                   <span className="text-body-bold font-body-bold text-default-font">
-                    {relatedProduct.name}
+                    $3.99/bunch
                   </span>
-                  <div className="flex w-full items-center justify-between">
-                    <span className="text-body-bold font-body-bold text-default-font">
-                      ${relatedProduct.price.toFixed(2)}/{relatedProduct.unit}
-                    </span>
-                  </div>
-                  <Button
-                    className="h-6 w-full flex-none"
-                    size="small"
-                    onClick={() => handleAddToCart()}
-                  >
-                    Add to Cart
-                  </Button>
                 </div>
+                <Button
+                  className="h-6 w-full flex-none"
+                  size="small"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                >
+                  Add to Cart
+                </Button>
               </div>
-            ))}
+            </div>
+            <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2 rounded-md border border-solid border-[#f0efedff] bg-default-background px-6 py-6 shadow-sm">
+              <img
+                className="h-48 w-full flex-none rounded-lg object-cover"
+                src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800"
+              />
+              <div className="flex w-full flex-col items-start gap-2">
+                <span className="text-body-bold font-body-bold text-default-font">
+                  Fresh Herbs Bundle
+                </span>
+                <div className="flex w-full items-center justify-between">
+                  <span className="text-body-bold font-body-bold text-default-font">
+                    $5.99/bundle
+                  </span>
+                </div>
+                <Button
+                  className="h-6 w-full flex-none"
+                  size="small"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                >
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
+            <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2 rounded-md border border-solid border-[#f0efedff] bg-default-background px-6 py-6 shadow-sm">
+              <img
+                className="h-48 w-full flex-none rounded-lg object-cover"
+                src="https://images.unsplash.com/photo-1557844352-761f2565b576?w=800"
+              />
+              <div className="flex w-full flex-col items-start gap-2">
+                <span className="text-body-bold font-body-bold text-default-font">
+                  Organic Lettuce Mix
+                </span>
+                <div className="flex w-full items-center justify-between">
+                  <span className="text-body-bold font-body-bold text-default-font">
+                    $4.50/bag
+                  </span>
+                </div>
+                <Button
+                  className="h-6 w-full flex-none"
+                  size="small"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                >
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
+            <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2 rounded-md border border-solid border-[#f0efedff] bg-default-background px-6 py-6 shadow-sm">
+              <img
+                className="h-48 w-full flex-none rounded-lg object-cover"
+                src="https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=800"
+              />
+              <div className="flex w-full flex-col items-start gap-2">
+                <span className="text-body-bold font-body-bold text-default-font">
+                  Fresh Green Beans
+                </span>
+                <div className="flex w-full items-center justify-between">
+                  <span className="text-body-bold font-body-bold text-default-font">
+                    $3.99/lb
+                  </span>
+                </div>
+                <Button
+                  className="h-6 w-full flex-none"
+                  size="small"
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+                >
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Footer */}
         <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-6 py-12 max-w-full">
           <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6">
             <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch">
@@ -796,28 +869,27 @@ const ProductDetailNew: React.FC = () => {
                 <img
                   className="h-5 w-5 flex-none object-cover"
                   src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
-                  alt="Logo"
                 />
                 <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                  BuyFresh.Food
+                  Subframe
                 </span>
               </div>
               <div className="flex w-full items-center gap-2">
                 <IconButton
                   icon={<FeatherFacebook />}
-                  onClick={() => {}}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
                 <IconButton
                   icon={<FeatherInstagram />}
-                  onClick={() => {}}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
                 <IconButton
                   icon={<FeatherXTwitter />}
-                  onClick={() => {}}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
                 <IconButton
                   icon={<FeatherSlack />}
-                  onClick={() => {}}
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
                 />
               </div>
             </div>
