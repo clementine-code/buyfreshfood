@@ -23,6 +23,7 @@ import { FeatherHeart } from "@subframe/core";
 import { FeatherX } from "@subframe/core";
 import { FeatherWifi } from "@subframe/core";
 import { FeatherWifiOff } from "@subframe/core";
+import { FeatherUser } from "@subframe/core";
 import { Loader } from "@/ui/components/Loader";
 import { Alert } from "@/ui/components/Alert";
 import Map from "../components/Map";
@@ -248,6 +249,11 @@ function Shop() {
     navigate(`/product/${productId}`);
   };
 
+  // Navigate to seller profile page
+  const handleSellerClick = (sellerId: string) => {
+    navigate(`/seller/${sellerId}`);
+  };
+
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
@@ -337,7 +343,7 @@ function Shop() {
     stock_quantity: item.inStock ? (item.stockLevel === 'high' ? 50 : item.stockLevel === 'medium' ? 25 : 5) : 0,
     is_organic: item.isOrganic,
     tags: item.tags,
-    seller: { name: item.seller },
+    seller: { name: item.seller, id: item.seller.toLowerCase().replace(/\s+/g, '-') },
     category: { name: item.category },
     average_rating: Math.random() * 2 + 3, // Mock rating
     reviews: []
@@ -380,7 +386,15 @@ function Shop() {
                 <span className="text-body font-body text-subtext-color line-clamp-2 hidden md:block">
                   {displayProduct.description}
                 </span>
-                <span className="text-caption font-caption text-subtext-color">
+                <span 
+                  className="text-caption font-caption text-subtext-color cursor-pointer hover:text-brand-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (displayProduct.seller?.id) {
+                      handleSellerClick(displayProduct.seller.id);
+                    }
+                  }}
+                >
                   by {displayProduct.seller?.name}
                 </span>
                 {displayProduct.average_rating && (
@@ -453,7 +467,15 @@ function Shop() {
             <span className="text-heading-3 font-heading-3 text-default-font">
               {displayProduct.name}
             </span>
-            <span className="text-caption font-caption text-subtext-color">
+            <span 
+              className="text-caption font-caption text-subtext-color cursor-pointer hover:text-brand-600"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (displayProduct.seller?.id) {
+                  handleSellerClick(displayProduct.seller.id);
+                }
+              }}
+            >
               by {displayProduct.seller?.name}
             </span>
             {displayProduct.average_rating && (
