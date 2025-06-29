@@ -606,7 +606,6 @@ const WaitlistModal: React.FC = () => {
             {/* UPDATED: Email field moved to top - PRIORITY FIELD */}
             <TextField
               className="h-auto w-full flex-none"
-              variant="filled"
               label="Email address"
               helpText=""
               error={!!error && !error.includes('location')}
@@ -792,7 +791,6 @@ const WaitlistModal: React.FC = () => {
             {/* UPDATED: Product interests with optional label */}
             <TextField
               className="h-auto w-full flex-none"
-              variant="filled"
               label="What would you most like to find? (optional)"
               helpText="Examples: Fresh eggs, local honey, heirloom tomatoes"
             >
