@@ -339,8 +339,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
-  // Render suggestions with simple absolute positioning (no portal)
-  // Render suggestions with simple positioning
+  // Render suggestions with improved positioning for mobile and tablet
   const suggestionList = useMemo(() => {
     console.log('🎨 Rendering suggestions:', { 
       showSuggestions, 
@@ -355,21 +354,21 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
 
     return (
-     <div 
-  className={`absolute top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden z-50 ${
-    screenSize === 'mobile' 
-      ? 'left-1/2 transform -translate-x-1/2' 
-      : isTablet 
-        ? 'left-1/2 transform -translate-x-1/2'
-        : 'left-0 right-0'
-  }`}
-  style={{ 
-    width: screenSize === 'mobile' ? '90vw' : (isTablet ? '400px' : 'auto'),
-    maxWidth: screenSize === 'mobile' ? '400px' : 'none',
-    maxHeight: '400px',
-    overflowY: 'auto'
-  }}
->
+      <div 
+        className={`absolute top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden z-50 ${
+          screenSize === 'mobile' 
+            ? 'left-1/2 transform -translate-x-1/2' 
+            : isTablet 
+              ? 'left-1/2 transform -translate-x-1/2'
+              : 'left-0 right-0'
+        }`}
+        style={{ 
+          width: screenSize === 'mobile' ? '90vw' : (isTablet ? '400px' : 'auto'),
+          maxWidth: screenSize === 'mobile' ? '400px' : 'none',
+          maxHeight: '400px',
+          overflowY: 'auto'
+        }}
+      >
         {isLoading && (
           <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
             <div className="flex items-center justify-center gap-2">
@@ -507,7 +506,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         )}
       </div>
     );
-  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile]);
+  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile, isTablet, screenSize]);
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
