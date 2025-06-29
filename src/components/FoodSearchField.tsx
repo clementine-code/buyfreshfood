@@ -111,8 +111,10 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [showSuggestions]);
 
-  // Search function - only trigger when user types
+  // Search function - FIXED: More aggressive search triggering
   const searchFood = useCallback(async (searchQuery: string) => {
+    console.log('🔍 searchFood called with:', searchQuery);
+    
     if (searchQuery.length === 0) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -126,13 +128,16 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
 
     setIsLoading(true);
+    console.log('🔄 Starting search for:', searchQuery);
+    
     try {
       const results = await foodSearchService.getFoodSuggestions(searchQuery);
+      console.log('✅ Search results:', results);
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
       setSelectedIndex(-1);
     } catch (error) {
-      console.error('Error searching food:', error);
+      console.error('❌ Error searching food:', error);
       setSuggestions([]);
       setShowSuggestions(false);
     } finally {
@@ -185,9 +190,10 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [query, onSearchSubmit, navigateToShop]);
 
-  // Handle input changes with debouncing
+  // Handle input changes with debouncing - FIXED: Shorter debounce
   const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
+    console.log('📝 Input changed to:', value);
     setQuery(value);
 
     if (debounceRef.current) {
@@ -195,9 +201,11 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
 
     if (value.trim().length >= 2) {
+      console.log('⏱️ Setting debounce timer for:', value);
       debounceRef.current = setTimeout(() => {
+        console.log('🚀 Debounce timer fired, searching for:', value);
         searchFood(value);
-      }, 300);
+      }, 200); // Reduced from 300ms to 200ms for faster response
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -293,12 +301,21 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }, 100);
   }, [onItemSelect, navigate]);
 
-  // Handle input focus
+  // Handle input focus - FIXED: Always show suggestions if available
   const handleInputFocus = useCallback(() => {
-    if (suggestions.length > 0 && query.length >= 2) {
-      setShowSuggestions(true);
+    console.log('🎯 Input focused, query:', query, 'suggestions:', suggestions.length);
+    if (query.length >= 2) {
+      // If we have a query but no suggestions, trigger search
+      if (suggestions.length === 0) {
+        console.log('🔄 No suggestions but have query, triggering search');
+        searchFood(query);
+      } else {
+        // Show existing suggestions
+        console.log('📋 Showing existing suggestions');
+        setShowSuggestions(true);
+      }
     }
-  }, [suggestions.length, query.length]);
+  }, [suggestions.length, query.length, searchFood, query]);
 
   // Handle input blur
   const handleInputBlur = useCallback(() => {
@@ -367,6 +384,14 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
   // Render suggestions portal - FIXED Z-INDEX AND POSITIONING
   const suggestionList = useMemo(() => {
+    console.log('🎨 Rendering suggestions:', { 
+      showSuggestions, 
+      suggestionsLength: suggestions.length, 
+      queryLength: query.length, 
+      portalContainer: !!portalContainer, 
+      inputRect: !!inputRect 
+    });
+
     if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) {
       return null;
     }
