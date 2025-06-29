@@ -861,66 +861,66 @@ const ProductDetailNew: React.FC = () => {
               </div>
 
               {/* Price and Quantity */}
-              <div className="flex w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-none xl:mx-0 flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm">
-                <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4">
-                  <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start gap-1">
-                    <span className="text-body-bold font-body-bold text-brand-700">
-                      Farm Fresh Price
-                    </span>
-                    <span className="text-heading-2 font-heading-2 text-default-font">
-                      ${product.price.toFixed(2)}/{product.unit}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-start sm:items-center gap-2">
-                    <span className="text-body-bold font-body-bold text-default-font">
-                      Quantity
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <IconButton
-                        disabled={quantity <= 1}
-                        variant="neutral-primary"
-                        size="small"
-                        icon={<FeatherMinus />}
-                        onClick={decreaseQuantity}
-                      />
-                      <span className="text-body-bold font-body-bold text-default-font w-6 text-center">
-                        {quantity}
-                      </span>
-                      <IconButton
-                        variant="neutral-primary"
-                        size="small"
-                        icon={<FeatherPlus />}
-                        onClick={increaseQuantity}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex w-full flex-col items-center gap-2">
-  <div className="flex w-full items-center gap-2">
-    <Button
-      className="h-10 grow shrink-0 basis-0"
-      size="large"
-      onClick={handleAddToCart}
-    >
-      Add to cart
-    </Button>
-    <IconButton
-      variant="destructive-secondary"
-      icon={<FeatherHeart />}
-      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-      className="flex-shrink-0"
-    />
+<div className="flex w-full max-w-md mx-auto lg:max-w-none lg:mx-0 flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm">
+  <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4">
+    <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start gap-1">
+      <span className="text-body-bold font-body-bold text-brand-700">
+        Farm Fresh Price
+      </span>
+      <span className="text-heading-2 font-heading-2 text-default-font">
+        ${product.price.toFixed(2)}/{product.unit}
+      </span>
+    </div>
+    <div className="flex flex-col items-start sm:items-center gap-2">
+      <span className="text-body-bold font-body-bold text-default-font">
+        Quantity
+      </span>
+      <div className="flex items-center gap-2">
+        <IconButton
+          disabled={quantity <= 1}
+          variant="neutral-primary"
+          size="small"
+          icon={<FeatherMinus />}
+          onClick={decreaseQuantity}
+        />
+        <span className="text-body-bold font-body-bold text-default-font w-6 text-center">
+          {quantity}
+        </span>
+        <IconButton
+          variant="neutral-primary"
+          size="small"
+          icon={<FeatherPlus />}
+          onClick={increaseQuantity}
+        />
+      </div>
+    </div>
   </div>
-  <Button
-    className="h-10 w-full flex-none"
-    variant="brand-secondary"
-    size="large"
-    onClick={handleBuyNow}
-  >
-    Buy now
-  </Button>
+  <div className="flex w-full flex-col items-center gap-2">
+    <div className="flex w-full items-center gap-2">
+      <Button
+        className="h-10 grow shrink-0 basis-0"
+        size="large"
+        onClick={handleAddToCart}
+      >
+        Add to cart
+      </Button>
+      <IconButton
+        variant="destructive-secondary"
+        icon={<FeatherHeart />}
+        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+        className="flex-shrink-0"
+      />
+    </div>
+    <Button
+      className="h-10 w-full flex-none"
+      variant="brand-secondary"
+      size="large"
+      onClick={handleBuyNow}
+    >
+      Buy now
+    </Button>
+  </div>
 </div>
-              </div>
 
               {/* Seller Information */}
               <div className="flex w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-none xl:mx-0 flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
