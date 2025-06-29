@@ -414,7 +414,7 @@ const ProductDetailNew: React.FC = () => {
   return (
     <DefaultPageLayout>
       {/* Breadcrumbs with absolute positioning */}
-      <div className="flex w-full items-center gap-8 px-4 md:px-8 lg:px-12 -mt-2">
+      <div className="flex w-full items-center gap-4 px-4 md:px-8 lg:px-12 -mt-2">
         <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
           <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
           <Breadcrumbs.Divider />
