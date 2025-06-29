@@ -509,7 +509,7 @@ const ProductDetailNew: React.FC = () => {
                   </div>
                   
                   <div className="flex flex-col items-end gap-2">
-                    <span className="text-body-bold font-body-bold text-default-font text-center">
+                    <span className="text-body-bold font-body-bold text-default-font">
                       Quantity
                     </span>
                     <div className="flex items-center gap-2">
