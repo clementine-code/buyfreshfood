@@ -909,7 +909,7 @@ const ProductDetailNew: React.FC = () => {
       icon={<FeatherHeart />}
       onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
       className="flex-shrink-0"
-    />
+    
   </div>
   <Button
     className="h-10 w-full flex-none"
