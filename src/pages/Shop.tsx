@@ -789,7 +789,7 @@ function Shop() {
   zIndex: 60,
   borderBottom: '1px solid #e5e7eb'
 }}>
-          <div className="flex w-full flex-col gap-3 px-4 py-4">
+          <div className="flex w-full flex-col gap-3 px-4 py-4 pt-6">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
               <div className="flex flex-col gap-1">
