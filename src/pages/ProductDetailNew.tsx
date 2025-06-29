@@ -407,7 +407,7 @@ const ProductDetailNew: React.FC = () => {
               </div>
 
               {/* Price and Quantity */}
-              <div className="flex w-full max-w-md mx-auto xl:max-w-none xl:mx-0 flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm">
+              <div className="flex w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-none xl:mx-0 flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm">
                 <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4">
                   <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start gap-1">
                     <span className="text-body-bold font-body-bold text-brand-700">
@@ -461,7 +461,7 @@ const ProductDetailNew: React.FC = () => {
               </div>
 
               {/* Seller Information */}
-              <div className="flex w-full max-w-md mx-auto xl:max-w-none xl:mx-0 flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
+              <div className="flex w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-none xl:mx-0 flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
                 <Avatar
                   size="x-large"
                   image={product.seller.image}
