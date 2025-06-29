@@ -248,50 +248,50 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
   // Handle suggestion clicks - COMPLETELY FIXED
   const handleSuggestionClick = useCallback((suggestion: FoodSearchSuggestion) => {
-  console.log('🔍 Suggestion clicked:', suggestion);
-  
-  preventBlurRef.current = true;
-  
-  // Set the input value
-  setQuery(suggestion.title);
-  
-  // Call the parent's onItemSelect if provided
-  if (onItemSelect) {
-    console.log('📞 Calling onItemSelect with:', suggestion);
-    onItemSelect(suggestion);
-  }
-  
-  // Navigate directly - don't rely on parent navigation
-  console.log('🚀 Navigating based on suggestion type:', suggestion.type);
-  
-  switch (suggestion.type) {
-    case 'category':
-      const categoryName = suggestion.title.replace(/^All\s+/, '');
-      console.log('📂 Navigating to category:', categoryName);
-      navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
-      break;
-    case 'product':
-      console.log('🛍️ Navigating to product search:', suggestion.title);
-      navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
-      break;
-    case 'seller':
-      console.log('🏪 Navigating to seller:', suggestion.title);
-      navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
-      break;
-    default:
-      console.log('🔍 Default search navigation:', suggestion.title);
-      navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
-  }
-  
-  // Hide suggestions
-  setShowSuggestions(false);
-  setSelectedIndex(-1);
-  
-  // Clean up
-  setTimeout(() => {
-    preventBlurRef.current = false;
-  }, 100);
-}, [onItemSelect, navigate]);
+    console.log('🔍 Suggestion clicked:', suggestion);
+    
+    preventBlurRef.current = true;
+    
+    // Set the input value
+    setQuery(suggestion.title);
+    
+    // Call the parent's onItemSelect if provided
+    if (onItemSelect) {
+      console.log('📞 Calling onItemSelect with:', suggestion);
+      onItemSelect(suggestion);
+    }
+    
+    // Navigate directly - don't rely on parent navigation
+    console.log('🚀 Navigating based on suggestion type:', suggestion.type);
+    
+    switch (suggestion.type) {
+      case 'category':
+        const categoryName = suggestion.title.replace(/^All\s+/, '');
+        console.log('📂 Navigating to category:', categoryName);
+        navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+        break;
+      case 'product':
+        console.log('🛍️ Navigating to product search:', suggestion.title);
+        navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+        break;
+      case 'seller':
+        console.log('🏪 Navigating to seller:', suggestion.title);
+        navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
+        break;
+      default:
+        console.log('🔍 Default search navigation:', suggestion.title);
+        navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+    }
+    
+    // Hide suggestions
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+    
+    // Clean up
+    setTimeout(() => {
+      preventBlurRef.current = false;
+    }, 100);
+  }, [onItemSelect, navigate]);
 
   // Handle input focus
   const handleInputFocus = useCallback(() => {
@@ -339,15 +339,15 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   }, []);
 
   // Clear search text when navigating away from shop page
-useEffect(() => {
-  if (location.pathname !== '/shop') {
-    console.log('📍 Left shop page, clearing search text');
-    setQuery("");
-    setSuggestions([]);
-    setShowSuggestions(false);
-    setSelectedIndex(-1);
-  }
-}, [location.pathname]);
+  useEffect(() => {
+    if (location.pathname !== '/shop') {
+      console.log('📍 Left shop page, clearing search text');
+      setQuery("");
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    }
+  }, [location.pathname]);
 
   // Get suggestion icon based on type
   const getSuggestionIcon = useCallback((suggestion: FoodSearchSuggestion) => {
@@ -365,56 +365,56 @@ useEffect(() => {
     }
   }, []);
 
-  // Render suggestions portal
+  // Render suggestions portal - FIXED Z-INDEX AND POSITIONING
   const suggestionList = useMemo(() => {
-  if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) {
-    return null;
-  }
-
-  const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
-  const top = inputRect.bottom + window.scrollY + 4;
-  
-  // FIXED: Better mobile positioning to prevent overflow
-  let left = inputRect.left + window.scrollX;
-  let width = inputRect.width;
-  
-  if (isMobile) {
-    // On mobile, use better positioning to prevent overflow
-    const viewportWidth = window.innerWidth;
-    const suggestionWidth = Math.min(viewportWidth - 32, 400); // 16px margin on each side
-    
-    // Center the suggestions or align to input, whichever fits better
-    const idealLeft = inputRect.left + window.scrollX;
-    const rightEdge = idealLeft + suggestionWidth;
-    
-    if (rightEdge > viewportWidth - 16) {
-      // If it would overflow, position from right edge
-      left = viewportWidth - suggestionWidth - 16;
-    } else if (idealLeft < 16) {
-      // If it would overflow left, position from left edge
-      left = 16;
-    } else {
-      // Use ideal position
-      left = idealLeft;
+    if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) {
+      return null;
     }
-    
-    width = suggestionWidth;
-  }
 
-  const suggestionContent = (
-    <div 
-      className="bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden"
-      style={{ 
-        position: 'absolute',
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${width}px`, // Changed from responsive width
-        maxHeight: '400px',
-        overflowY: 'auto',
-        zIndex: 99999,
-        pointerEvents: 'auto'
-      }}
-    >
+    const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
+    const top = inputRect.bottom + window.scrollY + 4;
+    
+    // FIXED: Better positioning calculation
+    let left = inputRect.left + window.scrollX;
+    let width = inputRect.width;
+    
+    if (isMobile) {
+      // On mobile, use better positioning to prevent overflow
+      const viewportWidth = window.innerWidth;
+      const suggestionWidth = Math.min(viewportWidth - 32, 400); // 16px margin on each side
+      
+      // Center the suggestions or align to input, whichever fits better
+      const idealLeft = inputRect.left + window.scrollX;
+      const rightEdge = idealLeft + suggestionWidth;
+      
+      if (rightEdge > viewportWidth - 16) {
+        // If it would overflow, position from right edge
+        left = viewportWidth - suggestionWidth - 16;
+      } else if (idealLeft < 16) {
+        // If it would overflow left, position from left edge
+        left = 16;
+      } else {
+        // Use ideal position
+        left = idealLeft;
+      }
+      
+      width = suggestionWidth;
+    }
+
+    const suggestionContent = (
+      <div 
+        className="bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden"
+        style={{ 
+          position: 'absolute',
+          top: `${top}px`,
+          left: `${left}px`,
+          width: `${width}px`,
+          maxHeight: '400px',
+          overflowY: 'auto',
+          zIndex: 99999,
+          pointerEvents: 'auto'
+        }}
+      >
         {isLoading && (
           <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
             <div className="flex items-center justify-center gap-2">
@@ -426,33 +426,33 @@ useEffect(() => {
 
         {!isLoading && limitedSuggestions.map((suggestion, index) => (
           <button
-  key={`${suggestion.type}-${suggestion.id}`}
-  className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
-    index === selectedIndex ? 'bg-brand-50' : ''
-  }`}
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('🖱️ Button clicked for:', suggestion.title);
-    handleSuggestionClick(suggestion);
-  }}
-  onMouseDown={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    preventBlurRef.current = true;
-    console.log('⬇️ Mouse down on suggestion');
-  }}
-  onMouseUp={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('⬆️ Mouse up on suggestion');
-    setTimeout(() => {
-      preventBlurRef.current = false;
-    }, 200);
-  }}
-  onMouseEnter={() => setSelectedIndex(index)}
-  type="button"
->
+            key={`${suggestion.type}-${suggestion.id}`}
+            className={`w-full text-left ${isMobile ? 'px-4 py-4' : 'px-3 py-3'} hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors ${
+              index === selectedIndex ? 'bg-brand-50' : ''
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🖱️ Button clicked for:', suggestion.title);
+              handleSuggestionClick(suggestion);
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              preventBlurRef.current = true;
+              console.log('⬇️ Mouse down on suggestion');
+            }}
+            onMouseUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('⬆️ Mouse up on suggestion');
+              setTimeout(() => {
+                preventBlurRef.current = false;
+              }, 200);
+            }}
+            onMouseEnter={() => setSelectedIndex(index)}
+            type="button"
+          >
             <div className={`flex items-start ${isMobile ? 'gap-4' : 'gap-3'}`}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
