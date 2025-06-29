@@ -744,7 +744,7 @@ const WaitlistModal: React.FC = () => {
                   </div>
                   {/* UPDATED: Edit button with proper positioning */}
                   <IconButton
-                    variant="neutral-secondary"
+                    variant="neutral-primary"
                     icon={<FeatherEdit3 />}
                     onClick={handleLocationEdit}
                     title="Edit location"
