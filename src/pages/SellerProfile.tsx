@@ -492,7 +492,7 @@ const SellerProfile: React.FC = () => {
                     </div>
                     <div className="flex w-full items-center gap-2 mt-auto">
                       <Button
-                        className="h-8 flex-1"
+                        className="h-8 w-full"
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
