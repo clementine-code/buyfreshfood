@@ -317,22 +317,22 @@ const ProductDetailNew: React.FC = () => {
 
   return (
     <DefaultPageLayout>
-      <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-0 pb-4">
-        {/* Breadcrumbs and Share Button */}
-        <div className="flex w-full items-center gap-4 mt-0 pt-0">
-          <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
-            <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
-            <Breadcrumbs.Divider />
-            <Breadcrumbs.Item active={true} className="truncate">
-              Heirloom Tomatoes (Sarah&#39;s Family Farm)
-            </Breadcrumbs.Item>
-          </Breadcrumbs>
-          <IconButton
-            icon={<FeatherShare />}
-            onClick={handleShare}
-            className="flex-shrink-0"
-          />
-        </div>
+    <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-0 pb-4">
+      {/* Breadcrumbs and Share Button */}
+      <div className="flex w-full items-center gap-4 -mt-4 pt-0">
+        <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
+          <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
+          <Breadcrumbs.Divider />
+          <Breadcrumbs.Item active={true} className="truncate">
+            Heirloom Tomatoes (Sarah&#39;s Family Farm)
+          </Breadcrumbs.Item>
+        </Breadcrumbs>
+        <IconButton
+          icon={<FeatherShare />}
+          onClick={handleShare}
+          className="flex-shrink-0"
+        />
+      </div>
 
         {/* Main Product Content */}
         <div className="flex w-full flex-col items-start justify-center gap-4">
