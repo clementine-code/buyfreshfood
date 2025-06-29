@@ -792,11 +792,6 @@ const ProductDetailNew: React.FC = () => {
             onClick={handleShare}
             className="flex-shrink-0"
           />
-          <IconButton
-            variant="destructive-secondary"
-            icon={<FeatherHeart />}
-            onClick={handleAddToCart}
-            className="flex-shrink-0"
           />
         </div>
 
@@ -901,22 +896,30 @@ const ProductDetailNew: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex w-full flex-col items-center gap-2">
-                  <Button
-                    className="h-10 w-full flex-none"
-                    size="large"
-                    onClick={handleAddToCart}
-                  >
-                    Add to cart
-                  </Button>
-                  <Button
-                    className="h-10 w-full flex-none"
-                    variant="brand-secondary"
-                    size="large"
-                    onClick={handleBuyNow}
-                  >
-                    Buy now
-                  </Button>
-                </div>
+  <div className="flex w-full items-center gap-2">
+    <Button
+      className="h-10 grow shrink-0 basis-0"
+      size="large"
+      onClick={handleAddToCart}
+    >
+      Add to cart
+    </Button>
+    <IconButton
+      variant="destructive-secondary"
+      icon={<FeatherHeart />}
+      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+      className="flex-shrink-0"
+    />
+  </div>
+  <Button
+    className="h-10 w-full flex-none"
+    variant="brand-secondary"
+    size="large"
+    onClick={handleBuyNow}
+  >
+    Buy now
+  </Button>
+</div>
               </div>
 
               {/* Seller Information */}
