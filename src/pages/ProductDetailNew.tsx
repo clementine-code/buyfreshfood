@@ -435,24 +435,24 @@ const ProductDetailNew: React.FC = () => {
         <div className="flex w-full flex-col items-start justify-center gap-4">
           <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
             {/* Product Images */}
-            <div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
-              <img
-                className="w-full h-auto max-h-[28rem] object-cover rounded-md"
-                src={product.images[selectedImage]}
-                alt={product.name}
-              />
-              <div className="flex w-full items-center gap-3 overflow-x-auto pb-2">
-                {product.images.map((image, index) => (
-                  <img
-                    key={index}
-                    className={`h-20 w-20 md:h-24 md:w-24 lg:h-32 lg:w-32 flex-none rounded-md object-cover cursor-pointer ${selectedImage === index ? 'ring-2 ring-brand-600' : ''}`}
-                    src={image}
-                    alt={`${product.name} view ${index + 1}`}
-                    onClick={() => setSelectedImage(index)}
-                  />
-                ))}
-              </div>
-            </div>
+<div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
+  <img
+    className="w-full h-auto max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] object-cover rounded-md"
+    src={product.images[selectedImage]}
+    alt={product.name}
+  />
+  <div className="flex w-full items-center gap-3 overflow-x-auto pb-2">
+    {product.images.map((image, index) => (
+      <img
+        key={index}
+        className={`h-20 w-20 md:h-24 md:w-24 lg:h-32 lg:w-32 flex-none rounded-md object-cover cursor-pointer ${selectedImage === index ? 'ring-2 ring-brand-600' : ''}`}
+        src={image}
+        alt={`${product.name} view ${index + 1}`}
+        onClick={() => setSelectedImage(index)}
+      />
+    ))}
+  </div>
+</div>
 
             {/* Product Details */}
             <div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
