@@ -358,9 +358,10 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
       <div 
   className="absolute top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden z-50"
   style={{ 
-    left: isMobile ? '-16px' : '0',
-    right: isMobile ? '-16px' : '0',
-    width: isMobile ? 'calc(100vw - 32px)' : 'auto',
+    left: isMobile ? '-60px' : '0',
+    right: isMobile ? '-60px' : '0',
+    width: isMobile ? 'auto' : 'auto',
+    maxWidth: isMobile ? '400px' : 'none',
     maxHeight: '400px',
     overflowY: 'auto'
   }}
