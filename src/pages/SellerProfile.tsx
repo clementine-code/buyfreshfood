@@ -34,6 +34,7 @@ import {
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
+import PhotoGallery from "../components/PhotoGallery";
 import L from 'leaflet';
 
 // Fix for default Leaflet markers
@@ -76,6 +77,21 @@ const sampleSellers = {
         url: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=1200",
         alt: "Family working together in the greenhouse with young tomato plants",
         caption: "Family tradition"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1585438896016-478e8a0cc2d2?w=1200",
+        alt: "Farmer holding freshly harvested organic vegetables",
+        caption: "Farm to table freshness"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1595880500386-4b33823ea618?w=1200",
+        alt: "Aerial view of organic farm with diverse crop rows",
+        caption: "Our diverse farm layout"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1592878840560-89d5c75d8180?w=1200",
+        alt: "Children learning about farming and sustainable practices",
+        caption: "Teaching the next generation"
       }
     ],
     farmPractices: [
@@ -93,6 +109,21 @@ const sampleSellers = {
         url: "https://images.unsplash.com/photo-1620588280212-9a9a7f01819e?w=1200",
         alt: "Farmer using sustainable irrigation system in tomato field",
         caption: "Water-saving irrigation"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1200",
+        alt: "Beneficial insects being released in the field for natural pest control",
+        caption: "Beneficial insects for pest management"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1598169929771-c2f7fb1c8bf7?w=1200",
+        alt: "Solar panels providing renewable energy for farm operations",
+        caption: "Renewable energy sources"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=1200",
+        alt: "Rainwater collection system for sustainable irrigation",
+        caption: "Rainwater harvesting"
       }
     ],
     details: {
@@ -197,6 +228,21 @@ const sampleSellers = {
         url: "https://images.unsplash.com/photo-1586686804663-f042d4e5c9ca?w=1200",
         alt: "Close-up of lion's mane mushroom growing on substrate",
         caption: "Lion's mane cultivation"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1603733167767-0db73c8e6ce2?w=1200",
+        alt: "Harvesting mushrooms by hand with care",
+        caption: "Careful hand harvesting"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?w=1200",
+        alt: "Mushroom mycelium spreading through substrate",
+        caption: "Mycelium development"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1652179289125-1eeba6fc8183?w=1200",
+        alt: "Mushroom growing kits ready for distribution",
+        caption: "Sustainable growing kits"
       }
     ],
     farmPractices: [
@@ -214,6 +260,21 @@ const sampleSellers = {
         url: "https://images.unsplash.com/photo-1603733167767-0db73c8e6ce2?w=1200",
         alt: "Harvesting mushrooms by hand with care",
         caption: "Careful hand harvesting"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1611089676098-5fa7965147a3?w=1200",
+        alt: "Freshly harvested shiitake mushrooms on wooden surface",
+        caption: "Fresh shiitake harvest"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1607877742574-a7253426f5af?w=1200",
+        alt: "Mushroom growing facility with controlled environment",
+        caption: "Our indoor growing facility"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1586686804663-f042d4e5c9ca?w=1200",
+        alt: "Close-up of lion's mane mushroom growing on substrate",
+        caption: "Lion's mane cultivation"
       }
     ],
     details: {
@@ -904,50 +965,16 @@ const SellerProfile: React.FC = () => {
               {seller.story}
             </p>
             
-            {/* Improved Farm Story Images */}
+            {/* Farm Photo Gallery */}
             <div className="w-full mt-4">
               <h3 className="text-heading-3 font-heading-3 text-default-font mb-4">Farm Photos</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {seller.storyImages.map((image: any, index: number) => (
-                  <div key={index} className="flex flex-col gap-2">
-                    <div className="relative overflow-hidden rounded-lg aspect-[4/3] shadow-md">
-                      <img 
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                        src={image.url} 
-                        alt={image.alt}
-                      />
-                    </div>
-                    {image.caption && (
-                      <p className="text-caption font-caption text-subtext-color text-center">
-                        {image.caption}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <PhotoGallery images={seller.storyImages} />
             </div>
             
             {/* Sustainable Farming Practices */}
             <div className="w-full mt-6 pt-6 border-t border-neutral-200">
               <h3 className="text-heading-3 font-heading-3 text-default-font mb-4">Sustainable Farming Practices</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {seller.farmPractices.map((image: any, index: number) => (
-                  <div key={index} className="flex flex-col gap-2">
-                    <div className="relative overflow-hidden rounded-lg aspect-[4/3] shadow-md">
-                      <img 
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                        src={image.url} 
-                        alt={image.alt}
-                      />
-                    </div>
-                    {image.caption && (
-                      <p className="text-caption font-caption text-subtext-color text-center">
-                        {image.caption}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <PhotoGallery images={seller.farmPractices} />
             </div>
           </div>
 
