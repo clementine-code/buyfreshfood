@@ -192,71 +192,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [query, onSearchSubmit, navigateToShop]);
 
-  // Handle input changes with debouncing - FIXED: Shorter debounce
-  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    console.log('📝 Input changed to:', value);
-    setQuery(value);
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    if (value.trim().length >= 2) {
-      console.log('⏱️ Setting debounce timer for:', value);
-      debounceRef.current = setTimeout(() => {
-        console.log('🚀 Debounce timer fired, searching for:', value);
-        searchFood(value);
-      }, 200); // Reduced from 300ms to 200ms for faster response
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
-  }, [searchFood]);
-
-  // Handle keyboard navigation
-  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showSuggestions || suggestions.length === 0) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        handleSearchClick();
-      }
-      return;
-    }
-
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        setSelectedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : 0
-        );
-        break;
-      
-      case 'ArrowUp':
-        event.preventDefault();
-        setSelectedIndex(prev => 
-          prev > 0 ? prev - 1 : suggestions.length - 1
-        );
-        break;
-      
-      case 'Enter':
-        event.preventDefault();
-        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
-          handleSuggestionClick(suggestions[selectedIndex]);
-        } else {
-          handleSearchClick();
-        }
-        break;
-      
-      case 'Escape':
-        setShowSuggestions(false);
-        setSelectedIndex(-1);
-        inputRef.current?.blur();
-        break;
-    }
-  }, [showSuggestions, suggestions, selectedIndex, handleSearchClick, handleSuggestionClick]);
-
-  // Handle suggestion clicks
+  // Handle suggestion clicks - MOVED BEFORE handleKeyDown
   const handleSuggestionClick = useCallback((suggestion: FoodSearchSuggestion) => {
     console.log('🔍 Suggestion clicked:', suggestion);
     
@@ -302,6 +238,70 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
       preventBlurRef.current = false;
     }, 100);
   }, [onItemSelect, navigate]);
+
+  // Handle input changes with debouncing - FIXED: Shorter debounce
+  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    console.log('📝 Input changed to:', value);
+    setQuery(value);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    if (value.trim().length >= 2) {
+      console.log('⏱️ Setting debounce timer for:', value);
+      debounceRef.current = setTimeout(() => {
+        console.log('🚀 Debounce timer fired, searching for:', value);
+        searchFood(value);
+      }, 200); // Reduced from 300ms to 200ms for faster response
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchFood]);
+
+  // Handle keyboard navigation - NOW AFTER handleSuggestionClick
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleSearchClick();
+      }
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        setSelectedIndex(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      
+      case 'ArrowUp':
+        event.preventDefault();
+        setSelectedIndex(prev => 
+          prev > 0 ? prev - 1 : suggestions.length - 1
+        );
+        break;
+      
+      case 'Enter':
+        event.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+          handleSuggestionClick(suggestions[selectedIndex]);
+        } else {
+          handleSearchClick();
+        }
+        break;
+      
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+        inputRef.current?.blur();
+        break;
+    }
+  }, [showSuggestions, suggestions, selectedIndex, handleSearchClick, handleSuggestionClick]);
 
   // Handle input focus - FIXED: Always trigger search if needed
   const handleInputFocus = useCallback(() => {
