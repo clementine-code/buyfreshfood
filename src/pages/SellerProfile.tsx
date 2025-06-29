@@ -62,8 +62,38 @@ const sampleSellers = {
     },
     story: "We're a family-owned organic farm dedicated to growing the freshest, most flavorful produce in Johnson County. Our sustainable farming practices ensure you get the best quality vegetables while protecting our environment for future generations.",
     storyImages: [
-      "https://images.unsplash.com/photo-1595880500386-4b33823ea618",
-      "https://images.unsplash.com/photo-1592878840560-89d5c75d8180"
+      {
+        url: "https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?w=1200",
+        alt: "Farmer inspecting tomato plants in the early morning sunlight",
+        caption: "Morning harvest inspection"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=1200",
+        alt: "Baskets of freshly harvested heirloom tomatoes in various colors",
+        caption: "Today's harvest"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=1200",
+        alt: "Family working together in the greenhouse with young tomato plants",
+        caption: "Family tradition"
+      }
+    ],
+    farmPractices: [
+      {
+        url: "https://images.unsplash.com/photo-1592150621744-aca64f48394a?w=1200",
+        alt: "Close-up of organic compost being added to garden soil",
+        caption: "Nutrient-rich organic compost"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200",
+        alt: "Rows of diverse vegetables growing together in companion planting system",
+        caption: "Companion planting for natural pest control"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1620588280212-9a9a7f01819e?w=1200",
+        alt: "Farmer using sustainable irrigation system in tomato field",
+        caption: "Water-saving irrigation"
+      }
     ],
     details: {
       pickup: "Pickup at Farm, Pickup at Farmer's Market, Delivery (select locations)",
@@ -153,8 +183,38 @@ const sampleSellers = {
     },
     story: "We specialize in growing gourmet and medicinal mushrooms using sustainable practices. Our indoor growing facility allows us to produce fresh mushrooms year-round, providing the Ozark region with nutritious and delicious fungi varieties.",
     storyImages: [
-      "https://images.unsplash.com/photo-1611089676098-5fa7965147a3",
-      "https://images.unsplash.com/photo-1607877742574-a7253426f5af"
+      {
+        url: "https://images.unsplash.com/photo-1611089676098-5fa7965147a3?w=1200",
+        alt: "Freshly harvested shiitake mushrooms on wooden surface",
+        caption: "Fresh shiitake harvest"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1607877742574-a7253426f5af?w=1200",
+        alt: "Mushroom growing facility with controlled environment",
+        caption: "Our indoor growing facility"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1586686804663-f042d4e5c9ca?w=1200",
+        alt: "Close-up of lion's mane mushroom growing on substrate",
+        caption: "Lion's mane cultivation"
+      }
+    ],
+    farmPractices: [
+      {
+        url: "https://images.unsplash.com/photo-1652179289125-1eeba6fc8183?w=1200",
+        alt: "Mushroom growing kits ready for distribution",
+        caption: "Sustainable growing kits"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?w=1200",
+        alt: "Mushroom mycelium spreading through substrate",
+        caption: "Mycelium development"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1603733167767-0db73c8e6ce2?w=1200",
+        alt: "Harvesting mushrooms by hand with care",
+        caption: "Careful hand harvesting"
+      }
     ],
     details: {
       pickup: "Pickup at Farm, Delivery (select locations), Farmers Markets",
@@ -843,15 +903,51 @@ const SellerProfile: React.FC = () => {
             <p className="text-body font-body text-default-font">
               {seller.story}
             </p>
-            <div className="flex w-full flex-col sm:flex-row items-center justify-center gap-4">
-              {seller.storyImages.map((image: string, index: number) => (
-                <img 
-                  key={index}
-                  className="h-52 w-full sm:w-52 flex-none rounded-md object-cover" 
-                  src={image} 
-                  alt={`${seller.name} story ${index + 1}`}
-                />
-              ))}
+            
+            {/* Improved Farm Story Images */}
+            <div className="w-full mt-4">
+              <h3 className="text-heading-3 font-heading-3 text-default-font mb-4">Farm Photos</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {seller.storyImages.map((image: any, index: number) => (
+                  <div key={index} className="flex flex-col gap-2">
+                    <div className="relative overflow-hidden rounded-lg aspect-[4/3] shadow-md">
+                      <img 
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        src={image.url} 
+                        alt={image.alt}
+                      />
+                    </div>
+                    {image.caption && (
+                      <p className="text-caption font-caption text-subtext-color text-center">
+                        {image.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Sustainable Farming Practices */}
+            <div className="w-full mt-6 pt-6 border-t border-neutral-200">
+              <h3 className="text-heading-3 font-heading-3 text-default-font mb-4">Sustainable Farming Practices</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {seller.farmPractices.map((image: any, index: number) => (
+                  <div key={index} className="flex flex-col gap-2">
+                    <div className="relative overflow-hidden rounded-lg aspect-[4/3] shadow-md">
+                      <img 
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        src={image.url} 
+                        alt={image.alt}
+                      />
+                    </div>
+                    {image.caption && (
+                      <p className="text-caption font-caption text-subtext-color text-center">
+                        {image.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
