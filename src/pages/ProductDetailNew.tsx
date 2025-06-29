@@ -562,15 +562,15 @@ const ProductDetailNew: React.FC = () => {
               </div>
 
               {/* Seller Information */}
-              <div className="flex w-full flex-col sm:flex-row items-start sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
-                <Avatar
-                  size="x-large"
-                  image={product.seller.image}
-                  className="flex-shrink-0"
-                >
-                  {product.seller.name.charAt(0)}
-                </Avatar>
-                <div className="flex grow shrink-0 basis-0 flex-col items-start">
+              <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
+  <Avatar
+    size="x-large"
+    image={product.seller.image}
+    className="flex-shrink-0"
+  >
+    {product.seller.name.charAt(0)}
+  </Avatar>
+  <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
                   <div className="flex items-center gap-2">
                     <span className="text-body-bold font-body-bold text-default-font">
                       {product.seller.name}
