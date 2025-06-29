@@ -24,7 +24,8 @@ import {
   FeatherFacebook,
   FeatherInstagram,
   FeatherXTwitter,
-  FeatherSlack
+  FeatherSlack,
+  FeatherHeart
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
@@ -319,19 +320,25 @@ const ProductDetailNew: React.FC = () => {
     <DefaultPageLayout>
     {/* Breadcrumbs with absolute positioning */}
     <div className="absolute top-20 left-0 right-0 flex w-full items-center gap-4 px-4 md:px-8 lg:px-12 py-2 bg-default-background z-10">
-      <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
-        <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
-        <Breadcrumbs.Divider />
-        <Breadcrumbs.Item active={true} className="truncate">
-          Heirloom Tomatoes (Sarah&#39;s Family Farm)
-        </Breadcrumbs.Item>
-      </Breadcrumbs>
-      <IconButton
-        icon={<FeatherShare />}
-        onClick={handleShare}
-        className="flex-shrink-0"
-      />
-    </div>
+  <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
+    <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
+    <Breadcrumbs.Divider />
+    <Breadcrumbs.Item active={true} className="truncate">
+      Heirloom Tomatoes (Sarah&#39;s Family Farm)
+    </Breadcrumbs.Item>
+  </Breadcrumbs>
+  <IconButton
+    icon={<FeatherShare />}
+    onClick={handleShare}
+    className="flex-shrink-0"
+  />
+  <IconButton
+    variant="destructive-secondary"
+    icon={<FeatherHeart />}
+    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
+    className="flex-shrink-0"
+  />
+</div>
 
     {/* Main content with top padding to account for absolute breadcrumbs */}
    <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-0 pb-4">
