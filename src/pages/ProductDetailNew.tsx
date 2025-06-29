@@ -318,7 +318,7 @@ const ProductDetailNew: React.FC = () => {
 
   return (
     <DefaultPageLayout>
-    <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-2 pb-4">
+    <div className="flex h-full w-full flex-col items-center lg:items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-2 pb-4">
       {/* Breadcrumbs and Share Button */}
       <div className="flex w-full items-center gap-4 -mt-2">
         <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
