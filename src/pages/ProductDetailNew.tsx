@@ -25,13 +25,23 @@ import {
   FeatherInstagram,
   FeatherXTwitter,
   FeatherSlack,
-  FeatherHeart,
   FeatherArrowLeft
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { getProductById, type Product } from "../lib/supabase";
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
+
+// Fix for default markers in React Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 // Product type definition
 interface ProductDetails {
@@ -49,6 +59,7 @@ interface ProductDetails {
     name: string;
     image: string;
     location: string;
+    coordinates: [number, number]; // [latitude, longitude]
     rating: number;
     reviewCount: number;
     verified: boolean;
@@ -114,21 +125,22 @@ const sampleProducts: { [key: string]: ProductDetails } = {
     seller: {
       name: "Sarah's Family Farm",
       image: "https://images.unsplash.com/photo-1507914372368-b2b085b925a1",
-      location: "123 Organic Way, Sunnyvale, CA 94086",
+      location: "123 Organic Way, Fayetteville, AR 72701",
+      coordinates: [36.0625, -94.1574],
       rating: 4.9,
       reviewCount: 324,
       verified: true,
       distance: "2.3 miles away",
       availability: "Pickup Today",
       contact: {
-        phone: "(408) 555-1234",
-        email: "sarah@sarahsfamilyfarm.com"
+        phone: "(479) 555-0123",
+        email: "info@sarahsfamilyfarm.com"
       }
     },
     pickup: {
       details: "Drive-through pickup at farm entrance with no reservation required.",
       hours: "Monday - Saturday: 8:00 AM - 6:00 PM\nSunday: 10:00 AM - 4:00 PM",
-      location: "123 Organic Way, Sunnyvale, CA 94086"
+      location: "123 Organic Way, Fayetteville, AR 72701"
     },
     reviews: {
       highlights: ["Incredibly fresh", "Better than store-bought", "Great value", "Will buy again"],
@@ -190,140 +202,47 @@ const sampleProducts: { [key: string]: ProductDetails } = {
       }
     ]
   },
-  "rainbow-swiss-chard": {
-    id: "rainbow-swiss-chard",
-    name: "Rainbow Swiss Chard",
-    description: "Colorful and nutritious leafy greens with vibrant stems. Excellent source of vitamins and minerals. Perfect for sautéing, adding to soups, or using in salads.",
-    price: 3.99,
-    unit: "bunch",
-    isOrganic: true,
-    images: [
-      "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800",
-      "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=800",
-      "https://images.unsplash.com/photo-1557844352-761f2565b576?w=800"
-    ],
-    tags: ["Organic", "Nutrient-Rich", "Colorful"],
-    rating: 4.8,
-    reviewCount: 16,
-    seller: {
-      name: "Green Acres Farm",
-      image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
-      location: "456 Farm Road, Fayetteville, AR 72701",
-      rating: 4.7,
-      reviewCount: 218,
-      verified: true,
-      distance: "3.1 miles away",
-      availability: "Pickup Today",
-      contact: {
-        phone: "(479) 555-0123",
-        email: "info@greenacresfarm.com"
-      }
-    },
-    pickup: {
-      details: "Farm stand pickup available during business hours. No appointment needed.",
-      hours: "Tuesday - Sunday: 9:00 AM - 5:00 PM\nClosed Mondays",
-      location: "456 Farm Road, Fayetteville, AR 72701"
-    },
-    reviews: {
-      highlights: ["Beautiful colors", "Very fresh", "Versatile", "Great flavor"],
-      ratings: {
-        five: 85,
-        four: 12,
-        three: 3,
-        two: 0,
-        one: 0
-      },
-      metrics: {
-        freshness: 4.9,
-        taste: 4.7,
-        value: 4.6
-      },
-      items: [
-        {
-          name: "Michael T.",
-          rating: 5,
-          date: "2 days ago",
-          comment: "The colors are stunning and the taste is amazing. So much better than store-bought chard. I sautéed it with garlic and olive oil - delicious!"
-        },
-        {
-          name: "Jessica R.",
-          rating: 5,
-          date: "1 week ago",
-          comment: "Super fresh and beautiful. The stems are so vibrant and the leaves are tender. Great addition to my weekly veggie rotation."
-        }
-      ]
-    },
-    relatedProducts: [
-      {
-        id: "heirloom-tomatoes",
-        name: "Heirloom Tomatoes",
-        price: 4.99,
-        unit: "lb",
-        image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800"
-      },
-      {
-        id: "fresh-herbs-bundle",
-        name: "Fresh Herbs Bundle",
-        price: 5.99,
-        unit: "bundle",
-        image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800"
-      },
-      {
-        id: "organic-lettuce-mix",
-        name: "Organic Lettuce Mix",
-        price: 4.50,
-        unit: "bag",
-        image: "https://images.unsplash.com/photo-1557844352-761f2565b576?w=800"
-      },
-      {
-        id: "baby-spinach",
-        name: "Baby Spinach",
-        price: 4.49,
-        unit: "bag",
-        image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=800"
-      }
-    ]
-  },
   "farm-fresh-eggs": {
     id: "farm-fresh-eggs",
     name: "Farm Fresh Eggs",
-    description: "Free-range eggs from pasture-raised hens. Rich, golden yolks and superior taste from hens with access to bugs and grass. Our chickens are raised humanely with plenty of outdoor access.",
+    description: "Free-range eggs from pasture-raised hens. Our chickens roam freely on organic pastures, resulting in eggs with rich, golden yolks and superior flavor. Each egg is hand-collected daily and carefully inspected for quality.",
     price: 6.99,
     unit: "dozen",
-    isOrganic: false,
+    isOrganic: true,
     images: [
-      "https://images.unsplash.com/photo-1590005354167-6da97870c757?w=800",
-      "https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=800",
-      "https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?w=800"
+      "https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?w=800",
+      "https://images.unsplash.com/photo-1489171078254-c3365d6e359f?w=800",
+      "https://images.unsplash.com/photo-1510130146128-7a7b6afb6f9d?w=800"
     ],
-    tags: ["Free-Range", "Pasture-Raised", "Golden Yolks"],
+    tags: ["Free Range", "Pasture Raised", "Local"],
     rating: 4.9,
-    reviewCount: 42,
+    reviewCount: 45,
     seller: {
       name: "Happy Hen Farm",
       image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
-      location: "789 Country Lane, Farmington, AR 72730",
+      location: "456 Farm Road, Farmington, AR 72730",
+      coordinates: [36.0420, -94.2474],
       rating: 4.8,
       reviewCount: 156,
       verified: true,
-      distance: "5.2 miles away",
+      distance: "5.1 miles away",
       availability: "Pickup Tomorrow",
       contact: {
-        phone: "(479) 555-0987",
+        phone: "(479) 555-0456",
         email: "eggs@happyhenfarm.com"
       }
     },
     pickup: {
-      details: "Farm gate pickup. Please text when you arrive and we'll bring your eggs out to you.",
-      hours: "Wednesday - Saturday: 10:00 AM - 4:00 PM\nSunday: 12:00 PM - 4:00 PM",
-      location: "789 Country Lane, Farmington, AR 72730"
+      details: "Farm stand pickup available during business hours. No appointment needed.",
+      hours: "Tuesday - Saturday: 9:00 AM - 5:00 PM\nSunday - Monday: Closed",
+      location: "456 Farm Road, Farmington, AR 72730"
     },
     reviews: {
-      highlights: ["Best eggs ever", "Beautiful yolks", "Worth every penny", "Consistent quality"],
+      highlights: ["Golden yolks", "Incredible flavor", "Worth every penny", "Best eggs ever"],
       ratings: {
         five: 95,
-        four: 5,
-        three: 0,
+        four: 3,
+        three: 2,
         two: 0,
         one: 0
       },
@@ -334,16 +253,16 @@ const sampleProducts: { [key: string]: ProductDetails } = {
       },
       items: [
         {
-          name: "Robert J.",
+          name: "Michael R.",
           rating: 5,
-          date: "5 days ago",
-          comment: "These eggs are incredible! The yolks are so orange and rich. Once you try these, you'll never go back to store-bought eggs again."
+          date: "2 days ago",
+          comment: "These eggs are incredible! The yolks are so orange and rich. You can really tell the difference from store-bought eggs. Will definitely be buying again."
         },
         {
-          name: "Amanda P.",
+          name: "Jennifer T.",
           rating: 5,
-          date: "2 weeks ago",
-          comment: "I can't believe the difference in taste. My family now refuses to eat any other eggs. Worth the drive to the farm to pick them up!"
+          date: "1 week ago",
+          comment: "I've been buying these eggs for months now and they're consistently excellent. The chickens are clearly well-cared for, and it shows in the quality of the eggs."
         }
       ]
     },
@@ -356,18 +275,18 @@ const sampleProducts: { [key: string]: ProductDetails } = {
         image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800"
       },
       {
-        id: "artisan-cheese-selection",
-        name: "Artisan Cheese Selection",
-        price: 18.99,
-        unit: "pack",
-        image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800"
+        id: "grass-fed-butter",
+        name: "Grass-Fed Butter",
+        price: 7.99,
+        unit: "lb",
+        image: "https://images.unsplash.com/photo-1589985270958-bf087b2d8ed7?w=800"
       },
       {
-        id: "grass-fed-ground-beef",
-        name: "Grass-Fed Ground Beef",
-        price: 9.99,
-        unit: "lb",
-        image: "https://images.unsplash.com/photo-1588347818481-c7c1b6b3b5b3?w=800"
+        id: "artisan-cheese",
+        name: "Artisan Cheese Selection",
+        price: 12.99,
+        unit: "pack",
+        image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800"
       },
       {
         id: "free-range-chicken",
@@ -378,45 +297,46 @@ const sampleProducts: { [key: string]: ProductDetails } = {
       }
     ]
   },
-  "artisan-sourdough-bread": {
-    id: "artisan-sourdough-bread",
+  "artisan-sourdough": {
+    id: "artisan-sourdough",
     name: "Artisan Sourdough Bread",
-    description: "Traditional sourdough bread made with wild yeast starter. Crispy crust, soft interior with complex flavors. Our bread is made with locally milled flour and a 24-hour fermentation process for maximum flavor and digestibility.",
+    description: "Hand-crafted sourdough bread made with our 5-year-old starter and locally milled flour. Each loaf is naturally leavened for 24 hours, creating complex flavors and a perfect crust. Baked fresh daily in our wood-fired oven.",
     price: 8.99,
     unit: "loaf",
     isOrganic: false,
     images: [
-      "https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=800",
-      "https://images.unsplash.com/photo-1585478259715-4d3a5f4a8771?w=800",
-      "https://images.unsplash.com/photo-1600398138360-766a0e0e7a3c?w=800"
+      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800",
+      "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=800",
+      "https://images.unsplash.com/photo-1549931319-a545dcf3bc7c?w=800"
     ],
-    tags: ["Artisan", "Wild Yeast", "Traditional"],
+    tags: ["Artisan", "Wild Yeast", "Wood-Fired"],
     rating: 4.8,
-    reviewCount: 31,
+    reviewCount: 67,
     seller: {
       name: "Sweet Life Bakery",
       image: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=800",
-      location: "321 Main Street, Springdale, AR 72762",
+      location: "789 Main Street, Springdale, AR 72762",
+      coordinates: [36.1867, -94.1288],
       rating: 4.9,
-      reviewCount: 287,
+      reviewCount: 210,
       verified: true,
-      distance: "4.7 miles away",
+      distance: "8.2 miles away",
       availability: "Pickup Today",
       contact: {
-        phone: "(479) 555-0456",
-        email: "orders@sweetlifebakery.com"
+        phone: "(479) 555-0789",
+        email: "hello@sweetlifebakery.com"
       }
     },
     pickup: {
-      details: "Bakery pickup. Fresh loaves available daily until sold out. Pre-orders recommended for guaranteed availability.",
-      hours: "Tuesday - Saturday: 7:00 AM - 2:00 PM\nClosed Sunday & Monday",
-      location: "321 Main Street, Springdale, AR 72762"
+      details: "Bakery pickup available during business hours. Pre-orders recommended for large quantities.",
+      hours: "Wednesday - Sunday: 7:00 AM - 2:00 PM\nMonday - Tuesday: Closed",
+      location: "789 Main Street, Springdale, AR 72762"
     },
     reviews: {
-      highlights: ["Perfect crust", "Amazing flavor", "Great texture", "Authentic sourdough"],
+      highlights: ["Perfect crust", "Complex flavor", "Authentic sourdough", "Worth the drive"],
       ratings: {
-        five: 87,
-        four: 10,
+        five: 85,
+        four: 12,
         three: 3,
         two: 0,
         one: 0
@@ -428,50 +348,168 @@ const sampleProducts: { [key: string]: ProductDetails } = {
       },
       items: [
         {
-          name: "Thomas B.",
+          name: "Robert J.",
           rating: 5,
-          date: "1 day ago",
-          comment: "This is what real bread should taste like! The crust is perfect and the inside is soft with just the right amount of chew. I'm a sourdough enthusiast and this is top-notch."
+          date: "5 days ago",
+          comment: "This is what real sourdough should taste like! The crust is perfect - crispy but not too hard, and the inside is soft with just the right amount of chew. I drive 30 minutes just to get this bread."
         },
         {
-          name: "Olivia M.",
+          name: "Amanda P.",
           rating: 5,
-          date: "4 days ago",
-          comment: "Worth every penny. The flavor is complex and delicious. It keeps well for several days too, though it rarely lasts that long in our house!"
+          date: "2 weeks ago",
+          comment: "As someone who used to live in San Francisco, I can say this sourdough is the real deal. The flavor is complex and tangy, and it keeps well for several days (if it lasts that long!)."
         }
       ]
     },
     relatedProducts: [
       {
-        id: "whole-wheat-dinner-rolls",
+        id: "whole-wheat-rolls",
         name: "Whole Wheat Dinner Rolls",
         price: 6.99,
         unit: "dozen",
+        image: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=800"
+      },
+      {
+        id: "artisan-baguette",
+        name: "Artisan Baguette",
+        price: 4.99,
+        unit: "each",
+        image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7c?w=800"
+      },
+      {
+        id: "cinnamon-raisin-bread",
+        name: "Cinnamon Raisin Bread",
+        price: 7.99,
+        unit: "loaf",
         image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800"
       },
       {
-        id: "artisan-cheese-selection",
-        name: "Artisan Cheese Selection",
-        price: 18.99,
-        unit: "pack",
-        image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800"
-      },
-      {
-        id: "raw-wildflower-honey",
-        name: "Raw Wildflower Honey",
-        price: 15.99,
-        unit: "jar",
-        image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800"
-      },
-      {
-        id: "fresh-whole-milk",
-        name: "Fresh Whole Milk",
-        price: 5.99,
-        unit: "half-gallon",
-        image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800"
+        id: "croissants",
+        name: "Butter Croissants",
+        price: 12.99,
+        unit: "half-dozen",
+        image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800"
       }
     ]
   }
+};
+
+// Helper function to convert Supabase Product to ProductDetails
+const convertSupabaseProduct = (product: Product): ProductDetails | null => {
+  if (!product || !product.seller) return null;
+  
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description || '',
+    price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+    unit: product.unit,
+    isOrganic: product.is_organic || false,
+    images: [product.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'],
+    tags: product.tags || [],
+    rating: product.average_rating || 4.5,
+    reviewCount: product.reviews?.length || 0,
+    seller: {
+      name: product.seller.name,
+      image: 'https://images.unsplash.com/photo-1507914372368-b2b085b925a1?w=800',
+      location: product.seller.location,
+      coordinates: [
+        product.seller.latitude || 36.0625, 
+        product.seller.longitude || -94.1574
+      ] as [number, number],
+      rating: 4.8,
+      reviewCount: 120,
+      verified: product.seller.verified || false,
+      distance: '3.2 miles away',
+      availability: 'Pickup Today',
+      contact: {
+        phone: product.seller.contact_phone || '(479) 555-0123',
+        email: product.seller.contact_email || 'contact@localfarm.com'
+      }
+    },
+    pickup: {
+      details: 'Pickup available during business hours.',
+      hours: 'Monday - Saturday: 9:00 AM - 5:00 PM\nSunday: Closed',
+      location: product.seller.location
+    },
+    reviews: {
+      highlights: ['Fresh', 'Great quality', 'Recommended'],
+      ratings: {
+        five: 80,
+        four: 15,
+        three: 5,
+        two: 0,
+        one: 0
+      },
+      metrics: {
+        freshness: 4.8,
+        taste: 4.7,
+        value: 4.6
+      },
+      items: product.reviews?.map((review: any) => ({
+        name: review.customer_name,
+        rating: review.rating,
+        date: new Date(review.created_at).toLocaleDateString(),
+        comment: review.comment || ''
+      })) || []
+    },
+    relatedProducts: []
+  };
+};
+
+// Helper function to convert FoodItem to ProductDetails
+const convertFoodItem = (item: FoodItem): ProductDetails | null => {
+  if (!item) return null;
+  
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    price: parseFloat(item.price.replace('$', '')),
+    unit: item.unit,
+    isOrganic: item.isOrganic,
+    images: [item.image],
+    tags: item.tags,
+    rating: 4.5,
+    reviewCount: 10,
+    seller: {
+      name: item.seller,
+      image: 'https://images.unsplash.com/photo-1507914372368-b2b085b925a1?w=800',
+      location: item.location,
+      coordinates: [36.0625, -94.1574], // Default coordinates
+      rating: 4.7,
+      reviewCount: 50,
+      verified: true,
+      distance: '4.5 miles away',
+      availability: 'Pickup Available',
+      contact: {
+        phone: '(479) 555-0123',
+        email: 'contact@localfarm.com'
+      }
+    },
+    pickup: {
+      details: 'Contact seller for pickup details.',
+      hours: 'Monday - Friday: 9:00 AM - 5:00 PM',
+      location: item.location
+    },
+    reviews: {
+      highlights: ['Fresh', 'Local', 'Quality'],
+      ratings: {
+        five: 70,
+        four: 20,
+        three: 10,
+        two: 0,
+        one: 0
+      },
+      metrics: {
+        freshness: 4.5,
+        taste: 4.6,
+        value: 4.4
+      },
+      items: []
+    },
+    relatedProducts: []
+  };
 };
 
 const ProductDetailNew: React.FC = () => {
@@ -491,163 +529,67 @@ const ProductDetailNew: React.FC = () => {
   // Load product data
   useEffect(() => {
     const loadProduct = async () => {
+      if (!id) {
+        setError('Product ID not provided');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
-      
+
       try {
-        if (!id) {
-          throw new Error("Product ID is missing");
-        }
-        
-        // First try to get from sample data
+        // First check if we have sample data for this product
         if (sampleProducts[id]) {
           setProduct(sampleProducts[id]);
-        } else {
-          // Try to get from Supabase
-          const { data: supabaseProduct, error } = await getProductById(id);
+          setLoading(false);
+          return;
+        }
+
+        // Try to get from Supabase
+        try {
+          const { data: supabaseProduct, error: supabaseError } = await getProductById(id);
           
-          if (supabaseProduct && !error) {
-            // Convert Supabase product to our ProductDetails format
+          if (supabaseProduct && !supabaseError) {
             const convertedProduct = convertSupabaseProduct(supabaseProduct);
-            setProduct(convertedProduct);
-          } else {
-            // Try to get from food search service
-            const foodItem = await foodSearchService.getFoodItemById(id);
-            if (foodItem) {
-              const convertedProduct = convertFoodItemToProduct(foodItem);
+            if (convertedProduct) {
               setProduct(convertedProduct);
-            } else {
-              throw new Error("Product not found");
+              setLoading(false);
+              return;
             }
           }
+        } catch (supabaseErr) {
+          console.warn('Error fetching from Supabase:', supabaseErr);
+          // Continue to fallback
         }
+
+        // Try food search service as fallback
+        try {
+          const foodItem = await foodSearchService.getFoodItemById(id);
+          if (foodItem) {
+            const convertedItem = convertFoodItem(foodItem);
+            if (convertedItem) {
+              setProduct(convertedItem);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (foodSearchErr) {
+          console.warn('Error fetching from food search service:', foodSearchErr);
+        }
+
+        // If we get here, we couldn't find the product
+        setError('Product not found');
       } catch (err) {
-        console.error("Error loading product:", err);
-        setError(err instanceof Error ? err.message : "Failed to load product");
+        console.error('Error loading product:', err);
+        setError('Failed to load product details');
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadProduct();
   }, [id]);
-
-  // Convert Supabase product to our ProductDetails format
-  const convertSupabaseProduct = (supabaseProduct: Product): ProductDetails => {
-    return {
-      id: supabaseProduct.id,
-      name: supabaseProduct.name,
-      description: supabaseProduct.description || "",
-      price: supabaseProduct.price,
-      unit: supabaseProduct.unit,
-      isOrganic: supabaseProduct.is_organic || false,
-      images: [
-        supabaseProduct.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
-        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
-        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800"
-      ],
-      tags: supabaseProduct.tags || [],
-      rating: supabaseProduct.average_rating || 4.5,
-      reviewCount: supabaseProduct.reviews?.length || 0,
-      seller: {
-        name: supabaseProduct.seller?.name || "Local Farm",
-        image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
-        location: supabaseProduct.seller?.location || "Local Area",
-        rating: 4.8,
-        reviewCount: 100,
-        verified: supabaseProduct.seller?.verified || false,
-        distance: "Nearby",
-        availability: "Pickup Available",
-        contact: {
-          phone: supabaseProduct.seller?.contact_phone || "(555) 555-5555",
-          email: supabaseProduct.seller?.contact_email || "contact@localfarm.com"
-        }
-      },
-      pickup: {
-        details: "Contact seller for pickup details",
-        hours: "Contact seller for hours",
-        location: supabaseProduct.seller?.location || "Local Area"
-      },
-      reviews: {
-        highlights: ["Fresh", "Local", "Quality"],
-        ratings: {
-          five: 80,
-          four: 15,
-          three: 5,
-          two: 0,
-          one: 0
-        },
-        metrics: {
-          freshness: 4.8,
-          taste: 4.7,
-          value: 4.6
-        },
-        items: supabaseProduct.reviews?.map(review => ({
-          name: review.customer_name,
-          rating: review.rating,
-          date: new Date(review.created_at).toLocaleDateString(),
-          comment: review.comment || ""
-        })) || []
-      },
-      relatedProducts: []
-    };
-  };
-
-  // Convert FoodItem to our ProductDetails format
-  const convertFoodItemToProduct = (foodItem: FoodItem): ProductDetails => {
-    return {
-      id: foodItem.id,
-      name: foodItem.name,
-      description: foodItem.description,
-      price: parseFloat(foodItem.price.replace('$', '')),
-      unit: foodItem.unit,
-      isOrganic: foodItem.isOrganic,
-      images: [
-        foodItem.image,
-        foodItem.image,
-        foodItem.image
-      ],
-      tags: foodItem.tags,
-      rating: 4.5, // Default rating
-      reviewCount: 10, // Default review count
-      seller: {
-        name: foodItem.seller,
-        image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
-        location: foodItem.location,
-        rating: 4.8,
-        reviewCount: 100,
-        verified: true,
-        distance: "Nearby",
-        availability: "Pickup Available",
-        contact: {
-          phone: "(555) 555-5555",
-          email: "contact@localfarm.com"
-        }
-      },
-      pickup: {
-        details: "Contact seller for pickup details",
-        hours: "Contact seller for hours",
-        location: foodItem.location
-      },
-      reviews: {
-        highlights: ["Fresh", "Local", "Quality"],
-        ratings: {
-          five: 80,
-          four: 15,
-          three: 5,
-          two: 0,
-          one: 0
-        },
-        metrics: {
-          freshness: 4.8,
-          taste: 4.7,
-          value: 4.6
-        },
-        items: []
-      },
-      relatedProducts: []
-    };
-  };
 
   // Handle quantity changes
   const increaseQuantity = () => {
@@ -717,13 +659,8 @@ const ProductDetailNew: React.FC = () => {
   };
 
   // Handle back button
-  const handleBackClick = () => {
+  const handleBack = () => {
     navigate(-1);
-  };
-
-  // Handle related product click
-  const handleRelatedProductClick = (productId: string) => {
-    navigate(`/product/${productId}`);
   };
 
   // Render star rating
@@ -755,9 +692,7 @@ const ProductDetailNew: React.FC = () => {
         <div className="flex h-full w-full items-center justify-center py-20">
           <div className="flex flex-col items-center gap-4 text-center">
             <span className="text-heading-2 font-heading-2 text-error-700">Product not found</span>
-            <span className="text-body font-body text-subtext-color">
-              {error || "The product you're looking for doesn't exist or has been removed."}
-            </span>
+            <span className="text-body font-body text-subtext-color">{error || "The product you're looking for doesn't exist or has been removed."}</span>
             <Button onClick={() => navigate('/shop')}>
               Browse Products
             </Button>
@@ -769,31 +704,32 @@ const ProductDetailNew: React.FC = () => {
 
   return (
     <DefaultPageLayout>
-      <div className="flex h-full w-full flex-col items-center lg:items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-2 pb-4">
-        {/* Breadcrumbs and Share Button */}
-        <div className="flex w-full items-center gap-4 -mt-2">
-          <Button
-            variant="neutral-tertiary"
-            icon={<FeatherArrowLeft />}
-            onClick={handleBackClick}
-            className="mr-2"
-          >
-            Back
-          </Button>
-          <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
-            <Breadcrumbs.Item onClick={() => navigate('/shop')}>Product Results</Breadcrumbs.Item>
-            <Breadcrumbs.Divider />
-            <Breadcrumbs.Item active={true} className="truncate">
-              {product.name} ({product.seller.name})
-            </Breadcrumbs.Item>
-          </Breadcrumbs>
-          <IconButton
-            icon={<FeatherShare />}
-            onClick={handleShare}
-            className="flex-shrink-0"
-          />
-        </div>
+      {/* Breadcrumbs with absolute positioning */}
+      <div className="absolute top-20 left-0 right-0 flex w-full items-center gap-4 px-4 md:px-8 lg:px-12 py-2 bg-default-background z-10">
+        <Button
+          variant="neutral-tertiary"
+          icon={<FeatherArrowLeft />}
+          onClick={handleBack}
+          className="flex-shrink-0"
+        >
+          Back
+        </Button>
+        <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
+          <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
+          <Breadcrumbs.Divider />
+          <Breadcrumbs.Item active={true} className="truncate">
+            {product.name} ({product.seller.name})
+          </Breadcrumbs.Item>
+        </Breadcrumbs>
+        <IconButton
+          icon={<FeatherShare />}
+          onClick={handleShare}
+          className="flex-shrink-0"
+        />
+      </div>
 
+      {/* Main content with top padding to account for absolute breadcrumbs */}
+      <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-0 pb-4">
         {/* Main Product Content */}
         <div className="flex w-full flex-col items-start justify-center gap-4">
           <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
@@ -860,69 +796,61 @@ const ProductDetailNew: React.FC = () => {
               </div>
 
               {/* Price and Quantity */}
-<div className="flex w-full max-w-md mx-auto lg:max-w-none lg:mx-0 flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm">
-  <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4">
-    <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start gap-1">
-      <span className="text-body-bold font-body-bold text-brand-700">
-        Farm Fresh Price
-      </span>
-      <span className="text-heading-2 font-heading-2 text-default-font">
-        ${product.price.toFixed(2)}/{product.unit}
-      </span>
-    </div>
-    <div className="flex flex-col items-start sm:items-center gap-2">
-      <span className="text-body-bold font-body-bold text-default-font">
-        Quantity
-      </span>
-      <div className="flex items-center gap-2">
-        <IconButton
-          disabled={quantity <= 1}
-          variant="neutral-primary"
-          size="small"
-          icon={<FeatherMinus />}
-          onClick={decreaseQuantity}
-        />
-        <span className="text-body-bold font-body-bold text-default-font w-6 text-center">
-          {quantity}
-        </span>
-        <IconButton
-          variant="neutral-primary"
-          size="small"
-          icon={<FeatherPlus />}
-          onClick={increaseQuantity}
-        />
-      </div>
-    </div>
-  </div>
-  <div className="flex w-full flex-col items-center gap-2">
-    <div className="flex w-full items-center gap-2">
-      <Button
-        className="h-10 grow shrink-0 basis-0"
-        size="large"
-        onClick={handleAddToCart}
-      >
-        Add to cart
-      </Button>
-      <IconButton
-        variant="destructive-secondary"
-        icon={<FeatherHeart />}
-        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-        className="flex-shrink-0"
-      />
-    </div>
-    <Button
-      className="h-10 w-full flex-none"
-      variant="brand-secondary"
-      size="large"
-      onClick={handleBuyNow}
-    >
-      Buy now
-    </Button>
-  </div>
-</div>
+              <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm">
+                <div className="flex w-full flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
+                    <span className="text-body-bold font-body-bold text-brand-700">
+                      Farm Fresh Price
+                    </span>
+                    <span className="text-heading-2 font-heading-2 text-default-font">
+                      ${product.price.toFixed(2)}/{product.unit}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-start sm:items-center gap-2">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      Quantity
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <IconButton
+                        disabled={quantity <= 1}
+                        variant="neutral-primary"
+                        size="small"
+                        icon={<FeatherMinus />}
+                        onClick={decreaseQuantity}
+                      />
+                      <span className="text-body-bold font-body-bold text-default-font w-6 text-center">
+                        {quantity}
+                      </span>
+                      <IconButton
+                        variant="neutral-primary"
+                        size="small"
+                        icon={<FeatherPlus />}
+                        onClick={increaseQuantity}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex w-full flex-col items-center gap-2">
+                  <Button
+                    className="h-10 w-full flex-none"
+                    size="large"
+                    onClick={handleAddToCart}
+                  >
+                    Add to cart
+                  </Button>
+                  <Button
+                    className="h-10 w-full flex-none"
+                    variant="brand-secondary"
+                    size="large"
+                    onClick={handleBuyNow}
+                  >
+                    Buy now
+                  </Button>
+                </div>
+              </div>
 
               {/* Seller Information */}
-              <div className="flex w-full max-w-md mx-auto md:max-w-lg lg:max-w-xl xl:max-w-none xl:mx-0 flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
+              <div className="flex w-full flex-col sm:flex-row items-start sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
                 <Avatar
                   size="x-large"
                   image={product.seller.image}
@@ -930,7 +858,7 @@ const ProductDetailNew: React.FC = () => {
                 >
                   {product.seller.name.charAt(0)}
                 </Avatar>
-                <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start">
+                <div className="flex grow shrink-0 basis-0 flex-col items-start">
                   <div className="flex items-center gap-2">
                     <span className="text-body-bold font-body-bold text-default-font">
                       {product.seller.name}
@@ -976,7 +904,7 @@ const ProductDetailNew: React.FC = () => {
           </div>
         </div>
 
-        {/* Pickup Information */}
+        {/* Pickup Information with Map */}
         <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm mt-4">
           <Accordion
             trigger={
@@ -990,79 +918,111 @@ const ProductDetailNew: React.FC = () => {
             defaultOpen={true}
           >
             <div className="flex w-full grow shrink-0 basis-0 flex-col items-start justify-center gap-4 border-t border-solid border-neutral-200 px-4 sm:px-6 py-4 sm:py-6">
-              <div className="flex items-start sm:items-center gap-4">
-                <FeatherTruck className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
-                <div className="flex flex-col items-start">
-                  <span className="text-body-bold font-body-bold text-default-font">
-                    Pickup Details
-                  </span>
-                  <span className="text-body font-body text-default-font">
-                    {product.pickup.details}
-                  </span>
-                </div>
-              </div>
-              <div className="flex w-full flex-col items-start gap-4">
-                <div className="flex items-start sm:items-center gap-4">
-                  <FeatherClock className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-body-bold font-body-bold text-default-font">
-                      Hours of Operation
-                    </span>
-                    <span className="text-body font-body text-default-font whitespace-pre-line">
-                      {product.pickup.hours}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-start sm:items-center gap-4">
-                  <FeatherMapPin className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-body-bold font-body-bold text-default-font">
-                      Farm Location
-                    </span>
-                    <span className="text-body font-body text-default-font">
-                      {product.pickup.location}
-                    </span>
-                    <Button
-                      variant="neutral-primary"
-                      size="small"
-                      icon={<FeatherMapPin />}
-                      onClick={handleGetDirections}
-                      className="mt-1"
-                    >
-                      Directions
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-start sm:items-center gap-4">
-                  <FeatherPhone className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="text-body-bold font-body-bold text-default-font">
-                      Contact
-                    </span>
-                    <span className="text-body font-body text-default-font">
-                      {product.seller.contact.phone} | {product.seller.contact.email}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <IconButton
-                        variant="neutral-primary"
-                        size="small"
-                        icon={<FeatherMessageCircle />}
-                        onClick={handleContactSeller}
-                      />
-                      <IconButton
-                        variant="neutral-primary"
-                        size="small"
-                        icon={<FeatherMail />}
-                        onClick={() => window.location.href = `mailto:${product.seller.contact.email}`}
-                      />
-                      <IconButton
-                        variant="neutral-primary"
-                        size="small"
-                        icon={<FeatherPhone />}
-                        onClick={() => window.location.href = `tel:${product.seller.contact.phone.replace(/[^0-9]/g, '')}`}
-                      />
+              <div className="flex w-full flex-col md:flex-row items-start gap-6">
+                {/* Pickup Details */}
+                <div className="flex flex-col items-start gap-6 w-full md:w-1/2">
+                  <div className="flex items-start sm:items-center gap-4">
+                    <FeatherTruck className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        Pickup Details
+                      </span>
+                      <span className="text-body font-body text-default-font">
+                        {product.pickup.details}
+                      </span>
                     </div>
                   </div>
+                  
+                  <div className="flex w-full flex-col items-start gap-4">
+                    <div className="flex items-start sm:items-center gap-4">
+                      <FeatherClock className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Hours of Operation
+                        </span>
+                        <span className="text-body font-body text-default-font whitespace-pre-line">
+                          {product.pickup.hours}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start sm:items-center gap-4">
+                      <FeatherMapPin className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
+                      <div className="flex flex-col items-start">
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Farm Location
+                        </span>
+                        <span className="text-body font-body text-default-font">
+                          {product.pickup.location}
+                        </span>
+                        <Button
+                          variant="neutral-primary"
+                          size="small"
+                          icon={<FeatherMapPin />}
+                          onClick={handleGetDirections}
+                          className="mt-1"
+                        >
+                          Directions
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start sm:items-center gap-4">
+                      <FeatherPhone className="text-heading-2 font-heading-2 text-default-font flex-shrink-0" />
+                      <div className="flex flex-col items-start gap-1">
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          Contact
+                        </span>
+                        <span className="text-body font-body text-default-font">
+                          {product.seller.contact.phone} | {product.seller.contact.email}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <IconButton
+                            variant="neutral-primary"
+                            size="small"
+                            icon={<FeatherMessageCircle />}
+                            onClick={handleContactSeller}
+                          />
+                          <IconButton
+                            variant="neutral-primary"
+                            size="small"
+                            icon={<FeatherMail />}
+                            onClick={() => window.location.href = `mailto:${product.seller.contact.email}`}
+                          />
+                          <IconButton
+                            variant="neutral-primary"
+                            size="small"
+                            icon={<FeatherPhone />}
+                            onClick={() => window.location.href = `tel:${product.seller.contact.phone.replace(/[^0-9]/g, '')}`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Map */}
+                <div className="w-full md:w-1/2 h-64 md:h-auto rounded-lg overflow-hidden border border-neutral-200">
+                  <MapContainer 
+                    center={product.seller.coordinates} 
+                    zoom={13} 
+                    style={{ height: '100%', minHeight: '300px', width: '100%' }}
+                    scrollWheelZoom={false}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={product.seller.coordinates}>
+                      <Popup>
+                        <div className="p-2">
+                          <h3 className="font-semibold">{product.seller.name}</h3>
+                          <p className="text-sm">{product.pickup.location}</p>
+                          <p className="text-xs mt-1">{product.seller.availability}</p>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
                 </div>
               </div>
             </div>
@@ -1234,7 +1194,7 @@ const ProductDetailNew: React.FC = () => {
               <div 
                 key={relatedProduct.id} 
                 className="flex flex-col items-start gap-2 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => handleRelatedProductClick(relatedProduct.id)}
+                onClick={() => navigate(`/product/${relatedProduct.id}`)}
               >
                 <img
                   className="h-48 w-full flex-none rounded-lg object-cover"
