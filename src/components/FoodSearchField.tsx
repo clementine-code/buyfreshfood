@@ -31,49 +31,15 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
-  const [inputRect, setInputRect] = useState<DOMRect | null>(null);
 
   const debounceRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const preventBlurRef = useRef(false);
   const searchTriggeredRef = useRef(false);
-  const isOnShopPageRef = useRef(false);
 
   const isMobile = screenSize === 'mobile';
   const isTablet = screenSize === 'tablet';
-
-  // Track if we're on shop page
-  useEffect(() => {
-    isOnShopPageRef.current = location.pathname === '/shop';
-  }, [location.pathname]);
-
-  // Setup portal container with better handling
-  useEffect(() => {
-    let container = document.getElementById('search-suggestions-portal');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'search-suggestions-portal';
-      container.className = 'search-suggestions-portal';
-      container.style.position = 'fixed'; // Changed from absolute to fixed
-      container.style.top = '0';
-      container.style.left = '0';
-      container.style.zIndex = '99999';
-      container.style.pointerEvents = 'none';
-      container.style.width = '100vw';
-      container.style.height = '100vh';
-      document.body.appendChild(container);
-    }
-    setPortalContainer(container);
-
-    return () => {
-      const portalEl = document.getElementById('search-suggestions-portal');
-      if (portalEl && portalEl.children.length === 0) {
-        document.body.removeChild(portalEl);
-      }
-    };
-  }, []);
 
   // Screen size detection
   useEffect(() => {
@@ -93,43 +59,9 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
-  // Update input position when suggestions are shown
-  useEffect(() => {
-    if (showSuggestions && inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      setInputRect(rect);
-    }
-  }, [showSuggestions]);
-
-  // Update position on scroll/resize with better handling
-  useEffect(() => {
-    const updatePosition = () => {
-      if (showSuggestions && inputRef.current) {
-        const rect = inputRef.current.getBoundingClientRect();
-        setInputRect(rect);
-      }
-    };
-
-    if (showSuggestions) {
-      const handleScroll = () => updatePosition();
-      const handleResize = () => updatePosition();
-      
-      // Listen to both window and document scroll events
-      window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-      document.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-      window.addEventListener('resize', handleResize, { passive: true });
-      
-      return () => {
-        window.removeEventListener('scroll', handleScroll, { capture: true });
-        document.removeEventListener('scroll', handleScroll, { capture: true });
-        window.removeEventListener('resize', handleResize);
-      };
-    }
-  }, [showSuggestions]);
-
   // Search function with improved logging and error handling
   const searchFood = useCallback(async (searchQuery: string) => {
-    console.log('🔍 searchFood called with:', searchQuery, 'on shop page:', isOnShopPageRef.current);
+    console.log('🔍 searchFood called with:', searchQuery);
     searchTriggeredRef.current = true;
     
     if (searchQuery.length === 0) {
@@ -167,63 +99,37 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     const trimmedQuery = searchQuery.trim();
     if (!trimmedQuery) return;
 
-    console.log('🔍 NAVIGATING TO SHOP:', { query: trimmedQuery, suggestion, currentPage: location.pathname });
+    console.log('🔍 NAVIGATING TO SHOP:', { query: trimmedQuery, suggestion });
 
     if (suggestion) {
       switch (suggestion.type) {
         case 'category':
           const categoryName = suggestion.title.replace(/^All\s+/, '');
           console.log('📂 Category navigation:', categoryName);
-          if (isOnShopPageRef.current) {
-            // Update URL without navigation to avoid page reload
-            window.history.pushState({}, '', `/shop?category=${encodeURIComponent(categoryName)}`);
-            window.dispatchEvent(new PopStateEvent('popstate'));
-          } else {
-            navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
-          }
+          navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
           break;
         case 'product':
           console.log('🛍️ Product navigation:', trimmedQuery);
-          if (isOnShopPageRef.current) {
-            window.history.pushState({}, '', `/shop?search=${encodeURIComponent(trimmedQuery)}`);
-            window.dispatchEvent(new PopStateEvent('popstate'));
-          } else {
-            navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
-          }
+          navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
           break;
         case 'seller':
           console.log('🏪 Seller navigation:', suggestion.title);
-          if (isOnShopPageRef.current) {
-            window.history.pushState({}, '', `/shop?seller=${encodeURIComponent(suggestion.title)}`);
-            window.dispatchEvent(new PopStateEvent('popstate'));
-          } else {
-            navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
-          }
+          navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
           break;
         default:
           console.log('🔍 Default navigation:', trimmedQuery);
-          if (isOnShopPageRef.current) {
-            window.history.pushState({}, '', `/shop?search=${encodeURIComponent(trimmedQuery)}`);
-            window.dispatchEvent(new PopStateEvent('popstate'));
-          } else {
-            navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
-          }
+          navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
       }
     } else {
       console.log('🔍 Search navigation:', trimmedQuery);
-      if (isOnShopPageRef.current) {
-        window.history.pushState({}, '', `/shop?search=${encodeURIComponent(trimmedQuery)}`);
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      } else {
-        navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
-      }
+      navigate(`/shop?search=${encodeURIComponent(trimmedQuery)}`);
     }
 
     // Close suggestions and clear input focus
     setShowSuggestions(false);
     setSelectedIndex(-1);
     inputRef.current?.blur();
-  }, [navigate, location.pathname]);
+  }, [navigate]);
 
   // Handle search button click
   const handleSearchClick = useCallback(() => {
@@ -233,7 +139,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [query, onSearchSubmit, navigateToShop]);
 
-  // Handle suggestion clicks - MOVED BEFORE handleKeyDown
+  // Handle suggestion clicks
   const handleSuggestionClick = useCallback((suggestion: FoodSearchSuggestion) => {
     console.log('🔍 Suggestion clicked:', suggestion);
     
@@ -249,7 +155,25 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     } else {
       // Navigate directly - don't rely on parent navigation
       console.log('🚀 Navigating based on suggestion type:', suggestion.type);
-      navigateToShop(suggestion.title, suggestion);
+      
+      switch (suggestion.type) {
+        case 'category':
+          const categoryName = suggestion.title.replace(/^All\s+/, '');
+          console.log('📂 Navigating to category:', categoryName);
+          navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+          break;
+        case 'product':
+          console.log('🛍️ Navigating to product search:', suggestion.title);
+          navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+          break;
+        case 'seller':
+          console.log('🏪 Navigating to seller:', suggestion.title);
+          navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
+          break;
+        default:
+          console.log('🔍 Default search navigation:', suggestion.title);
+          navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+      }
     }
     
     // Hide suggestions
@@ -260,9 +184,9 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     setTimeout(() => {
       preventBlurRef.current = false;
     }, 100);
-  }, [onItemSelect, navigateToShop]);
+  }, [onItemSelect, navigate]);
 
-  // Handle input changes with debouncing - FIXED: Shorter debounce
+  // Handle input changes with debouncing
   const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     console.log('📝 Input changed to:', value);
@@ -277,14 +201,14 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
       debounceRef.current = setTimeout(() => {
         console.log('🚀 Debounce timer fired, searching for:', value);
         searchFood(value);
-      }, 200); // Reduced from 300ms to 200ms for faster response
+      }, 200);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
     }
   }, [searchFood]);
 
-  // Handle keyboard navigation - NOW AFTER handleSuggestionClick
+  // Handle keyboard navigation
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showSuggestions || suggestions.length === 0) {
       if (event.key === 'Enter') {
@@ -326,7 +250,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [showSuggestions, suggestions, selectedIndex, handleSearchClick, handleSuggestionClick]);
 
-  // Handle input focus - FIXED: Always trigger search if needed
+  // Handle input focus
   const handleInputFocus = useCallback(() => {
     console.log('🎯 Input focused, query:', query, 'suggestions:', suggestions.length);
     
@@ -388,17 +312,16 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     };
   }, []);
 
-  // DON'T clear search text when navigating to shop page - this was causing issues
+  // Clear search text when navigating away from shop page
   useEffect(() => {
-    // Only clear if we're leaving the shop page and going somewhere else
-    if (location.pathname !== '/shop' && query && isOnShopPageRef.current) {
+    if (location.pathname !== '/shop') {
       console.log('📍 Left shop page, clearing search text');
       setQuery("");
       setSuggestions([]);
       setShowSuggestions(false);
       setSelectedIndex(-1);
     }
-  }, [location.pathname, query]);
+  }, [location.pathname]);
 
   // Get suggestion icon based on type
   const getSuggestionIcon = useCallback((suggestion: FoodSearchSuggestion) => {
@@ -416,59 +339,26 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
-  // Render suggestions portal - FIXED Z-INDEX AND POSITIONING
+  // Render suggestions with simple absolute positioning (no portal)
   const suggestionList = useMemo(() => {
     console.log('🎨 Rendering suggestions:', { 
       showSuggestions, 
       suggestionsLength: suggestions.length, 
-      queryLength: query.length, 
-      portalContainer: !!portalContainer, 
-      inputRect: !!inputRect,
-      isOnShopPage: isOnShopPageRef.current
+      queryLength: query.length
     });
 
-    if (!showSuggestions || suggestions.length === 0 || query.length < 2 || !portalContainer || !inputRect) {
+    if (!showSuggestions || suggestions.length === 0 || query.length < 2) {
       return null;
     }
 
     const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
-    
-    // FIXED: Better positioning calculation for shop page
-    let top = inputRect.bottom + 4;
-    let left = inputRect.left;
-    let width = inputRect.width;
-    
-    // Ensure we're positioned correctly relative to viewport
-    if (isMobile) {
-      const viewportWidth = window.innerWidth;
-      const suggestionWidth = Math.min(viewportWidth - 32, 400);
-      
-      const idealLeft = inputRect.left;
-      const rightEdge = idealLeft + suggestionWidth;
-      
-      if (rightEdge > viewportWidth - 16) {
-        left = viewportWidth - suggestionWidth - 16;
-      } else if (idealLeft < 16) {
-        left = 16;
-      } else {
-        left = idealLeft;
-      }
-      
-      width = suggestionWidth;
-    }
 
-    const suggestionContent = (
+    return (
       <div 
-        className="bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden"
+        className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden z-50"
         style={{ 
-          position: 'fixed', // Changed to fixed positioning
-          top: `${top}px`,
-          left: `${left}px`,
-          width: `${width}px`,
           maxHeight: '400px',
-          overflowY: 'auto',
-          zIndex: 99999,
-          pointerEvents: 'auto'
+          overflowY: 'auto'
         }}
       >
         {isLoading && (
@@ -608,9 +498,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         )}
       </div>
     );
-
-    return createPortal(suggestionContent, portalContainer);
-  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile, portalContainer, inputRect]);
+  }, [showSuggestions, suggestions, isLoading, query, selectedIndex, getSuggestionIcon, handleSuggestionClick, handleSearchClick, isMobile]);
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
