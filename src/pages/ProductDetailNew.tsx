@@ -69,6 +69,22 @@ interface Product {
       email: string;
     }
   };
+  farmStory: {
+    text: string;
+    images: {
+      url: string;
+      alt: string;
+      caption?: string;
+    }[];
+  };
+  farmPractices: {
+    text: string;
+    images: {
+      url: string;
+      alt: string;
+      caption?: string;
+    }[];
+  };
   pickup: {
     details: string;
     hours: string;
@@ -135,6 +151,46 @@ const sampleProduct: Product = {
       phone: "(479) 555-0123",
       email: "sarah@sarahsfamilyfarm.com"
     }
+  },
+  farmStory: {
+    text: "Our family has been farming this land for three generations, focusing on sustainable practices and heirloom varieties. We believe in growing food the way nature intended - without harmful chemicals and with respect for the soil and ecosystem. Every tomato is hand-picked at peak ripeness to ensure the best flavor and nutritional value.",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?w=1200",
+        alt: "Farmer inspecting tomato plants in the early morning sunlight",
+        caption: "Morning harvest inspection"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=1200",
+        alt: "Baskets of freshly harvested heirloom tomatoes in various colors",
+        caption: "Today's harvest"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?w=1200",
+        alt: "Family working together in the greenhouse with young tomato plants",
+        caption: "Family tradition"
+      }
+    ]
+  },
+  farmPractices: {
+    text: "We use organic growing methods that focus on soil health and biodiversity. Our tomatoes are grown in nutrient-rich soil amended with our own compost, and we use companion planting and beneficial insects for pest management instead of chemicals. We believe these practices not only produce healthier food but also protect our land for future generations.",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1592150621744-aca64f48394a?w=1200",
+        alt: "Close-up of organic compost being added to garden soil",
+        caption: "Nutrient-rich organic compost"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200",
+        alt: "Rows of diverse vegetables growing together in companion planting system",
+        caption: "Companion planting for natural pest control"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1620588280212-9a9a7f01819e?w=1200",
+        alt: "Farmer using sustainable irrigation system in tomato field",
+        caption: "Water-saving irrigation"
+      }
+    ]
   },
   pickup: {
     details: "Drive-through pickup at farm entrance with no reservation required.",
@@ -277,6 +333,8 @@ const ProductDetailNew: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showFarmStory, setShowFarmStory] = useState(false);
+  const [showFarmPractices, setShowFarmPractices] = useState(false);
   
   // Load product data
   useEffect(() => {
@@ -353,6 +411,13 @@ const ProductDetailNew: React.FC = () => {
     }
   };
 
+  // Navigate to seller profile
+  const handleSellerClick = () => {
+    if (product && product.seller.id) {
+      navigate(`/seller/${product.seller.id}`);
+    }
+  };
+
   // Handle contact seller
   const handleContactSeller = () => {
     // In a real app, this would open a chat with the seller
@@ -372,13 +437,6 @@ const ProductDetailNew: React.FC = () => {
   const handleGetDirections = () => {
     if (product) {
       window.open(`https://maps.google.com?q=${encodeURIComponent(product.seller.location)}`, '_blank');
-    }
-  };
-
-  // Navigate to seller profile
-  const handleSellerClick = () => {
-    if (product && product.seller.id) {
-      navigate(`/seller/${product.seller.id}`);
     }
   };
 
@@ -445,24 +503,24 @@ const ProductDetailNew: React.FC = () => {
         <div className="flex w-full flex-col items-start justify-center gap-4">
           <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
             {/* Product Images */}
-<div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
-  <img
-    className="w-full h-auto max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] object-cover rounded-md"
-    src={product.images[selectedImage]}
-    alt={product.name}
-  />
-  <div className="flex w-full items-center gap-3 overflow-x-auto pb-2">
-    {product.images.map((image, index) => (
-      <img
-        key={index}
-        className={`h-20 w-20 md:h-24 md:w-24 lg:h-32 lg:w-32 flex-none rounded-md object-cover cursor-pointer ${selectedImage === index ? 'ring-2 ring-brand-600' : ''}`}
-        src={image}
-        alt={`${product.name} view ${index + 1}`}
-        onClick={() => setSelectedImage(index)}
-      />
-    ))}
-  </div>
-</div>
+            <div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
+              <img
+                className="w-full h-auto max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] object-cover rounded-md"
+                src={product.images[selectedImage]}
+                alt={product.name}
+              />
+              <div className="flex w-full items-center gap-3 overflow-x-auto pb-2">
+                {product.images.map((image, index) => (
+                  <img
+                    key={index}
+                    className={`h-20 w-20 md:h-24 md:w-24 lg:h-32 lg:w-32 flex-none rounded-md object-cover cursor-pointer ${selectedImage === index ? 'ring-2 ring-brand-600' : ''}`}
+                    src={image}
+                    alt={`${product.name} view ${index + 1}`}
+                    onClick={() => setSelectedImage(index)}
+                  />
+                ))}
+              </div>
+            </div>
 
             {/* Product Details */}
             <div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
@@ -573,15 +631,15 @@ const ProductDetailNew: React.FC = () => {
 
               {/* Seller Information */}
               <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
-  <Avatar
-    size="x-large"
-    image={product.seller.image}
-    className="flex-shrink-0 cursor-pointer"
-    onClick={handleSellerClick}
-  >
-    {product.seller.name.charAt(0)}
-  </Avatar>
-  <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
+                <Avatar
+                  size="x-large"
+                  image={product.seller.image}
+                  className="flex-shrink-0 cursor-pointer"
+                  onClick={handleSellerClick}
+                >
+                  {product.seller.name.charAt(0)}
+                </Avatar>
+                <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
                   <div className="flex items-center gap-2">
                     <span 
                       className="text-body-bold font-body-bold text-default-font cursor-pointer hover:text-brand-600"
@@ -628,6 +686,84 @@ const ProductDetailNew: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Farm Story Section */}
+        <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm mt-4">
+          <Accordion
+            trigger={
+              <div className="flex w-full items-center justify-between px-4 sm:px-6 py-4 sm:py-6">
+                <span className="text-heading-2 font-heading-2 text-default-font">
+                  Our Farm Story
+                </span>
+                <Accordion.Chevron />
+              </div>
+            }
+            defaultOpen={showFarmStory}
+            onOpenChange={setShowFarmStory}
+          >
+            <div className="flex w-full flex-col border-t border-solid border-neutral-200 px-4 sm:px-6 py-4 sm:py-6">
+              <p className="text-body font-body text-default-font mb-6">
+                {product.farmStory.text}
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {product.farmStory.images.map((image, index) => (
+                  <div key={index} className="flex flex-col gap-2">
+                    <img 
+                      src={image.url} 
+                      alt={image.alt}
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                    {image.caption && (
+                      <p className="text-caption font-caption text-subtext-color text-center">
+                        {image.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Accordion>
+        </div>
+
+        {/* Sustainable Farming Practices Section */}
+        <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm">
+          <Accordion
+            trigger={
+              <div className="flex w-full items-center justify-between px-4 sm:px-6 py-4 sm:py-6">
+                <span className="text-heading-2 font-heading-2 text-default-font">
+                  Sustainable Farming Practices
+                </span>
+                <Accordion.Chevron />
+              </div>
+            }
+            defaultOpen={showFarmPractices}
+            onOpenChange={setShowFarmPractices}
+          >
+            <div className="flex w-full flex-col border-t border-solid border-neutral-200 px-4 sm:px-6 py-4 sm:py-6">
+              <p className="text-body font-body text-default-font mb-6">
+                {product.farmPractices.text}
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {product.farmPractices.images.map((image, index) => (
+                  <div key={index} className="flex flex-col gap-2">
+                    <img 
+                      src={image.url} 
+                      alt={image.alt}
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                    {image.caption && (
+                      <p className="text-caption font-caption text-subtext-color text-center">
+                        {image.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Accordion>
         </div>
 
         {/* Pickup Information with Map */}
