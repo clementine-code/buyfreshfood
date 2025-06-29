@@ -435,7 +435,7 @@ const Cart: React.FC = () => {
       <div className="container max-w-none flex h-full w-full flex-col items-center gap-8 bg-default-background py-12 px-4 md:px-6">
         <div className="flex w-full max-w-[1280px] flex-col md:flex-row items-start gap-8">
           {/* Main Cart Section */}
-          <div className="flex grow shrink-0 basis-0 flex-col items-start gap-8 w-full md:w-auto">
+          <div className="flex grow shrink-0 basis-0 flex-col items-start gap-8 w-full md:w-auto pt-0">
             {/* Cart Header */}
             <div className="flex w-full items-center justify-between">
               <div className="flex flex-col items-start gap-1">
