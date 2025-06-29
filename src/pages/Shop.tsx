@@ -778,12 +778,9 @@ function Shop() {
         onScroll={handlePageScroll}
       >
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
-        <div className={`sort-filter-bar xl:hidden w-full ${
-          (showMobileFilters || showMobileMap) ? 'hidden' : ''
-        }`} style={{
-          transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
-          transition: 'transform 0.3s ease-in-out'
-        }}>
+        <div className={`sort-filter-bar xl:hidden w-full sticky top-20 bg-white border-b border-neutral-200 shadow-sm z-50 ${
+  (showMobileFilters || showMobileMap) ? 'hidden' : ''
+}`}>
           <div className="flex w-full flex-col gap-3 px-4 py-4">
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
