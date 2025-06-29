@@ -355,13 +355,13 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     const limitedSuggestions = suggestions.slice(0, isMobile ? 3 : 4);
 
     return (
-      <div 
+     <div 
   className="absolute top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden z-50"
   style={{ 
-    left: isMobile ? '-60px' : '0',
-    right: isMobile ? '-60px' : '0',
-    width: isMobile ? 'auto' : 'auto',
-    maxWidth: isMobile ? '400px' : 'none',
+    left: screenSize === 'mobile' ? '-60px' : '0',
+    right: screenSize === 'mobile' ? '-60px' : '0',
+    width: screenSize === 'mobile' ? 'auto' : (isTablet ? '400px' : 'auto'),
+    maxWidth: screenSize === 'mobile' ? '400px' : 'none',
     maxHeight: '400px',
     overflowY: 'auto'
   }}
