@@ -54,6 +54,7 @@ interface Product {
   rating: number;
   reviewCount: number;
   seller: {
+    id: string;
     name: string;
     image: string;
     location: string;
@@ -120,6 +121,7 @@ const sampleProduct: Product = {
   rating: 4.7,
   reviewCount: 22,
   seller: {
+    id: "sarah-family-farm",
     name: "Sarah's Family Farm",
     image: "https://images.unsplash.com/photo-1507914372368-b2b085b925a1",
     location: "123 Organic Way, Fayetteville, AR 72701",
@@ -253,6 +255,7 @@ const productSamples: {[key: string]: Product} = {
     reviewCount: 15,
     seller: {
       ...sampleProduct.seller,
+      id: "ozark-mushrooms",
       name: "Ozark Mushrooms",
       image: "https://images.unsplash.com/photo-1595475207225-428b62bda831",
       location: "45 Forest Lane, Winslow, AR 72959",
@@ -369,6 +372,13 @@ const ProductDetailNew: React.FC = () => {
   const handleGetDirections = () => {
     if (product) {
       window.open(`https://maps.google.com?q=${encodeURIComponent(product.seller.location)}`, '_blank');
+    }
+  };
+
+  // Navigate to seller profile
+  const handleSellerClick = () => {
+    if (product && product.seller.id) {
+      navigate(`/seller/${product.seller.id}`);
     }
   };
 
@@ -566,13 +576,17 @@ const ProductDetailNew: React.FC = () => {
   <Avatar
     size="x-large"
     image={product.seller.image}
-    className="flex-shrink-0"
+    className="flex-shrink-0 cursor-pointer"
+    onClick={handleSellerClick}
   >
     {product.seller.name.charAt(0)}
   </Avatar>
   <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
                   <div className="flex items-center gap-2">
-                    <span className="text-body-bold font-body-bold text-default-font">
+                    <span 
+                      className="text-body-bold font-body-bold text-default-font cursor-pointer hover:text-brand-600"
+                      onClick={handleSellerClick}
+                    >
                       {product.seller.name}
                     </span>
                     {product.seller.verified && (
@@ -898,7 +912,10 @@ const ProductDetailNew: React.FC = () => {
         {/* Related Products */}
         <div className="flex w-full flex-col items-start gap-4 mt-2">
           <h2 className="text-heading-2 font-heading-2 text-default-font">
-            More from {product.seller.name}
+            More from <span 
+              className="cursor-pointer hover:text-brand-600"
+              onClick={handleSellerClick}
+            >{product.seller.name}</span>
           </h2>
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {product.relatedProducts.map((relatedProduct) => (
