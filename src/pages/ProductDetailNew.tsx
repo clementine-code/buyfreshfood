@@ -317,8 +317,8 @@ const ProductDetailNew: React.FC = () => {
 
   return (
     <DefaultPageLayout>
-    {/* Breadcrumbs directly under layout */}
-    <div className="flex w-full items-center gap-4 px-4 md:px-8 lg:px-12 py-2">
+    {/* Breadcrumbs with absolute positioning */}
+    <div className="absolute top-20 left-0 right-0 flex w-full items-center gap-4 px-4 md:px-8 lg:px-12 py-2 bg-default-background z-10">
       <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
         <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
         <Breadcrumbs.Divider />
@@ -333,9 +333,9 @@ const ProductDetailNew: React.FC = () => {
       />
     </div>
 
-    {/* Main content container */}
-    <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-2 pb-4">
-      {/* Main Product Content - remove the breadcrumbs section from here */}
+    {/* Main content with top padding to account for absolute breadcrumbs */}
+    <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-16 pb-4">
+      {/* Main Product Content */}
       <div className="flex w-full flex-col items-start justify-center gap-4">
         <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
             {/* Product Images */}
