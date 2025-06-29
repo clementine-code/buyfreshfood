@@ -789,6 +789,7 @@ function Shop() {
   zIndex: 60,
   borderBottom: '1px solid #e5e7eb'
 }}>
+          {/* IMPORTANT: pt-0 -mt-2 prevents product overlap with sort bar - don't change! */}
           <div className="flex w-full flex-col gap-3 px-4 py-4 pt-0" style={{ marginTop: '-8px' }}>
 
             {/* Search Status and Controls */}
