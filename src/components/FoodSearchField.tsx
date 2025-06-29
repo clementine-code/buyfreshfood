@@ -38,6 +38,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const preventBlurRef = useRef(false);
+  const searchTriggeredRef = useRef(false);
 
   const isMobile = screenSize === 'mobile';
   const isTablet = screenSize === 'tablet';
@@ -111,9 +112,10 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, [showSuggestions]);
 
-  // Search function - FIXED: More aggressive search triggering
+  // Search function with improved logging and error handling
   const searchFood = useCallback(async (searchQuery: string) => {
     console.log('🔍 searchFood called with:', searchQuery);
+    searchTriggeredRef.current = true;
     
     if (searchQuery.length === 0) {
       setSuggestions([]);
@@ -132,7 +134,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     
     try {
       const results = await foodSearchService.getFoodSuggestions(searchQuery);
-      console.log('✅ Search results:', results);
+      console.log('✅ Search results:', results.length, 'items');
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
       setSelectedIndex(-1);
@@ -145,7 +147,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }
   }, []);
 
-  // Navigate to Shop page with search query - FIXED
+  // Navigate to Shop page with search query
   const navigateToShop = useCallback((searchQuery: string, suggestion?: FoodSearchSuggestion) => {
     const trimmedQuery = searchQuery.trim();
     if (!trimmedQuery) return;
@@ -252,9 +254,9 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
         inputRef.current?.blur();
         break;
     }
-  }, [showSuggestions, suggestions, selectedIndex, handleSearchClick]);
+  }, [showSuggestions, suggestions, selectedIndex, handleSearchClick, handleSuggestionClick]);
 
-  // Handle suggestion clicks - COMPLETELY FIXED
+  // Handle suggestion clicks
   const handleSuggestionClick = useCallback((suggestion: FoodSearchSuggestion) => {
     console.log('🔍 Suggestion clicked:', suggestion);
     
@@ -267,28 +269,28 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     if (onItemSelect) {
       console.log('📞 Calling onItemSelect with:', suggestion);
       onItemSelect(suggestion);
-    }
-    
-    // Navigate directly - don't rely on parent navigation
-    console.log('🚀 Navigating based on suggestion type:', suggestion.type);
-    
-    switch (suggestion.type) {
-      case 'category':
-        const categoryName = suggestion.title.replace(/^All\s+/, '');
-        console.log('📂 Navigating to category:', categoryName);
-        navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
-        break;
-      case 'product':
-        console.log('🛍️ Navigating to product search:', suggestion.title);
-        navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
-        break;
-      case 'seller':
-        console.log('🏪 Navigating to seller:', suggestion.title);
-        navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
-        break;
-      default:
-        console.log('🔍 Default search navigation:', suggestion.title);
-        navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+    } else {
+      // Navigate directly - don't rely on parent navigation
+      console.log('🚀 Navigating based on suggestion type:', suggestion.type);
+      
+      switch (suggestion.type) {
+        case 'category':
+          const categoryName = suggestion.title.replace(/^All\s+/, '');
+          console.log('📂 Navigating to category:', categoryName);
+          navigate(`/shop?category=${encodeURIComponent(categoryName)}`);
+          break;
+        case 'product':
+          console.log('🛍️ Navigating to product search:', suggestion.title);
+          navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+          break;
+        case 'seller':
+          console.log('🏪 Navigating to seller:', suggestion.title);
+          navigate(`/shop?seller=${encodeURIComponent(suggestion.title)}`);
+          break;
+        default:
+          console.log('🔍 Default search navigation:', suggestion.title);
+          navigate(`/shop?search=${encodeURIComponent(suggestion.title)}`);
+      }
     }
     
     // Hide suggestions
@@ -301,30 +303,38 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
     }, 100);
   }, [onItemSelect, navigate]);
 
-  // Handle input focus - FIXED: Always show suggestions if available
+  // Handle input focus - FIXED: Always trigger search if needed
   const handleInputFocus = useCallback(() => {
     console.log('🎯 Input focused, query:', query, 'suggestions:', suggestions.length);
+    
     if (query.length >= 2) {
       // If we have a query but no suggestions, trigger search
-      if (suggestions.length === 0) {
+      if (suggestions.length === 0 && !searchTriggeredRef.current) {
         console.log('🔄 No suggestions but have query, triggering search');
         searchFood(query);
-      } else {
+      } else if (suggestions.length > 0) {
         // Show existing suggestions
         console.log('📋 Showing existing suggestions');
         setShowSuggestions(true);
       }
     }
-  }, [suggestions.length, query.length, searchFood, query]);
+  }, [suggestions.length, query, searchFood]);
+
+  // Reset search triggered flag when query changes
+  useEffect(() => {
+    searchTriggeredRef.current = false;
+  }, [query]);
 
   // Handle input blur
   const handleInputBlur = useCallback(() => {
     if (preventBlurRef.current) {
+      console.log('🛑 Preventing blur due to suggestion click');
       return;
     }
     
     setTimeout(() => {
       if (!preventBlurRef.current) {
+        console.log('👋 Hiding suggestions on blur');
         setShowSuggestions(false);
         setSelectedIndex(-1);
       }
