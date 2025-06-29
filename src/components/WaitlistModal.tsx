@@ -623,14 +623,10 @@ const WaitlistModal: React.FC = () => {
             {/* FIXED: Location Input Section - Exact same design as LocationCollectionModal */}
             {showLocationInput && (
               <div className="w-full relative">
-                <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
-                  Location
-                </label>
-                
                 <div className="flex items-end justify-end gap-2 relative">
                   <TextField 
                     className="h-auto grow shrink-0 basis-0" 
-                    label="" 
+                    label="Location" 
                     helpText="" 
                     error={!!error}
                     icon={<FeatherMapPin />}
