@@ -340,6 +340,7 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
   }, []);
 
   // Render suggestions with simple absolute positioning (no portal)
+  // Render suggestions with simple positioning
   const suggestionList = useMemo(() => {
     console.log('🎨 Rendering suggestions:', { 
       showSuggestions, 
@@ -355,18 +356,15 @@ const FoodSearchField: React.FC<FoodSearchFieldProps> = ({
 
     return (
       <div 
-        className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden z-50"
+        className={`absolute top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-lg overflow-hidden z-50 ${
+          isMobile 
+            ? 'left-4 right-4 max-w-none' 
+            : 'left-0 right-0'
+        }`}
         style={{ 
-  position: 'absolute',
-  top: `${top}px`,
-  left: isMobile ? '16px' : `${left}px`,
-  right: isMobile ? '16px' : 'auto',
-  width: isMobile ? 'auto' : `${width}px`,
-  maxHeight: '400px',
-  overflowY: 'auto',
-  zIndex: 99999,
-  pointerEvents: 'auto'
-}}
+          maxHeight: '400px',
+          overflowY: 'auto'
+        }}
       >
         {isLoading && (
           <div className={`text-center text-subtext-color ${isMobile ? 'px-4 py-8' : 'px-3 py-4'}`}>
