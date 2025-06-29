@@ -17,6 +17,7 @@ import Waitlist from "./pages/Waitlist";
 import ProductDetail from "./pages/ProductDetail";
 import ProductDetailNew from "./pages/ProductDetailNew";
 import SellerProfile from "./pages/SellerProfile";
+import Cart from "./pages/Cart";
 
 function WaitlistModals() {
   const { state, closeAllModals, openWaitlistModal, openLocationModal, reopenWaitlistForm } = useWaitlistContext();
@@ -66,6 +67,7 @@ function AppContent() {
           <Route path="/product/:id" element={<ProductDetailNew />} />
           <Route path="/product-old/:id" element={<ProductDetail />} />
           <Route path="/seller/:id" element={<SellerProfile />} />
+          <Route path="/cart" element={<Cart />} />
         </Routes>
       </DefaultPageLayout>
       <WaitlistModals />

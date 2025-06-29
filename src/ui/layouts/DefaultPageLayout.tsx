@@ -65,6 +65,24 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
       setIsLocationModalOpen(true);
     };
 
+    // Get cart item count from localStorage
+    const getCartItemCount = () => {
+      try {
+        const savedCart = localStorage.getItem('freshFoodCart');
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          return Object.values(parsedCart.sellers).reduce((count: number, seller: any) => {
+            return count + seller.items.reduce((itemCount: number, item: any) => itemCount + item.quantity, 0);
+          }, 0);
+        }
+      } catch (error) {
+        console.error('Error parsing saved cart:', error);
+      }
+      return 0;
+    };
+
+    const cartItemCount = getCartItemCount();
+
     return (
       <div
         className={SubframeUtils.twClassNames(
@@ -123,9 +141,19 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
                 <Button variant="brand-secondary" icon={<FeatherUser />}>
                   Sign In
                 </Button>
-                <Button icon={<FeatherShoppingCart />}>
-                  Cart
-                </Button>
+                <div className="relative">
+                  <Button 
+                    icon={<FeatherShoppingCart />}
+                    onClick={() => navigate('/cart')}
+                  >
+                    Cart
+                  </Button>
+                  {cartItemCount > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-brand-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                      {cartItemCount > 9 ? '9+' : cartItemCount}
+                    </div>
+                  )}
+                </div>
               </>
             }
           />
@@ -156,14 +184,17 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
             {/* Right Actions - Location and Cart */}
             <div className="flex items-center justify-end gap-2">
               <LocationButton className="flex-shrink-0" onClick={handleLocationButtonClick} />
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 relative">
                 <IconButton
                   variant="brand-primary"
                   icon={<FeatherShoppingCart />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                    // Add your cart logic here
-                  }}
+                  onClick={() => navigate('/cart')}
                 />
+                {cartItemCount > 0 && (
+                  <div className="absolute -top-1 -right-1 bg-brand-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                    {cartItemCount > 9 ? '9+' : cartItemCount}
+                  </div>
+                )}
               </div>
             </div>
           </nav>
