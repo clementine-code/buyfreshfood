@@ -62,8 +62,8 @@ function AppContent() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/sell" element={<Sell />} />
           <Route path="/waitlist" element={<Waitlist />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/product-new/:id" element={<ProductDetailNew />} />
+          <Route path="/product/:id" element={<ProductDetailNew />} />
+          <Route path="/product-old/:id" element={<ProductDetail />} />
         </Routes>
       </DefaultPageLayout>
       <WaitlistModals />

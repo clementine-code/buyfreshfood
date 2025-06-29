@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMap } from "@subframe/core";
 import { FeatherFilter } from "@subframe/core";
@@ -37,6 +37,7 @@ import { useWaitlistContext } from "../contexts/WaitlistContext";
 
 function Shop() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("grid");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
@@ -242,6 +243,11 @@ function Shop() {
     } : undefined);
   };
 
+  // Navigate to product detail page
+  const handleProductClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
   // Check if any filters are applied
   const hasFiltersApplied = Object.values(appliedFilters).some(filterArray => filterArray.length > 0);
 
@@ -343,7 +349,10 @@ function Shop() {
     
     if (isListView) {
       return (
-        <div className="flex items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100">
+        <div 
+          className="flex items-start gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100 cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => handleProductClick(displayProduct.id)}
+        >
           <img
             className="h-20 w-20 md:h-24 md:w-24 flex-none rounded-md object-cover"
             src={displayProduct.image_url || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'}
@@ -392,7 +401,10 @@ function Shop() {
                   <Button
                     className="h-8"
                     size="small"
-                    onClick={() => handleAddToCart(displayProduct)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(displayProduct);
+                    }}
                   >
                     Add to Cart
                   </Button>
@@ -400,7 +412,10 @@ function Shop() {
                     variant="destructive-secondary"
                     size="small"
                     icon={<FeatherHeart />}
-                    onClick={() => handleSaveForLater(displayProduct)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSaveForLater(displayProduct);
+                    }}
                   />
                 </div>
               </div>
@@ -411,7 +426,10 @@ function Shop() {
     }
 
     return (
-      <div className="flex flex-col justify-between gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100 h-full">
+      <div 
+        className="flex flex-col justify-between gap-4 rounded-lg bg-white px-4 py-4 shadow-sm border border-neutral-100 h-full cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => handleProductClick(displayProduct.id)}
+      >
         <div className="flex flex-col gap-4">
           <img
             className="h-48 w-full flex-none rounded-md object-cover"
@@ -454,14 +472,20 @@ function Shop() {
         <div className="flex w-full items-center gap-2">
           <Button
             className="h-8 grow shrink-0 basis-0"
-            onClick={() => handleAddToCart(displayProduct)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddToCart(displayProduct);
+            }}
           >
             Add to Cart
           </Button>
           <IconButton
             variant="destructive-secondary"
             icon={<FeatherHeart />}
-            onClick={() => handleSaveForLater(displayProduct)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSaveForLater(displayProduct);
+            }}
           />
         </div>
       </div>

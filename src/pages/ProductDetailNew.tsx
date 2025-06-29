@@ -25,13 +25,16 @@ import {
   FeatherInstagram,
   FeatherXTwitter,
   FeatherSlack,
-  FeatherHeart
+  FeatherHeart,
+  FeatherArrowLeft
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
+import { getProductById, type Product } from "../lib/supabase";
+import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 
 // Product type definition
-interface Product {
+interface ProductDetails {
   id: string;
   name: string;
   description: string;
@@ -91,100 +94,384 @@ interface Product {
   }[];
 }
 
-// Sample product data
-const sampleProduct: Product = {
-  id: "heirloom-tomatoes",
-  name: "Heirloom Tomatoes",
-  description: "Hand-picked this morning! Our heirloom tomatoes are grown naturally without pesticides. Perfect for salads, sandwiches, or just enjoying fresh off the vine. Multiple varieties available including Brandywine, Cherokee Purple, and Green Zebra.",
-  price: 4.99,
-  unit: "lb",
-  isOrganic: true,
-  images: [
-    "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800",
-    "https://images.unsplash.com/photo-1597362925123-77861d3fbac7",
-    "https://images.unsplash.com/photo-1597362925552-5f2f3c7e2c97"
-  ],
-  tags: ["Picked Today", "Pesticide Free", "Local"],
-  rating: 4.7,
-  reviewCount: 22,
-  seller: {
-    name: "Sarah's Family Farm",
-    image: "https://images.unsplash.com/photo-1507914372368-b2b085b925a1",
-    location: "123 Organic Way, Sunnyvale, CA 94086",
-    rating: 4.9,
-    reviewCount: 324,
-    verified: true,
-    distance: "2.3 miles away",
-    availability: "Pickup Today",
-    contact: {
-      phone: "(408) 555-1234",
-      email: "sarah@sarahsfamilyfarm.com"
-    }
-  },
-  pickup: {
-    details: "Drive-through pickup at farm entrance with no reservation required.",
-    hours: "Monday - Saturday: 8:00 AM - 6:00 PM\nSunday: 10:00 AM - 4:00 PM",
-    location: "123 Organic Way, Sunnyvale, CA 94086"
-  },
-  reviews: {
-    highlights: ["Incredibly fresh", "Better than store-bought", "Great value", "Will buy again"],
-    ratings: {
-      five: 90,
-      four: 7,
-      three: 2,
-      two: 1,
-      one: 0
+// Sample product data collection
+const sampleProducts: { [key: string]: ProductDetails } = {
+  "heirloom-tomatoes": {
+    id: "heirloom-tomatoes",
+    name: "Heirloom Tomatoes",
+    description: "Hand-picked this morning! Our heirloom tomatoes are grown naturally without pesticides. Perfect for salads, sandwiches, or just enjoying fresh off the vine. Multiple varieties available including Brandywine, Cherokee Purple, and Green Zebra.",
+    price: 4.99,
+    unit: "lb",
+    isOrganic: true,
+    images: [
+      "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800",
+      "https://images.unsplash.com/photo-1597362925123-77861d3fbac7",
+      "https://images.unsplash.com/photo-1597362925552-5f2f3c7e2c97"
+    ],
+    tags: ["Picked Today", "Pesticide Free", "Local"],
+    rating: 4.7,
+    reviewCount: 22,
+    seller: {
+      name: "Sarah's Family Farm",
+      image: "https://images.unsplash.com/photo-1507914372368-b2b085b925a1",
+      location: "123 Organic Way, Sunnyvale, CA 94086",
+      rating: 4.9,
+      reviewCount: 324,
+      verified: true,
+      distance: "2.3 miles away",
+      availability: "Pickup Today",
+      contact: {
+        phone: "(408) 555-1234",
+        email: "sarah@sarahsfamilyfarm.com"
+      }
     },
-    metrics: {
-      freshness: 4.9,
-      taste: 4.8,
-      value: 4.7
+    pickup: {
+      details: "Drive-through pickup at farm entrance with no reservation required.",
+      hours: "Monday - Saturday: 8:00 AM - 6:00 PM\nSunday: 10:00 AM - 4:00 PM",
+      location: "123 Organic Way, Sunnyvale, CA 94086"
     },
-    items: [
+    reviews: {
+      highlights: ["Incredibly fresh", "Better than store-bought", "Great value", "Will buy again"],
+      ratings: {
+        five: 90,
+        four: 7,
+        three: 2,
+        two: 1,
+        one: 0
+      },
+      metrics: {
+        freshness: 4.9,
+        taste: 4.8,
+        value: 4.7
+      },
+      items: [
+        {
+          name: "Emily K.",
+          rating: 5,
+          date: "3 days ago",
+          comment: "Absolutely love these farm-fresh tomatoes! The flavor is unbelievably rich and vibrant. You can truly taste the difference of locally grown, organic produce."
+        },
+        {
+          name: "David L.",
+          rating: 5,
+          date: "1 week ago",
+          comment: "Supporting local farmers has never tasted so good! These tomatoes are consistently fresh, juicy, and packed with incredible flavor. Highly recommend!"
+        }
+      ]
+    },
+    relatedProducts: [
       {
-        name: "Emily K.",
-        rating: 5,
-        date: "3 days ago",
-        comment: "Absolutely love these farm-fresh tomatoes! The flavor is unbelievably rich and vibrant. You can truly taste the difference of locally grown, organic produce."
+        id: "rainbow-swiss-chard",
+        name: "Rainbow Swiss Chard",
+        price: 3.99,
+        unit: "bunch",
+        image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800"
       },
       {
-        name: "David L.",
-        rating: 5,
-        date: "1 week ago",
-        comment: "Supporting local farmers has never tasted so good! These tomatoes are consistently fresh, juicy, and packed with incredible flavor. Highly recommend!"
+        id: "fresh-herbs-bundle",
+        name: "Fresh Herbs Bundle",
+        price: 5.99,
+        unit: "bundle",
+        image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800"
+      },
+      {
+        id: "organic-lettuce-mix",
+        name: "Organic Lettuce Mix",
+        price: 4.50,
+        unit: "bag",
+        image: "https://images.unsplash.com/photo-1557844352-761f2565b576?w=800"
+      },
+      {
+        id: "fresh-green-beans",
+        name: "Fresh Green Beans",
+        price: 3.99,
+        unit: "lb",
+        image: "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=800"
       }
     ]
   },
-  relatedProducts: [
-    {
-      id: "rainbow-swiss-chard",
-      name: "Rainbow Swiss Chard",
-      price: 3.99,
-      unit: "bunch",
-      image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800"
+  "rainbow-swiss-chard": {
+    id: "rainbow-swiss-chard",
+    name: "Rainbow Swiss Chard",
+    description: "Colorful and nutritious leafy greens with vibrant stems. Excellent source of vitamins and minerals. Perfect for sautéing, adding to soups, or using in salads.",
+    price: 3.99,
+    unit: "bunch",
+    isOrganic: true,
+    images: [
+      "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800",
+      "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=800",
+      "https://images.unsplash.com/photo-1557844352-761f2565b576?w=800"
+    ],
+    tags: ["Organic", "Nutrient-Rich", "Colorful"],
+    rating: 4.8,
+    reviewCount: 16,
+    seller: {
+      name: "Green Acres Farm",
+      image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
+      location: "456 Farm Road, Fayetteville, AR 72701",
+      rating: 4.7,
+      reviewCount: 218,
+      verified: true,
+      distance: "3.1 miles away",
+      availability: "Pickup Today",
+      contact: {
+        phone: "(479) 555-0123",
+        email: "info@greenacresfarm.com"
+      }
     },
-    {
-      id: "fresh-herbs-bundle",
-      name: "Fresh Herbs Bundle",
-      price: 5.99,
-      unit: "bundle",
-      image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800"
+    pickup: {
+      details: "Farm stand pickup available during business hours. No appointment needed.",
+      hours: "Tuesday - Sunday: 9:00 AM - 5:00 PM\nClosed Mondays",
+      location: "456 Farm Road, Fayetteville, AR 72701"
     },
-    {
-      id: "organic-lettuce-mix",
-      name: "Organic Lettuce Mix",
-      price: 4.50,
-      unit: "bag",
-      image: "https://images.unsplash.com/photo-1557844352-761f2565b576?w=800"
+    reviews: {
+      highlights: ["Beautiful colors", "Very fresh", "Versatile", "Great flavor"],
+      ratings: {
+        five: 85,
+        four: 12,
+        three: 3,
+        two: 0,
+        one: 0
+      },
+      metrics: {
+        freshness: 4.9,
+        taste: 4.7,
+        value: 4.6
+      },
+      items: [
+        {
+          name: "Michael T.",
+          rating: 5,
+          date: "2 days ago",
+          comment: "The colors are stunning and the taste is amazing. So much better than store-bought chard. I sautéed it with garlic and olive oil - delicious!"
+        },
+        {
+          name: "Jessica R.",
+          rating: 5,
+          date: "1 week ago",
+          comment: "Super fresh and beautiful. The stems are so vibrant and the leaves are tender. Great addition to my weekly veggie rotation."
+        }
+      ]
     },
-    {
-      id: "fresh-green-beans",
-      name: "Fresh Green Beans",
-      price: 3.99,
-      unit: "lb",
-      image: "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=800"
-    }
-  ]
+    relatedProducts: [
+      {
+        id: "heirloom-tomatoes",
+        name: "Heirloom Tomatoes",
+        price: 4.99,
+        unit: "lb",
+        image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800"
+      },
+      {
+        id: "fresh-herbs-bundle",
+        name: "Fresh Herbs Bundle",
+        price: 5.99,
+        unit: "bundle",
+        image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800"
+      },
+      {
+        id: "organic-lettuce-mix",
+        name: "Organic Lettuce Mix",
+        price: 4.50,
+        unit: "bag",
+        image: "https://images.unsplash.com/photo-1557844352-761f2565b576?w=800"
+      },
+      {
+        id: "baby-spinach",
+        name: "Baby Spinach",
+        price: 4.49,
+        unit: "bag",
+        image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=800"
+      }
+    ]
+  },
+  "farm-fresh-eggs": {
+    id: "farm-fresh-eggs",
+    name: "Farm Fresh Eggs",
+    description: "Free-range eggs from pasture-raised hens. Rich, golden yolks and superior taste from hens with access to bugs and grass. Our chickens are raised humanely with plenty of outdoor access.",
+    price: 6.99,
+    unit: "dozen",
+    isOrganic: false,
+    images: [
+      "https://images.unsplash.com/photo-1590005354167-6da97870c757?w=800",
+      "https://images.unsplash.com/photo-1587486913049-53fc88980cfc?w=800",
+      "https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?w=800"
+    ],
+    tags: ["Free-Range", "Pasture-Raised", "Golden Yolks"],
+    rating: 4.9,
+    reviewCount: 42,
+    seller: {
+      name: "Happy Hen Farm",
+      image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
+      location: "789 Country Lane, Farmington, AR 72730",
+      rating: 4.8,
+      reviewCount: 156,
+      verified: true,
+      distance: "5.2 miles away",
+      availability: "Pickup Tomorrow",
+      contact: {
+        phone: "(479) 555-0987",
+        email: "eggs@happyhenfarm.com"
+      }
+    },
+    pickup: {
+      details: "Farm gate pickup. Please text when you arrive and we'll bring your eggs out to you.",
+      hours: "Wednesday - Saturday: 10:00 AM - 4:00 PM\nSunday: 12:00 PM - 4:00 PM",
+      location: "789 Country Lane, Farmington, AR 72730"
+    },
+    reviews: {
+      highlights: ["Best eggs ever", "Beautiful yolks", "Worth every penny", "Consistent quality"],
+      ratings: {
+        five: 95,
+        four: 5,
+        three: 0,
+        two: 0,
+        one: 0
+      },
+      metrics: {
+        freshness: 5.0,
+        taste: 4.9,
+        value: 4.7
+      },
+      items: [
+        {
+          name: "Robert J.",
+          rating: 5,
+          date: "5 days ago",
+          comment: "These eggs are incredible! The yolks are so orange and rich. Once you try these, you'll never go back to store-bought eggs again."
+        },
+        {
+          name: "Amanda P.",
+          rating: 5,
+          date: "2 weeks ago",
+          comment: "I can't believe the difference in taste. My family now refuses to eat any other eggs. Worth the drive to the farm to pick them up!"
+        }
+      ]
+    },
+    relatedProducts: [
+      {
+        id: "fresh-whole-milk",
+        name: "Fresh Whole Milk",
+        price: 5.99,
+        unit: "half-gallon",
+        image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800"
+      },
+      {
+        id: "artisan-cheese-selection",
+        name: "Artisan Cheese Selection",
+        price: 18.99,
+        unit: "pack",
+        image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800"
+      },
+      {
+        id: "grass-fed-ground-beef",
+        name: "Grass-Fed Ground Beef",
+        price: 9.99,
+        unit: "lb",
+        image: "https://images.unsplash.com/photo-1588347818481-c7c1b6b3b5b3?w=800"
+      },
+      {
+        id: "free-range-chicken",
+        name: "Free-Range Chicken",
+        price: 16.99,
+        unit: "whole",
+        image: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=800"
+      }
+    ]
+  },
+  "artisan-sourdough-bread": {
+    id: "artisan-sourdough-bread",
+    name: "Artisan Sourdough Bread",
+    description: "Traditional sourdough bread made with wild yeast starter. Crispy crust, soft interior with complex flavors. Our bread is made with locally milled flour and a 24-hour fermentation process for maximum flavor and digestibility.",
+    price: 8.99,
+    unit: "loaf",
+    isOrganic: false,
+    images: [
+      "https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=800",
+      "https://images.unsplash.com/photo-1585478259715-4d3a5f4a8771?w=800",
+      "https://images.unsplash.com/photo-1600398138360-766a0e0e7a3c?w=800"
+    ],
+    tags: ["Artisan", "Wild Yeast", "Traditional"],
+    rating: 4.8,
+    reviewCount: 31,
+    seller: {
+      name: "Sweet Life Bakery",
+      image: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=800",
+      location: "321 Main Street, Springdale, AR 72762",
+      rating: 4.9,
+      reviewCount: 287,
+      verified: true,
+      distance: "4.7 miles away",
+      availability: "Pickup Today",
+      contact: {
+        phone: "(479) 555-0456",
+        email: "orders@sweetlifebakery.com"
+      }
+    },
+    pickup: {
+      details: "Bakery pickup. Fresh loaves available daily until sold out. Pre-orders recommended for guaranteed availability.",
+      hours: "Tuesday - Saturday: 7:00 AM - 2:00 PM\nClosed Sunday & Monday",
+      location: "321 Main Street, Springdale, AR 72762"
+    },
+    reviews: {
+      highlights: ["Perfect crust", "Amazing flavor", "Great texture", "Authentic sourdough"],
+      ratings: {
+        five: 87,
+        four: 10,
+        three: 3,
+        two: 0,
+        one: 0
+      },
+      metrics: {
+        freshness: 4.9,
+        taste: 4.8,
+        value: 4.6
+      },
+      items: [
+        {
+          name: "Thomas B.",
+          rating: 5,
+          date: "1 day ago",
+          comment: "This is what real bread should taste like! The crust is perfect and the inside is soft with just the right amount of chew. I'm a sourdough enthusiast and this is top-notch."
+        },
+        {
+          name: "Olivia M.",
+          rating: 5,
+          date: "4 days ago",
+          comment: "Worth every penny. The flavor is complex and delicious. It keeps well for several days too, though it rarely lasts that long in our house!"
+        }
+      ]
+    },
+    relatedProducts: [
+      {
+        id: "whole-wheat-dinner-rolls",
+        name: "Whole Wheat Dinner Rolls",
+        price: 6.99,
+        unit: "dozen",
+        image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800"
+      },
+      {
+        id: "artisan-cheese-selection",
+        name: "Artisan Cheese Selection",
+        price: 18.99,
+        unit: "pack",
+        image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800"
+      },
+      {
+        id: "raw-wildflower-honey",
+        name: "Raw Wildflower Honey",
+        price: 15.99,
+        unit: "jar",
+        image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800"
+      },
+      {
+        id: "fresh-whole-milk",
+        name: "Fresh Whole Milk",
+        price: 5.99,
+        unit: "half-gallon",
+        image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800"
+      }
+    ]
+  }
 };
 
 const ProductDetailNew: React.FC = () => {
@@ -194,21 +481,173 @@ const ProductDetailNew: React.FC = () => {
   const { openWaitlistFlow } = useWaitlistContext();
   
   // State
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllReviews, setShowAllReviews] = useState(false);
   
   // Load product data
   useEffect(() => {
-    // Simulate API call
-    setLoading(true);
-    setTimeout(() => {
-      setProduct(sampleProduct);
-      setLoading(false);
-    }, 500);
+    const loadProduct = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        if (!id) {
+          throw new Error("Product ID is missing");
+        }
+        
+        // First try to get from sample data
+        if (sampleProducts[id]) {
+          setProduct(sampleProducts[id]);
+        } else {
+          // Try to get from Supabase
+          const { data: supabaseProduct, error } = await getProductById(id);
+          
+          if (supabaseProduct && !error) {
+            // Convert Supabase product to our ProductDetails format
+            const convertedProduct = convertSupabaseProduct(supabaseProduct);
+            setProduct(convertedProduct);
+          } else {
+            // Try to get from food search service
+            const foodItem = await foodSearchService.getFoodItemById(id);
+            if (foodItem) {
+              const convertedProduct = convertFoodItemToProduct(foodItem);
+              setProduct(convertedProduct);
+            } else {
+              throw new Error("Product not found");
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error loading product:", err);
+        setError(err instanceof Error ? err.message : "Failed to load product");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadProduct();
   }, [id]);
+
+  // Convert Supabase product to our ProductDetails format
+  const convertSupabaseProduct = (supabaseProduct: Product): ProductDetails => {
+    return {
+      id: supabaseProduct.id,
+      name: supabaseProduct.name,
+      description: supabaseProduct.description || "",
+      price: supabaseProduct.price,
+      unit: supabaseProduct.unit,
+      isOrganic: supabaseProduct.is_organic || false,
+      images: [
+        supabaseProduct.image_url || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
+        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
+        "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800"
+      ],
+      tags: supabaseProduct.tags || [],
+      rating: supabaseProduct.average_rating || 4.5,
+      reviewCount: supabaseProduct.reviews?.length || 0,
+      seller: {
+        name: supabaseProduct.seller?.name || "Local Farm",
+        image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
+        location: supabaseProduct.seller?.location || "Local Area",
+        rating: 4.8,
+        reviewCount: 100,
+        verified: supabaseProduct.seller?.verified || false,
+        distance: "Nearby",
+        availability: "Pickup Available",
+        contact: {
+          phone: supabaseProduct.seller?.contact_phone || "(555) 555-5555",
+          email: supabaseProduct.seller?.contact_email || "contact@localfarm.com"
+        }
+      },
+      pickup: {
+        details: "Contact seller for pickup details",
+        hours: "Contact seller for hours",
+        location: supabaseProduct.seller?.location || "Local Area"
+      },
+      reviews: {
+        highlights: ["Fresh", "Local", "Quality"],
+        ratings: {
+          five: 80,
+          four: 15,
+          three: 5,
+          two: 0,
+          one: 0
+        },
+        metrics: {
+          freshness: 4.8,
+          taste: 4.7,
+          value: 4.6
+        },
+        items: supabaseProduct.reviews?.map(review => ({
+          name: review.customer_name,
+          rating: review.rating,
+          date: new Date(review.created_at).toLocaleDateString(),
+          comment: review.comment || ""
+        })) || []
+      },
+      relatedProducts: []
+    };
+  };
+
+  // Convert FoodItem to our ProductDetails format
+  const convertFoodItemToProduct = (foodItem: FoodItem): ProductDetails => {
+    return {
+      id: foodItem.id,
+      name: foodItem.name,
+      description: foodItem.description,
+      price: parseFloat(foodItem.price.replace('$', '')),
+      unit: foodItem.unit,
+      isOrganic: foodItem.isOrganic,
+      images: [
+        foodItem.image,
+        foodItem.image,
+        foodItem.image
+      ],
+      tags: foodItem.tags,
+      rating: 4.5, // Default rating
+      reviewCount: 10, // Default review count
+      seller: {
+        name: foodItem.seller,
+        image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
+        location: foodItem.location,
+        rating: 4.8,
+        reviewCount: 100,
+        verified: true,
+        distance: "Nearby",
+        availability: "Pickup Available",
+        contact: {
+          phone: "(555) 555-5555",
+          email: "contact@localfarm.com"
+        }
+      },
+      pickup: {
+        details: "Contact seller for pickup details",
+        hours: "Contact seller for hours",
+        location: foodItem.location
+      },
+      reviews: {
+        highlights: ["Fresh", "Local", "Quality"],
+        ratings: {
+          five: 80,
+          four: 15,
+          three: 5,
+          two: 0,
+          one: 0
+        },
+        metrics: {
+          freshness: 4.8,
+          taste: 4.7,
+          value: 4.6
+        },
+        items: []
+      },
+      relatedProducts: []
+    };
+  };
 
   // Handle quantity changes
   const increaseQuantity = () => {
@@ -277,6 +716,16 @@ const ProductDetailNew: React.FC = () => {
     }
   };
 
+  // Handle back button
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+
+  // Handle related product click
+  const handleRelatedProductClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
   // Render star rating
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -306,7 +755,9 @@ const ProductDetailNew: React.FC = () => {
         <div className="flex h-full w-full items-center justify-center py-20">
           <div className="flex flex-col items-center gap-4 text-center">
             <span className="text-heading-2 font-heading-2 text-error-700">Product not found</span>
-            <span className="text-body font-body text-subtext-color">The product you're looking for doesn't exist or has been removed.</span>
+            <span className="text-body font-body text-subtext-color">
+              {error || "The product you're looking for doesn't exist or has been removed."}
+            </span>
             <Button onClick={() => navigate('/shop')}>
               Browse Products
             </Button>
@@ -318,32 +769,40 @@ const ProductDetailNew: React.FC = () => {
 
   return (
     <DefaultPageLayout>
-    <div className="flex h-full w-full flex-col items-center lg:items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-2 pb-4">
-      {/* Breadcrumbs and Share Button */}
-      <div className="flex w-full items-center gap-4 -mt-2">
-        <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
-          <Breadcrumbs.Item>Product Results</Breadcrumbs.Item>
-          <Breadcrumbs.Divider />
-          <Breadcrumbs.Item active={true} className="truncate">
-            Heirloom Tomatoes (Sarah&#39;s Family Farm)
-          </Breadcrumbs.Item>
-        </Breadcrumbs>
-        <IconButton
-          icon={<FeatherShare />}
-          onClick={handleShare}
-          className="flex-shrink-0"
-        />
-        <IconButton
-          variant="destructive-secondary"
-          icon={<FeatherHeart />}
-          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {}}
-          className="flex-shrink-0"
-        />
-      </div>
+      <div className="flex h-full w-full flex-col items-center lg:items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-2 pb-4">
+        {/* Breadcrumbs and Share Button */}
+        <div className="flex w-full items-center gap-4 -mt-2">
+          <Button
+            variant="neutral-tertiary"
+            icon={<FeatherArrowLeft />}
+            onClick={handleBackClick}
+            className="mr-2"
+          >
+            Back
+          </Button>
+          <Breadcrumbs className="h-auto grow shrink-0 basis-0 overflow-hidden">
+            <Breadcrumbs.Item onClick={() => navigate('/shop')}>Product Results</Breadcrumbs.Item>
+            <Breadcrumbs.Divider />
+            <Breadcrumbs.Item active={true} className="truncate">
+              {product.name} ({product.seller.name})
+            </Breadcrumbs.Item>
+          </Breadcrumbs>
+          <IconButton
+            icon={<FeatherShare />}
+            onClick={handleShare}
+            className="flex-shrink-0"
+          />
+          <IconButton
+            variant="destructive-secondary"
+            icon={<FeatherHeart />}
+            onClick={handleAddToCart}
+            className="flex-shrink-0"
+          />
+        </div>
 
-      {/* Main Product Content */}
-      <div className="flex w-full flex-col items-start justify-center gap-4">
-        <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
+        {/* Main Product Content */}
+        <div className="flex w-full flex-col items-start justify-center gap-4">
+          <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
             {/* Product Images */}
             <div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
               <img
@@ -772,7 +1231,8 @@ const ProductDetailNew: React.FC = () => {
             {product.relatedProducts.map((relatedProduct) => (
               <div 
                 key={relatedProduct.id} 
-                className="flex flex-col items-start gap-2 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm"
+                className="flex flex-col items-start gap-2 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleRelatedProductClick(relatedProduct.id)}
               >
                 <img
                   className="h-48 w-full flex-none rounded-lg object-cover"
@@ -791,7 +1251,10 @@ const ProductDetailNew: React.FC = () => {
                   <Button
                     className="h-8 w-full flex-none"
                     size="small"
-                    onClick={handleAddToCart}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart();
+                    }}
                   >
                     Add to Cart
                   </Button>
