@@ -792,7 +792,6 @@ const ProductDetailNew: React.FC = () => {
             onClick={handleShare}
             className="flex-shrink-0"
           />
-          />
         </div>
 
         {/* Main Product Content */}
