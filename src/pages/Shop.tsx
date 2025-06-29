@@ -36,6 +36,13 @@ import { foodSearchService, type FoodItem } from "../services/foodSearchService"
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 
+/*
+VISUAL LAYOUT FIXES - DO NOT MODIFY:
+- Sort bar spacing: pt-0 -mt-2 to prevent product overlap
+- Search suggestions: uses left:50% transform centering for mobile
+- Maintains scroll animation with transform-based hiding
+*/
+
 function Shop() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
