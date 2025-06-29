@@ -732,7 +732,7 @@ const WaitlistModal: React.FC = () => {
             {/* Existing Location Display - Shows when location is set */}
             {!showLocationInput && currentLocationData && (
               <div className="w-full">
-                <label className="block text-caption-bold font-caption-bold text-default-font mb-2">
+                <label className="block text-body-bold font-body-bold text-default-font mb-2">
                   Location
                 </label>
                 <div className="flex items-center gap-2">
