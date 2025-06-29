@@ -72,7 +72,7 @@ const TextFieldRoot = React.forwardRef<HTMLElement, TextFieldRootProps>(
         {...otherProps}
       >
         {label ? (
-          <span className="text-caption-bold font-caption-bold text-default-font">
+          <span className="text-default-font text-body-bold font-body-bold">
             {label}
           </span>
         ) : null}
