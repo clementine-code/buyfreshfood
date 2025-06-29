@@ -341,8 +341,6 @@ const ProductDetailNew: React.FC = () => {
         />
       </div>
 
-    {/* Main content with top padding to account for absolute breadcrumbs */}
-   <div className="flex h-full w-full flex-col items-start justify-center gap-4 bg-default-background px-4 md:px-8 lg:px-12 pt-0 pb-4">
       {/* Main Product Content */}
       <div className="flex w-full flex-col items-start justify-center gap-4">
         <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
