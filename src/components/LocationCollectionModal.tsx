@@ -573,13 +573,13 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
           {modalState === 'saved' ? (
             <>
               <IconButton 
-                variant="neutral-secondary" 
+                variant="neutral-primary" 
                 icon={<FeatherPencil />} 
                 onClick={handleEdit}
                 title="Edit location"
               />
               <IconButton 
-                variant="neutral-secondary" 
+                variant="neutral-primary" 
                 icon={<FeatherTrash />} 
                 onClick={handleDelete}
                 title="Remove location"
@@ -587,7 +587,7 @@ const LocationCollectionModal: React.FC<LocationCollectionModalProps> = ({
             </>
           ) : (
             <IconButton 
-              variant="neutral-secondary" 
+              variant="neutral-primary" 
               icon={<FeatherLocate />} 
               onClick={detectCurrentLocation}
               loading={isDetectingLocation}
