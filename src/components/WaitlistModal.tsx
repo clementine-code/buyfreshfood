@@ -755,9 +755,9 @@ const WaitlistModal: React.FC = () => {
             
             {/* UPDATED: Interests section with optional label */}
             <div className="flex w-full flex-col items-start gap-2">
-              <span className="text-body-bold font-body-bold text-default-font mobile:text-sm">
-                I'm interested in: <span className="text-body-bold font-body-bold text-subtext-color">(optional)</span>
-              </span>
+              <label className="block text-body-bold font-body-bold text-default-font mb-2">
+                I'm interested in: (optional])
+                </label>
               <CheckboxCard
                 checked={interests.buying}
                 onCheckedChange={(checked) => setInterests(prev => ({ ...prev, buying: checked }))}
