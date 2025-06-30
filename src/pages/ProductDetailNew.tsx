@@ -25,8 +25,7 @@ import {
   FeatherInstagram,
   FeatherXTwitter,
   FeatherSlack,
-  FeatherHeart,
-  FeatherCheck
+  FeatherHeart
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
@@ -275,7 +274,6 @@ const ProductDetailNew: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Load product data
   useEffect(() => {
@@ -349,7 +347,7 @@ const ProductDetailNew: React.FC = () => {
         name: product.seller.name,
         avatar: product.seller.image,
         distance: product.seller.distance,
-        pickupStatus: product.seller.availability.includes('Today') ? "Pickup available today" : "Pickup available tomorrow",
+        pickupStatus: product.seller.availability.includes('Today') ? 'Pickup available today' : 'Pickup available tomorrow',
         selectedPickupTime: null,
         pickupInstructions: "",
         items: [cartItem]
@@ -359,13 +357,8 @@ const ProductDetailNew: React.FC = () => {
     // Save updated cart to localStorage
     localStorage.setItem('freshFoodCart', JSON.stringify(cart));
     
-    // Show success modal
-    setShowSuccessModal(true);
-    
-    // Hide success modal after 2 seconds
-    setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 2000);
+    // Show confirmation
+    alert(`Added ${quantity} ${quantity > 1 ? 'items' : 'item'} to your cart!`);
   };
 
   // Handle save for later
@@ -413,10 +406,13 @@ const ProductDetailNew: React.FC = () => {
 
   // Handle buy now
   const handleBuyNow = () => {
+    if (!product) return;
+    
+    // Add to cart first
     handleAddToCart();
-    setTimeout(() => {
-      navigate('/cart');
-    }, 500);
+    
+    // Then navigate to cart
+    navigate('/cart');
   };
 
   // Handle share
@@ -434,7 +430,7 @@ const ProductDetailNew: React.FC = () => {
     }
   };
 
-  // Handle contact seller - keep waitlist functionality
+  // Handle contact seller
   const handleContactSeller = () => {
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
@@ -519,24 +515,24 @@ const ProductDetailNew: React.FC = () => {
         <div className="flex w-full flex-col items-start justify-center gap-4">
           <div className="flex w-full flex-col lg:flex-row items-start gap-6 lg:gap-12">
             {/* Product Images */}
-<div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
-  <img
-    className="w-full h-auto max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] object-cover rounded-md"
-    src={product.images[selectedImage]}
-    alt={product.name}
-  />
-  <div className="flex w-full items-center gap-3 overflow-x-auto pb-2">
-    {product.images.map((image, index) => (
-      <img
-        key={index}
-        className={`h-20 w-20 md:h-24 md:w-24 lg:h-32 lg:w-32 flex-none rounded-md object-cover cursor-pointer ${selectedImage === index ? 'ring-2 ring-brand-600' : ''}`}
-        src={image}
-        alt={`${product.name} view ${index + 1}`}
-        onClick={() => setSelectedImage(index)}
-      />
-    ))}
-  </div>
-</div>
+            <div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
+              <img
+                className="w-full h-auto max-h-[20rem] md:max-h-[24rem] lg:max-h-[28rem] object-cover rounded-md"
+                src={product.images[selectedImage]}
+                alt={product.name}
+              />
+              <div className="flex w-full items-center gap-3 overflow-x-auto pb-2">
+                {product.images.map((image, index) => (
+                  <img
+                    key={index}
+                    className={`h-20 w-20 md:h-24 md:w-24 lg:h-32 lg:w-32 flex-none rounded-md object-cover cursor-pointer ${selectedImage === index ? 'ring-2 ring-brand-600' : ''}`}
+                    src={image}
+                    alt={`${product.name} view ${index + 1}`}
+                    onClick={() => setSelectedImage(index)}
+                  />
+                ))}
+              </div>
+            </div>
 
             {/* Product Details */}
             <div className="flex w-full lg:w-1/2 flex-col items-start gap-4">
@@ -647,14 +643,14 @@ const ProductDetailNew: React.FC = () => {
 
               {/* Seller Information */}
               <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
-  <Avatar
-    size="x-large"
-    image={product.seller.image}
-    className="flex-shrink-0"
-  >
-    {product.seller.name.charAt(0)}
-  </Avatar>
-  <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
+                <Avatar
+                  size="x-large"
+                  image={product.seller.image}
+                  className="flex-shrink-0"
+                >
+                  {product.seller.name.charAt(0)}
+                </Avatar>
+                <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
                   <div className="flex items-center gap-2">
                     <span className="text-body-bold font-body-bold text-default-font">
                       {product.seller.name}
@@ -1055,7 +1051,7 @@ const ProductDetailNew: React.FC = () => {
                             name: product.seller.name,
                             avatar: product.seller.image,
                             distance: product.seller.distance,
-                            pickupStatus: product.seller.availability.includes('Today') ? "Pickup available today" : "Pickup available tomorrow",
+                            pickupStatus: product.seller.availability.includes('Today') ? 'Pickup available today' : 'Pickup available tomorrow',
                             selectedPickupTime: null,
                             pickupInstructions: "",
                             items: [cartItem]
@@ -1162,57 +1158,34 @@ const ProductDetailNew: React.FC = () => {
                 <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
                   Product
                 </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Features</span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Integrations</span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Pricing</span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Features
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Integrations
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Pricing
+                </span>
               </div>
               <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
                 <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
                   Company
                 </span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">About us</span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Blog</span>
-                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Careers</span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  About us
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Blog
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Careers
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg">
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success-100">
-                <FeatherCheck className="h-8 w-8 text-success-600" />
-              </div>
-              <h2 className="text-heading-2 font-heading-2 text-default-font">Added to Cart!</h2>
-              <p className="text-body font-body text-default-font">
-                {product.name} has been added to your cart.
-              </p>
-              <div className="flex w-full gap-4 mt-4">
-                <Button 
-                  variant="neutral-secondary"
-                  className="flex-1"
-                  onClick={() => setShowSuccessModal(false)}
-                >
-                  Continue Shopping
-                </Button>
-                <Button 
-                  className="flex-1"
-                  onClick={() => {
-                    setShowSuccessModal(false);
-                    navigate('/cart');
-                  }}
-                >
-                  View Cart
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </DefaultPageLayout>
   );
 };

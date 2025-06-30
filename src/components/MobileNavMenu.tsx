@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FeatherX, FeatherHome, FeatherShoppingBag, FeatherStore, FeatherUser, FeatherShoppingCart } from "@subframe/core";
 import { IconButton } from "@/ui/components/IconButton";
@@ -16,24 +16,53 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   // Get cart item count from localStorage
-  const getCartItemCount = () => {
-    try {
-      const savedCart = localStorage.getItem('freshFoodCart');
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart);
-        return Object.values(parsedCart.sellers).reduce((count: number, seller: any) => {
-          return count + seller.items.reduce((itemCount: number, item: any) => itemCount + item.quantity, 0);
-        }, 0);
+  useEffect(() => {
+    const getCartItemCount = () => {
+      try {
+        const savedCart = localStorage.getItem('freshFoodCart');
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          const count = Object.values(parsedCart.sellers).reduce((total: number, seller: any) => {
+            return total + seller.items.reduce((itemCount: number, item: any) => itemCount + item.quantity, 0);
+          }, 0);
+          setCartItemCount(count);
+        } else {
+          setCartItemCount(0);
+        }
+      } catch (error) {
+        console.error('Error parsing saved cart:', error);
+        setCartItemCount(0);
       }
-    } catch (error) {
-      console.error('Error parsing saved cart:', error);
-    }
-    return 0;
-  };
+    };
 
-  const cartItemCount = getCartItemCount();
+    // Initial count
+    getCartItemCount();
+
+    // Set up storage event listener to update count when cart changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'freshFoodCart') {
+        getCartItemCount();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Custom event for same-tab updates
+    const handleCustomEvent = () => getCartItemCount();
+    window.addEventListener('cartUpdated', handleCustomEvent);
+
+    // Check for cart updates every 2 seconds (fallback)
+    const intervalId = setInterval(getCartItemCount, 2000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cartUpdated', handleCustomEvent);
+      clearInterval(intervalId);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -104,7 +133,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
                 <div className="relative">
                   <FeatherShoppingCart className="w-5 h-5" />
                   {cartItemCount > 0 && (
-                    <div className="absolute -top-2 -right-2 bg-neutral-300 text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                    <div className="absolute -top-2 -right-2 bg-brand-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                       {cartItemCount > 9 ? '9+' : cartItemCount}
                     </div>
                   )}

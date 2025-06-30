@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as SubframeUtils from "../utils";
 import { TopbarWithCenterSearch3 } from "../components/TopbarWithCenterSearch3";
@@ -30,6 +30,53 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const navigate = useNavigate();
     const [showMobileNav, setShowMobileNav] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [cartItemCount, setCartItemCount] = useState(0);
+
+    // Get cart item count from localStorage
+    useEffect(() => {
+      const getCartItemCount = () => {
+        try {
+          const savedCart = localStorage.getItem('freshFoodCart');
+          if (savedCart) {
+            const parsedCart = JSON.parse(savedCart);
+            const count = Object.values(parsedCart.sellers).reduce((total: number, seller: any) => {
+              return total + seller.items.reduce((itemCount: number, item: any) => itemCount + item.quantity, 0);
+            }, 0);
+            setCartItemCount(count);
+          } else {
+            setCartItemCount(0);
+          }
+        } catch (error) {
+          console.error('Error parsing saved cart:', error);
+          setCartItemCount(0);
+        }
+      };
+
+      // Initial count
+      getCartItemCount();
+
+      // Set up storage event listener to update count when cart changes
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'freshFoodCart') {
+          getCartItemCount();
+        }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+
+      // Custom event for same-tab updates
+      const handleCustomEvent = () => getCartItemCount();
+      window.addEventListener('cartUpdated', handleCustomEvent);
+
+      // Check for cart updates every 2 seconds (fallback)
+      const intervalId = setInterval(getCartItemCount, 2000);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('cartUpdated', handleCustomEvent);
+        clearInterval(intervalId);
+      };
+    }, []);
 
     const handleFoodItemSelect = (suggestion: FoodSearchSuggestion) => {
       console.log('Selected food item:', suggestion);
@@ -64,24 +111,6 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const handleLocationButtonClick = () => {
       setIsLocationModalOpen(true);
     };
-
-    // Get cart item count from localStorage
-    const getCartItemCount = () => {
-      try {
-        const savedCart = localStorage.getItem('freshFoodCart');
-        if (savedCart) {
-          const parsedCart = JSON.parse(savedCart);
-          return Object.values(parsedCart.sellers).reduce((count: number, seller: any) => {
-            return count + seller.items.reduce((itemCount: number, item: any) => itemCount + item.quantity, 0);
-          }, 0);
-        }
-      } catch (error) {
-        console.error('Error parsing saved cart:', error);
-      }
-      return 0;
-    };
-
-    const cartItemCount = getCartItemCount();
 
     return (
       <div
@@ -149,7 +178,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
                     Cart
                   </Button>
                   {cartItemCount > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-neutral-300 text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                    <div className="absolute -top-1 -right-1 bg-brand-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                       {cartItemCount > 9 ? '9+' : cartItemCount}
                     </div>
                   )}
@@ -191,7 +220,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
                   onClick={() => navigate('/cart')}
                 />
                 {cartItemCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-neutral-300 text-black rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                  <div className="absolute -top-1 -right-1 bg-brand-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                     {cartItemCount > 9 ? '9+' : cartItemCount}
                   </div>
                 )}
@@ -214,15 +243,15 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
         />
 
         {/* Main Content - Conditional overflow based on marketplace mode */}
-{children ? (
-  <div className={
-    enableMarketplaceMode 
-      ? "flex-1 w-full bg-default-background overflow-hidden pt-12" 
-      : "flex-1 w-full bg-default-background overflow-y-auto pt-12"
-  }>
-    {children}
-  </div>
-) : null}
+        {children ? (
+          <div className={
+            enableMarketplaceMode 
+              ? "flex-1 w-full bg-default-background overflow-hidden pt-12" 
+              : "flex-1 w-full bg-default-background overflow-y-auto pt-12"
+          }>
+            {children}
+          </div>
+        ) : null}
       </div>
     );
   }

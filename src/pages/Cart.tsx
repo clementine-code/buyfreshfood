@@ -109,67 +109,8 @@ const Cart: React.FC = () => {
   // Initialize default cart
   const initializeDefaultCart = () => {
     setCartState({
-      sellers: {
-        'sarah-farm': {
-          id: 'sarah-farm',
-          name: "Sarah's Family Farm",
-          avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-          distance: "2.3 miles away",
-          pickupStatus: "Pickup available today",
-          selectedPickupTime: null,
-          pickupInstructions: "",
-          items: [
-            {
-              id: 'carrots-1',
-              name: 'Carrots',
-              description: 'Harvested today',
-              price: 3.99,
-              unit: 'lb',
-              quantity: 2,
-              image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37"
-            },
-            {
-              id: 'potatoes-1', 
-              name: 'Potatoes',
-              description: 'Collected this morning',
-              price: 4.00,
-              unit: 'lb',
-              quantity: 1,
-              image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
-            }
-          ]
-        },
-        'green-valley': {
-          id: 'green-valley',
-          name: 'Green Valley Organics',
-          avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-          distance: "3.1 miles away", 
-          pickupStatus: "Pickup available tomorrow",
-          selectedPickupTime: null,
-          pickupInstructions: "",
-          items: [
-            {
-              id: 'cauliflower-1',
-              name: 'Cauliflower',
-              description: 'Peak season',
-              price: 4.99,
-              unit: 'bag',
-              quantity: 3,
-              image: "https://images.unsplash.com/photo-1566842600175-97dca489844f"
-            }
-          ]
-        }
-      },
-      savedItems: [
-        {
-          id: 'apples-1',
-          name: 'Apples',
-          price: 5.50,
-          unit: 'bag',
-          image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716",
-          sellerId: 'orchard-farm'
-        }
-      ]
+      sellers: {},
+      savedItems: []
     });
   };
 
@@ -463,10 +404,10 @@ const Cart: React.FC = () => {
     // In a real app, this would process payment and create orders
     // For demo, we'll just clear the cart after modal is closed
     setTimeout(() => {
-      setCartState({
+      setCartState(prevState => ({
         sellers: {},
-        savedItems: [...cartState.savedItems]
-      });
+        savedItems: prevState.savedItems // Keep saved items
+      }));
       setShowSuccessModal(false);
     }, 3000);
   };
@@ -733,129 +674,162 @@ const Cart: React.FC = () => {
             )}
           </div>
 
-          {/* Order Summary Sidebar */}
-          {!isCartEmpty && (
-            <div className="flex w-full md:w-80 flex-none flex-col items-start gap-6 rounded-lg border border-solid border-neutral-border bg-white px-4 py-4 md:px-6 md:py-6 sticky top-24">
-              <span className="text-heading-3 font-heading-3 text-default-font">
-                Order Summary
-              </span>
-              <div className="flex w-full flex-col items-start gap-2">
-                <div className="flex w-full items-center justify-between">
-                  <span className="text-body font-body text-default-font">
-                    Subtotal
-                  </span>
-                  <span className="text-body-bold font-body-bold text-default-font">
-                    ${Object.values(cartState.sellers).reduce((sum, seller) => {
-                      const { subtotal } = calculateSellerTotal(seller);
-                      return sum + subtotal;
-                    }, 0).toFixed(2)}
-                  </span>
+          {/* Order Summary and Saved Items Sidebar */}
+          <div className="flex w-full md:w-80 flex-none flex-col items-start gap-6 rounded-lg border border-solid border-neutral-border bg-white px-4 py-4 md:px-6 md:py-6 sticky top-24">
+            {!isCartEmpty && (
+              <>
+                <span className="text-heading-3 font-heading-3 text-default-font">
+                  Order Summary
+                </span>
+                <div className="flex w-full flex-col items-start gap-2">
+                  <div className="flex w-full items-center justify-between">
+                    <span className="text-body font-body text-default-font">
+                      Subtotal
+                    </span>
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      ${Object.values(cartState.sellers).reduce((sum, seller) => {
+                        const { subtotal } = calculateSellerTotal(seller);
+                        return sum + subtotal;
+                      }, 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center justify-between">
+                    <span className="text-body font-body text-default-font">
+                      Taxes (10%)
+                    </span>
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      ${Object.values(cartState.sellers).reduce((sum, seller) => {
+                        const { taxes } = calculateSellerTotal(seller);
+                        return sum + taxes;
+                      }, 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex h-px w-full flex-none items-start bg-neutral-border" />
+                  <div className="flex w-full items-center justify-between">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      Total
+                    </span>
+                    <span className="text-heading-3 font-heading-3 text-default-font">
+                      ${calculateGrandTotal().toFixed(2)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex w-full items-center justify-between">
-                  <span className="text-body font-body text-default-font">
-                    Taxes (10%)
-                  </span>
-                  <span className="text-body-bold font-body-bold text-default-font">
-                    ${Object.values(cartState.sellers).reduce((sum, seller) => {
-                      const { taxes } = calculateSellerTotal(seller);
-                      return sum + taxes;
-                    }, 0).toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex h-px w-full flex-none items-start bg-neutral-border" />
-                <div className="flex w-full items-center justify-between">
-                  <span className="text-body-bold font-body-bold text-default-font">
-                    Total
-                  </span>
-                  <span className="text-heading-3 font-heading-3 text-default-font">
-                    ${calculateGrandTotal().toFixed(2)}
-                  </span>
-                </div>
-              </div>
-              <Button 
-                className="h-10 w-full flex-none"
-                onClick={handleCheckoutAll}
-                disabled={Object.values(cartState.sellers).some(seller => !seller.selectedPickupTime)}
-              >
-                Checkout - ALL
-              </Button>
-              
-              {Object.values(cartState.sellers).some(seller => !seller.selectedPickupTime) && (
-                <Alert 
-                  variant="warning" 
-                  icon={<FeatherAlertCircle />}
-                  title="Pickup times required"
-                  description="Please select pickup times for all sellers before checkout"
-                />
-              )}
+                <Button 
+                  className="h-10 w-full flex-none"
+                  onClick={handleCheckoutAll}
+                  disabled={Object.values(cartState.sellers).some(seller => !seller.selectedPickupTime)}
+                >
+                  Checkout - ALL
+                </Button>
+                
+                {Object.values(cartState.sellers).some(seller => !seller.selectedPickupTime) && (
+                  <Alert 
+                    variant="warning" 
+                    icon={<FeatherAlertCircle />}
+                    title="Pickup times required"
+                    description="Please select pickup times for all sellers before checkout"
+                  />
+                )}
 
-              {/* Saved for Later Section */}
-              {cartState.savedItems.length > 0 && (
+                {/* Pickup Coordination Info */}
                 <div className="flex w-full flex-col items-start gap-4 mt-4 pt-4 border-t border-neutral-200">
                   <span className="text-body-bold font-body-bold text-default-font">
-                    Saved for Later ({cartState.savedItems.length})
+                    About Local Pickup
                   </span>
-                  {cartState.savedItems.map((item, index) => (
-                    <div 
-                      key={item.id} 
-                      className="flex w-full items-center gap-4 rounded-md border border-solid border-neutral-border bg-default-background px-4 py-4 shadow-sm relative group"
-                    >
-                      <img
-                        className="h-16 w-16 flex-none rounded-md object-cover"
-                        src={item.image}
-                        alt={item.name}
-                      />
-                      <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          {item.name}
-                        </span>
-                        <span className="text-body font-body text-default-font">
-                          ${item.price.toFixed(2)}/{item.unit}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <IconButton
-                          variant="neutral-tertiary"
-                          icon={<FeatherTrash />}
-                          onClick={() => deleteSavedItem(index)}
-                          className="transition-opacity hover:bg-error-50 hover:text-error-600"
-                          aria-label={`Delete ${item.name} from saved items`}
-                          title="Delete saved item"
-                        />
-                        <Button 
-                          variant="neutral-secondary" 
-                          size="small"
-                          onClick={() => addSavedItemToCart(index)}
-                          aria-label={`Add ${item.name} to cart`}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="flex items-start gap-3">
+                    <FeatherMapPin className="text-brand-600 flex-shrink-0 mt-1" />
+                    <p className="text-body font-body text-subtext-color">
+                      Products are picked up directly from each seller at their farm or market location.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <FeatherClock className="text-brand-600 flex-shrink-0 mt-1" />
+                    <p className="text-body font-body text-subtext-color">
+                      Select a convenient pickup time for each seller based on their availability.
+                    </p>
+                  </div>
                 </div>
-              )}
+              </>
+            )}
 
-              {/* Pickup Coordination Info */}
-              <div className="flex w-full flex-col items-start gap-4 mt-4 pt-4 border-t border-neutral-200">
-                <span className="text-body-bold font-body-bold text-default-font">
-                  About Local Pickup
-                </span>
-                <div className="flex items-start gap-3">
-                  <FeatherMapPin className="text-brand-600 flex-shrink-0 mt-1" />
+            {/* Saved for Later Section - Always visible */}
+            <div className={`flex w-full flex-col items-start gap-4 ${!isCartEmpty ? 'mt-4 pt-4 border-t border-neutral-200' : ''}`}>
+              <span className="text-heading-3 font-heading-3 text-default-font">
+                Saved for Later ({cartState.savedItems.length})
+              </span>
+              
+              {cartState.savedItems.length === 0 ? (
+                <div className="flex w-full flex-col items-center justify-center gap-4 py-6 text-center bg-neutral-50 rounded-md">
+                  <FeatherHeart className="h-8 w-8 text-neutral-300" />
                   <p className="text-body font-body text-subtext-color">
-                    Products are picked up directly from each seller at their farm or market location.
+                    No items saved for later
                   </p>
+                  <LinkButton
+                    onClick={() => navigate('/shop')}
+                    variant="brand"
+                  >
+                    Browse Products
+                  </LinkButton>
                 </div>
-                <div className="flex items-start gap-3">
-                  <FeatherClock className="text-brand-600 flex-shrink-0 mt-1" />
-                  <p className="text-body font-body text-subtext-color">
-                    Select a convenient pickup time for each seller based on their availability.
-                  </p>
-                </div>
-              </div>
+              ) : (
+                cartState.savedItems.map((item, index) => (
+                  <div 
+                    key={item.id} 
+                    className="flex w-full items-center gap-4 rounded-md border border-solid border-neutral-border bg-default-background px-4 py-4 shadow-sm relative group"
+                  >
+                    <img
+                      className="h-16 w-16 flex-none rounded-md object-cover"
+                      src={item.image}
+                      alt={item.name}
+                    />
+                    <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        {item.name}
+                      </span>
+                      <span className="text-body font-body text-default-font">
+                        ${item.price.toFixed(2)}/{item.unit}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <IconButton
+                        variant="neutral-tertiary"
+                        icon={<FeatherTrash />}
+                        onClick={() => deleteSavedItem(index)}
+                        className="transition-opacity hover:bg-error-50 hover:text-error-600"
+                        aria-label={`Delete ${item.name} from saved items`}
+                        title="Delete saved item"
+                      />
+                      <Button 
+                        variant="neutral-secondary" 
+                        size="small"
+                        onClick={() => addSavedItemToCart(index)}
+                        aria-label={`Add ${item.name} to cart`}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-          )}
+
+            {/* Empty Cart Message */}
+            {isCartEmpty && cartState.savedItems.length > 0 && (
+              <div className="flex w-full flex-col items-center gap-4 mt-4 pt-4 border-t border-neutral-200">
+                <Button
+                  size="large"
+                  onClick={() => navigate('/shop')}
+                  icon={<FeatherShoppingBag />}
+                  className="w-full"
+                >
+                  Shop Local Food
+                </Button>
+                <p className="text-body font-body text-subtext-color text-center">
+                  Add items to your cart to continue shopping
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Success Modal */}
