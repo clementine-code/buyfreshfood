@@ -112,31 +112,47 @@ class LocationService {
 
     const url = `${this.supabaseUrl}/functions/v1/${endpoint}`;
     
+    // DEBUG: Log the values being used
+    console.log('🔍 DEBUG - Supabase URL:', this.supabaseUrl);
+    console.log('🔍 DEBUG - Supabase Anon Key:', this.supabaseAnonKey ? 'Present' : 'Missing');
+    console.log('🔍 DEBUG - Full URL:', url);
+    console.log('🔍 DEBUG - Request data:', data);
+    
     try {
-      // Create abort controller for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.supabaseAnonKey}`,
+      };
+      
+      // DEBUG: Log headers
+      console.log('🔍 DEBUG - Request headers:', headers);
       
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.supabaseAnonKey}`,
-        },
+        headers,
         body: JSON.stringify(data),
         signal: controller.signal
       });
 
       clearTimeout(timeoutId);
+      
+      // DEBUG: Log response
+      console.log('🔍 DEBUG - Response status:', response.status);
+      console.log('🔍 DEBUG - Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log('🔍 DEBUG - Error response data:', errorData);
         throw new Error(errorData.error || `Backend API error: ${response.status}`);
       }
 
       return await response.json();
 
     } catch (error) {
+      console.log('🔍 DEBUG - Caught error:', error);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout - please check your connection');
       }
