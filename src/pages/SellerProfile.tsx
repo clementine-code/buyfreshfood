@@ -34,6 +34,7 @@ import {
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
+import { useSnackbar } from "../contexts/SnackbarContext";
 import PhotoGallery from "../components/PhotoGallery";
 import L from 'leaflet';
 
@@ -283,6 +284,7 @@ const SellerProfile: React.FC = () => {
   // Waitlist integration
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
+  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     const loadSellerData = async () => {
@@ -372,8 +374,17 @@ const SellerProfile: React.FC = () => {
     // Save updated cart to localStorage
     localStorage.setItem('freshFoodCart', JSON.stringify(cart));
     
-    // Show confirmation
-    alert(`Added ${product.name} to your cart!`);
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('cartUpdated'));
+    
+    // Show snackbar notification
+    showSnackbar('cart', {
+      id: product.id,
+      name: product.name,
+      quantity: 1,
+      unit: unit,
+      image: product.image
+    });
   };
 
   const handleSaveForLater = (product: any) => {
@@ -415,10 +426,19 @@ const SellerProfile: React.FC = () => {
       // Save updated cart to localStorage
       localStorage.setItem('freshFoodCart', JSON.stringify(cart));
       
-      // Show confirmation
-      alert(`Saved ${product.name} for later!`);
+      // Show snackbar notification
+      showSnackbar('saved', {
+        id: product.id,
+        name: product.name,
+        image: product.image
+      });
     } else {
-      alert(`${product.name} is already in your saved items!`);
+      // Show snackbar for already saved item
+      showSnackbar('saved', {
+        id: product.id,
+        name: product.name,
+        image: product.image
+      });
     }
   };
 

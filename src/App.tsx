@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { LocationProvider } from "./contexts/LocationContext";
 import { WaitlistProvider } from "./contexts/WaitlistContext";
+import { SnackbarProvider } from "./contexts/SnackbarContext";
 import PasswordProtection from "./components/PasswordProtection";
 import ScrollToTop from "./components/ScrollToTop";
 import WaitlistModal from "./components/WaitlistModal";
@@ -81,8 +82,10 @@ function App() {
       <LocationProvider>
         <WaitlistProvider>
           <Router>
-            <ScrollToTop />
-            <AppContent />
+            <SnackbarProvider>
+              <ScrollToTop />
+              <AppContent />
+            </SnackbarProvider>
           </Router>
         </WaitlistProvider>
       </LocationProvider>

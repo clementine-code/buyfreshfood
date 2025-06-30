@@ -29,6 +29,7 @@ import {
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
+import { useSnackbar } from "../contexts/SnackbarContext";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -267,6 +268,7 @@ const ProductDetailNew: React.FC = () => {
   const navigate = useNavigate();
   const { state: locationState } = useLocationContext();
   const { openWaitlistFlow } = useWaitlistContext();
+  const { showSnackbar } = useSnackbar();
   
   // State
   const [product, setProduct] = useState<Product | null>(null);
@@ -357,8 +359,17 @@ const ProductDetailNew: React.FC = () => {
     // Save updated cart to localStorage
     localStorage.setItem('freshFoodCart', JSON.stringify(cart));
     
-    // Show confirmation
-    alert(`Added ${quantity} ${quantity > 1 ? 'items' : 'item'} to your cart!`);
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('cartUpdated'));
+    
+    // Show snackbar notification
+    showSnackbar('cart', {
+      id: product.id,
+      name: product.name,
+      quantity: quantity,
+      unit: product.unit,
+      image: product.images[0]
+    });
   };
 
   // Handle save for later
@@ -397,10 +408,19 @@ const ProductDetailNew: React.FC = () => {
       // Save updated cart to localStorage
       localStorage.setItem('freshFoodCart', JSON.stringify(cart));
       
-      // Show confirmation
-      alert(`Saved ${product.name} for later!`);
+      // Show snackbar notification
+      showSnackbar('saved', {
+        id: product.id,
+        name: product.name,
+        image: product.images[0]
+      });
     } else {
-      alert(`${product.name} is already in your saved items!`);
+      // Show snackbar for already saved item
+      showSnackbar('saved', {
+        id: product.id,
+        name: product.name,
+        image: product.images[0]
+      });
     }
   };
 
@@ -1061,8 +1081,17 @@ const ProductDetailNew: React.FC = () => {
                         // Save updated cart to localStorage
                         localStorage.setItem('freshFoodCart', JSON.stringify(cart));
                         
-                        // Show confirmation
-                        alert(`Added ${relatedProduct.name} to your cart!`);
+                        // Dispatch custom event to notify other components
+                        window.dispatchEvent(new Event('cartUpdated'));
+                        
+                        // Show snackbar notification
+                        showSnackbar('cart', {
+                          id: relatedProduct.id,
+                          name: relatedProduct.name,
+                          quantity: 1,
+                          unit: relatedProduct.unit,
+                          image: relatedProduct.image
+                        });
                       }}
                     >
                       Add to Cart
@@ -1106,10 +1135,19 @@ const ProductDetailNew: React.FC = () => {
                           // Save updated cart to localStorage
                           localStorage.setItem('freshFoodCart', JSON.stringify(cart));
                           
-                          // Show confirmation
-                          alert(`Saved ${relatedProduct.name} for later!`);
+                          // Show snackbar notification
+                          showSnackbar('saved', {
+                            id: relatedProduct.id,
+                            name: relatedProduct.name,
+                            image: relatedProduct.image
+                          });
                         } else {
-                          alert(`${relatedProduct.name} is already in your saved items!`);
+                          // Show snackbar for already saved item
+                          showSnackbar('saved', {
+                            id: relatedProduct.id,
+                            name: relatedProduct.name,
+                            image: relatedProduct.image
+                          });
                         }
                       }}
                     />

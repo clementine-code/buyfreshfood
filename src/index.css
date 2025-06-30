@@ -279,3 +279,34 @@ html, body {
 .hide-scrollbar-until-hover:hover::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
 }
+
+/* Snackbar animations */
+@keyframes slideInDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutUp {
+  from {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+}
+
+.snackbar-enter {
+  animation: slideInDown 0.3s forwards;
+}
+
+.snackbar-exit {
+  animation: slideOutUp 0.3s forwards;
+}

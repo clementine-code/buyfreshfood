@@ -35,6 +35,7 @@ import { getProducts, getCategories, getSellers, type Product } from "../lib/sup
 import { foodSearchService, type FoodItem } from "../services/foodSearchService";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
+import { useSnackbar } from "../contexts/SnackbarContext";
 
 /*
 VISUAL LAYOUT FIXES - DO NOT MODIFY:
@@ -75,6 +76,9 @@ function Shop() {
 
   // Scroll direction for mobile filter bar
   const [scrollDirection, setScrollDirection] = useState('up');
+
+  // Snackbar context
+  const { showSnackbar } = useSnackbar();
 
   const handlePageScroll = (event) => {
     // Only run on mobile
@@ -283,11 +287,17 @@ function Shop() {
     // Save updated cart to localStorage
     localStorage.setItem('freshFoodCart', JSON.stringify(cart));
     
-    // Show confirmation
-    alert(`Added ${product.name} to your cart!`);
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('cartUpdated'));
     
-    // Optional: Navigate to cart
-    // navigate('/cart');
+    // Show snackbar notification instead of alert
+    showSnackbar('cart', {
+      id: product.id,
+      name: product.name,
+      quantity: 1,
+      unit: product.unit,
+      image: product.image_url || product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'
+    });
   };
 
   // Handle Save for Later
@@ -325,10 +335,19 @@ function Shop() {
       // Save updated cart to localStorage
       localStorage.setItem('freshFoodCart', JSON.stringify(cart));
       
-      // Show confirmation
-      alert(`Saved ${product.name} for later!`);
+      // Show snackbar notification instead of alert
+      showSnackbar('saved', {
+        id: product.id,
+        name: product.name,
+        image: product.image_url || product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'
+      });
     } else {
-      alert(`${product.name} is already in your saved items!`);
+      // Show snackbar for already saved item
+      showSnackbar('saved', {
+        id: product.id,
+        name: product.name,
+        image: product.image_url || product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'
+      });
     }
   };
 
