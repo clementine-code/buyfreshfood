@@ -310,3 +310,60 @@ html, body {
 .snackbar-exit {
   animation: slideOutUp 0.25s forwards ease-in;
 }
+
+/* Tablet-specific optimizations */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Cart page optimizations */
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  /* Improve spacing for cart items */
+  .rounded-md {
+    border-radius: 8px;
+  }
+  
+  /* Better pickup time buttons for tablets */
+  .pickup-time-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  /* Ensure sidebar doesn't get too narrow */
+  .md\:w-80 {
+    width: 280px !important;
+  }
+  
+  /* Improve spacing between main content and sidebar */
+  .md\:gap-8 {
+    gap: 24px !important;
+  }
+  
+  /* Ensure text doesn't overflow */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* iPad Mini specific optimizations (768px width) */
+@media (width: 768px) {
+  /* Adjust layout for this exact breakpoint */
+  .md\:flex-row {
+    flex-direction: column !important;
+  }
+  
+  .md\:w-80 {
+    width: 100% !important;
+  }
+  
+  /* Make sidebar full width on exactly iPad Mini */
+  .sticky.top-24 {
+    position: relative;
+    top: 0;
+    margin-top: 24px;
+  }
+}

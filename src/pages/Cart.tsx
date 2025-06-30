@@ -397,10 +397,10 @@ const Cart: React.FC = () => {
 
   return (
     <DefaultPageLayout>
-      <div className="container max-w-none flex h-full w-full flex-col items-center gap-8 bg-default-background py-12 px-4 md:px-6">
-        <div className="flex w-full max-w-[1280px] flex-col md:flex-row items-start gap-8">
+      <div className="container max-w-none flex h-full w-full flex-col items-center gap-8 bg-default-background py-8 md:py-12 px-4 md:px-6">
+        <div className="flex w-full max-w-[1280px] flex-col md:flex-row items-start gap-6 md:gap-8">
           {/* Main Cart Section */}
-          <div className="flex grow shrink-0 basis-0 flex-col items-start gap-8 w-full md:w-auto">
+          <div className="flex grow shrink-0 basis-0 flex-col items-start gap-6 md:gap-8 w-full md:w-auto">
             {/* Cart Header */}
             <div className="flex w-full items-center justify-between">
               <div className="flex flex-col items-start gap-1">
@@ -414,9 +414,16 @@ const Cart: React.FC = () => {
               <LinkButton
                 icon={<FeatherArrowLeft />}
                 onClick={() => navigate('/shop')}
+                className="hidden sm:flex"
               >
                 Continue Shopping
               </LinkButton>
+              <IconButton
+                icon={<FeatherArrowLeft />}
+                onClick={() => navigate('/shop')}
+                className="sm:hidden"
+                aria-label="Continue Shopping"
+              />
             </div>
 
             {/* Empty Cart State */}
@@ -492,18 +499,24 @@ const Cart: React.FC = () => {
                             variant={seller.selectedPickupTime === "Today 3-6pm" ? "brand-primary" : "neutral-secondary"}
                             onClick={() => updatePickupTime(seller.id, "Today 3-6pm")}
                             disabled={!seller.pickupStatus.includes('today')}
+                            className="text-sm md:text-base"
+                            size="small"
                           >
                             Today 3-6pm
                           </Button>
                           <Button 
                             variant={seller.selectedPickupTime === "Tomorrow 9am-12pm" ? "brand-primary" : "neutral-secondary"}
                             onClick={() => updatePickupTime(seller.id, "Tomorrow 9am-12pm")}
+                            className="text-sm md:text-base"
+                            size="small"
                           >
                             Tomorrow 9am-12pm
                           </Button>
                           <Button 
                             variant={seller.selectedPickupTime === "Saturday 8-11am" ? "brand-primary" : "neutral-secondary"}
                             onClick={() => updatePickupTime(seller.id, "Saturday 8-11am")}
+                            className="text-sm md:text-base"
+                            size="small"
                           >
                             Saturday 8-11am
                           </Button>
