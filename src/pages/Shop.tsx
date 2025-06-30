@@ -959,7 +959,7 @@ function Shop() {
         </div>
 
         {/* Products Grid/List - Full width, scrollable content */}
-        <div className="w-full px-4 flex-1 pt-2">
+        <div className="w-full px-4 flex-1 pt-4">
           {currentProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
               <FeatherX className="w-16 h-16 text-neutral-300 mb-4" />
