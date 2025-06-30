@@ -144,7 +144,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
                 <Link to="/">
                   <img
                     className="h-10 flex-none object-contain cursor-pointer"
-                    src="/Buy-Fresh-Food-Logo-All.png"
+                    src="/Buy-Fresh-Food-Logo.png"
                     alt="Buy Fresh. Food Logo"
                   />
                 </Link>
@@ -219,7 +219,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
             <Link to="/" className="flex-shrink-0 mr-2">
               <img
                 className="h-8 object-contain"
-                src="/Buy-Fresh-Food-Logo-All.png"
+                src="/Buy-Fresh-Food-Logo.png"
                 alt="Buy Fresh. Food Logo"
               />
             </Link>

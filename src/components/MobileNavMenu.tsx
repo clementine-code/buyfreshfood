@@ -89,7 +89,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
           <div className="flex items-center gap-3">
             <img
               className="h-10 object-contain"
-              src="/Buy-Fresh-Food-Logo-All.png"
+              src="/Buy-Fresh-Food-Logo.png"
               alt="Buy Fresh. Food Logo"
             />
           </div>

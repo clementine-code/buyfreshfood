@@ -21,7 +21,7 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
             <Link to="/">
               <img
                 className="h-10 flex-none object-contain"
-                src="/Buy-Fresh-Food-Logo-All.png"
+                src="/Buy-Fresh-Food-Logo.png"
                 alt="Buy Fresh. Food Logo"
               />
             </Link>
