@@ -79,12 +79,12 @@ function App() {
   return (
     <LocationProvider>
       <WaitlistProvider>
-        <Router>
-          <SnackbarProvider>
+        <SnackbarProvider>
+          <Router>
             <ScrollToTop />
             <AppContent />
-          </SnackbarProvider>
-        </Router>
+          </Router>
+        </SnackbarProvider>
       </WaitlistProvider>
     </LocationProvider>
   );
