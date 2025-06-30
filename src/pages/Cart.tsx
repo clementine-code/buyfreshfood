@@ -568,14 +568,17 @@ const Cart: React.FC = () => {
                       {/* Cart Items from this Seller */}
                       <div className="flex w-full flex-col items-start gap-4">
                         {seller.items.map((item) => (
-                          <div key={item.id} className="flex w-full items-center gap-4 rounded-md bg-neutral-50 px-4 py-4">
+                          <div key={item.id} className="flex w-full flex-wrap sm:flex-nowrap items-center gap-3 rounded-md bg-neutral-50 px-3 py-3 sm:px-4 sm:py-4">
+                            {/* Product Image */}
                             <img
                               className="h-16 w-16 flex-none rounded-md object-cover"
                               src={item.image}
                               alt={item.name}
                             />
-                            <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
-                              <span className="text-body-bold font-body-bold text-default-font">
+                            
+                            {/* Product Info - Grows to fill space */}
+                            <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1 min-w-0">
+                              <span className="text-body-bold font-body-bold text-default-font truncate w-full">
                                 {item.name}
                               </span>
                               <span className="text-caption font-caption text-subtext-color">
@@ -585,39 +588,48 @@ const Cart: React.FC = () => {
                                 ${item.price.toFixed(2)}/{item.unit}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <IconButton
-                                variant="neutral-primary"
-                                size="small"
-                                icon={<FeatherMinus />}
-                                onClick={() => updateItemQuantity(seller.id, item.id, item.quantity - 1)}
-                                disabled={item.quantity <= 1}
-                              />
-                              <span className="text-body-bold font-body-bold text-default-font w-6 text-center">
-                                {item.quantity}
+                            
+                            {/* Mobile Layout: Second Row for Controls */}
+                            <div className="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-3 mt-2 sm:mt-0">
+                              {/* Quantity Controls */}
+                              <div className="flex items-center gap-2">
+                                <IconButton
+                                  variant="neutral-primary"
+                                  size="small"
+                                  icon={<FeatherMinus />}
+                                  onClick={() => updateItemQuantity(seller.id, item.id, item.quantity - 1)}
+                                  disabled={item.quantity <= 1}
+                                />
+                                <span className="text-body-bold font-body-bold text-default-font w-6 text-center">
+                                  {item.quantity}
+                                </span>
+                                <IconButton
+                                  variant="neutral-primary"
+                                  size="small"
+                                  icon={<FeatherPlus />}
+                                  onClick={() => updateItemQuantity(seller.id, item.id, item.quantity + 1)}
+                                />
+                              </div>
+                              
+                              {/* Price */}
+                              <span className="text-body-bold font-body-bold text-default-font min-w-[60px] text-right sm:ml-2">
+                                ${(item.price * item.quantity).toFixed(2)}
                               </span>
-                              <IconButton
-                                variant="neutral-primary"
-                                size="small"
-                                icon={<FeatherPlus />}
-                                onClick={() => updateItemQuantity(seller.id, item.id, item.quantity + 1)}
-                              />
-                            </div>
-                            <span className="text-body-bold font-body-bold text-default-font w-16 text-right">
-                              ${(item.price * item.quantity).toFixed(2)}
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <IconButton
-                                icon={<FeatherTrash />}
-                                onClick={() => removeItem(seller.id, item.id)}
-                                title="Remove from cart"
-                              />
-                              <IconButton
-                                variant="destructive-secondary"
-                                icon={<FeatherHeart />}
-                                onClick={() => saveForLater(seller.id, item.id)}
-                                title="Save for later"
-                              />
+                              
+                              {/* Action Buttons */}
+                              <div className="flex items-center gap-2 ml-auto">
+                                <IconButton
+                                  icon={<FeatherTrash />}
+                                  onClick={() => removeItem(seller.id, item.id)}
+                                  title="Remove from cart"
+                                />
+                                <IconButton
+                                  variant="destructive-secondary"
+                                  icon={<FeatherHeart />}
+                                  onClick={() => saveForLater(seller.id, item.id)}
+                                  title="Save for later"
+                                />
+                              </div>
                             </div>
                           </div>
                         ))}
