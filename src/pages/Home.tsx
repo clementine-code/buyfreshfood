@@ -19,6 +19,7 @@ import { FeatherXTwitter } from "@subframe/core";
 import { FeatherSlack } from "@subframe/core";
 import { useLocationContext } from "../contexts/LocationContext";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
+import Footer from "../components/Footer";
 
 function Home() {
   const navigate = useNavigate();
@@ -186,48 +187,10 @@ function Home() {
               </div>
             </div>
           </div>
-
-          {/* Footer */}
-          <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background px-6 py-12 max-w-full mobile:px-4 mobile:py-8">
-            <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:gap-4">
-              <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
-                <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-center mobile:justify-center">
-                  <img
-                    className="h-5 w-5 flex-none object-cover"
-                    src="/Buy-Fresh-Food-Logo.png"
-                  />
-                  <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    BuyFresh.Food
-                  </span>
-                </div>
-                <div className="flex w-full items-center gap-2 mobile:justify-center">
-                  <IconButton icon={<FeatherFacebook />} onClick={() => {}} />
-                  <IconButton icon={<FeatherInstagram />} onClick={() => {}} />
-                  <IconButton icon={<FeatherXTwitter />} onClick={() => {}} />
-                  <IconButton icon={<FeatherSlack />} onClick={() => {}} />
-                </div>
-              </div>
-              <div className="flex grow shrink-0 basis-0 flex-wrap items-start gap-4 self-stretch mobile:grid mobile:grid-cols-2 mobile:gap-6">
-                <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                  <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Product
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Features</span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Integrations</span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Pricing</span>
-                </div>
-                <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                  <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Company
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">About us</span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Blog</span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">Careers</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </DefaultPageLayout>
   );
