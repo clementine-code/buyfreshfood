@@ -279,7 +279,7 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
   // NEW: Checkout-specific waitlist flow
   const openCheckoutWaitlistFlow = async () => {
     // Determine waitlist type based on location context
-    const { isNWA, city, state, zipCode, location } = state.currentLocationData || {};
+    const { isNWA, city, state: locationStateProp, zipCode, formattedAddress } = state.currentLocationData || {};
     const waitlistType = isNWA ? 'early_access' : 'geographic';
     
     // Open waitlist flow with checkout context
@@ -288,9 +288,9 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
       state.currentLocationData ? {
         isNWA: isNWA || false,
         city: city || '',
-        state: state || '',
+        state: locationStateProp || '',
         zipCode: zipCode || '',
-        formattedAddress: location || ''
+        formattedAddress: formattedAddress || ''
       } : undefined,
       { 
         collectLocationInModal: !state.currentLocationData,
@@ -302,7 +302,7 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
   // NEW: Sign In-specific waitlist flow
   const openSignInWaitlistFlow = async () => {
     // Determine waitlist type based on location context
-    const { isNWA, city, state, zipCode, location } = state.currentLocationData || {};
+    const { isNWA, city, state: locationStateProp, zipCode, formattedAddress } = state.currentLocationData || {};
     const waitlistType = isNWA ? 'early_access' : 'geographic';
     
     // Open waitlist flow with sign in context
@@ -311,9 +311,9 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
       state.currentLocationData ? {
         isNWA: isNWA || false,
         city: city || '',
-        state: state || '',
+        state: locationStateProp || '',
         zipCode: zipCode || '',
-        formattedAddress: location || ''
+        formattedAddress: formattedAddress || ''
       } : undefined,
       { 
         collectLocationInModal: !state.currentLocationData,
