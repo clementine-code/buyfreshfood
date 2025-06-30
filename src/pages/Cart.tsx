@@ -78,11 +78,6 @@ const Cart: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   
-  // Delete confirmation modal state
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  
   // Ref for tracking cart changes
   const cartUpdateRef = useRef<number>(0);
 
@@ -376,34 +371,17 @@ const Cart: React.FC = () => {
     });
   };
 
-  // Delete saved item with confirmation
-  const openDeleteConfirmation = (index: number) => {
-    setItemToDelete(index);
-    setShowDeleteModal(true);
-  };
-
-  // Confirm deletion of saved item
-  const confirmDeleteSavedItem = () => {
-    if (itemToDelete === null) return;
-    
-    setDeleteLoading(true);
-    
-    // Simulate a short loading state for better UX
-    setTimeout(() => {
-      setCartState(prevState => {
-        const updatedSavedItems = [...prevState.savedItems];
-        updatedSavedItems.splice(itemToDelete, 1);
-        
-        return {
-          ...prevState,
-          savedItems: updatedSavedItems
-        };
-      });
+  // Delete saved item directly without confirmation
+  const deleteSavedItem = (index: number) => {
+    setCartState(prevState => {
+      const updatedSavedItems = [...prevState.savedItems];
+      updatedSavedItems.splice(index, 1);
       
-      setDeleteLoading(false);
-      setShowDeleteModal(false);
-      setItemToDelete(null);
-    }, 500);
+      return {
+        ...prevState,
+        savedItems: updatedSavedItems
+      };
+    });
   };
 
   // Update pickup time
@@ -836,6 +814,14 @@ const Cart: React.FC = () => {
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
+                        <IconButton
+                          variant="neutral-tertiary"
+                          icon={<FeatherTrash />}
+                          onClick={() => deleteSavedItem(index)}
+                          className="transition-opacity hover:bg-error-50 hover:text-error-600"
+                          aria-label={`Delete ${item.name} from saved items`}
+                          title="Delete saved item"
+                        />
                         <Button 
                           variant="neutral-secondary" 
                           size="small"
@@ -844,14 +830,6 @@ const Cart: React.FC = () => {
                         >
                           Add
                         </Button>
-                        <IconButton
-                          variant="neutral-tertiary"
-                          icon={<FeatherTrash />}
-                          onClick={() => openDeleteConfirmation(index)}
-                          className="transition-opacity hover:bg-error-50 hover:text-error-600"
-                          aria-label={`Delete ${item.name} from saved items`}
-                          title="Delete saved item"
-                        />
                       </div>
                     </div>
                   ))}
@@ -896,55 +874,6 @@ const Cart: React.FC = () => {
                 >
                   Continue Shopping
                 </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteModal && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setShowDeleteModal(false);
-                setItemToDelete(null);
-              }
-            }}
-          >
-            <div 
-              className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex flex-col items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error-100">
-                  <FeatherTrash className="h-8 w-8 text-error-600" />
-                </div>
-                <h2 className="text-heading-2 font-heading-2 text-default-font text-center">Delete Saved Item?</h2>
-                <p className="text-body font-body text-subtext-color text-center">
-                  Are you sure you want to remove this item from your saved items? This action cannot be undone.
-                </p>
-                <div className="flex w-full gap-4 mt-4">
-                  <Button 
-                    variant="neutral-secondary"
-                    className="flex-1"
-                    onClick={() => {
-                      setShowDeleteModal(false);
-                      setItemToDelete(null);
-                    }}
-                    disabled={deleteLoading}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    variant="destructive-primary"
-                    className="flex-1"
-                    onClick={confirmDeleteSavedItem}
-                    loading={deleteLoading}
-                  >
-                    {deleteLoading ? 'Deleting...' : 'Delete'}
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
