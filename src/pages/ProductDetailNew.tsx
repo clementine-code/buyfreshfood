@@ -675,7 +675,7 @@ const ProductDetailNew: React.FC = () => {
                 </Button>
               </div>
 
-             {/* Seller Info */}
+             {/* Seller Info 
 <div className="bg-neutral-50 rounded-lg p-4">
   <div className="flex items-start gap-3">
     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100">
@@ -702,7 +702,7 @@ const ProductDetailNew: React.FC = () => {
     </Button>
   </div>
 </div>
-
+*/}
         {/* Pickup Information with Map */}
         <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm mt-4">
           <Accordion
