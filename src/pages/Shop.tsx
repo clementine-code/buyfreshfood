@@ -887,7 +887,7 @@ function Shop() {
   transition: 'transform 0.3s ease-in-out'
 }}>
           {/* IMPORTANT: pt-0 -mt-2 prevents product overlap with sort bar - don't change! */}
-          <div className="flex w-full flex-col gap-3 px-4 py-4 pt-0" style={{ marginTop: '-4px' }}>
+          <div className="flex w-full flex-col gap-3 px-4 py-4">
 
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
