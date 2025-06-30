@@ -503,6 +503,7 @@ const ProductDetailNew: React.FC = () => {
             <span className="text-body font-body text-subtext-color">Loading product details...</span>
           </div>
         </div>
+      </div>
       </DefaultPageLayout>
     );
   }
@@ -1214,7 +1215,6 @@ const ProductDetailNew: React.FC = () => {
           </div>
         </div>
       </div>
-          </div>
     </DefaultPageLayout>
   );
 };
