@@ -66,16 +66,16 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
     };
   }, [isOpen]);
   
-  // Handle join waitlist click
-  const handleJoinWaitlistClick = () => {
-    onClose();
-    openWaitlistFlow('geographic', undefined, { collectLocationInModal: true });
-  };
-  
   // Handle sign in click
   const handleSignInClick = () => {
     onClose();
     openSignInWaitlistFlow();
+  };
+  
+  // Handle join waitlist click
+  const handleJoinWaitlistClick = () => {
+    onClose();
+    openWaitlistFlow('geographic', undefined, { collectLocationInModal: true });
   };
 
   if (!isOpen) return null;
@@ -105,15 +105,6 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
         {/* Navigation Items */}
         <div className="flex-1 p-6">
           <nav className="space-y-2">
-            {/* NEW: Join Waitlist - Prominent placement */}
-            <div 
-              className="flex items-center gap-4 p-4 rounded-lg bg-brand-50 border border-brand-100 text-brand-700 mb-4 cursor-pointer"
-              onClick={handleJoinWaitlistClick}
-            >
-              <FeatherClock className="w-5 h-5" />
-              <span className="text-body-bold font-body-bold">Join Waitlist</span>
-            </div>
-            
             <Link to="/" onClick={onClose}>
               <div className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
                 location.pathname === "/" 
@@ -175,6 +166,15 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               onClick={handleSignInClick}
             >
               Sign In
+            </Button>
+            
+            <Button 
+              variant="brand-tertiary" 
+              icon={<FeatherClock />}
+              className="w-full justify-start"
+              onClick={handleJoinWaitlistClick}
+            >
+              Join Waitlist
             </Button>
           </div>
         </div>
