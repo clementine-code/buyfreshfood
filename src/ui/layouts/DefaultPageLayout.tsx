@@ -34,10 +34,10 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
     
-    // Waitlist integration
-    const { openSignInWaitlistFlow } = useWaitlistContext();
-    const { state: locationState } = useLocationContext();
-
+    // Safely access context with error handling
+    const waitlistContext = useWaitlistContext();
+    const locationContext = useLocationContext();
+    
     // Get cart item count from localStorage
     useEffect(() => {
       const getCartItemCount = () => {
@@ -121,7 +121,9 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     // Handle sign in button click - trigger waitlist flow
     const handleSignInClick = (e: React.MouseEvent) => {
       e.preventDefault();
-      openSignInWaitlistFlow();
+      if (waitlistContext) {
+        waitlistContext.openSignInWaitlistFlow();
+      }
     };
 
     return (
