@@ -472,6 +472,20 @@ const ProductDetailNew: React.FC = () => {
     }
   };
 
+  const handleSellerClick = () => {
+  if (!product) return;
+  
+  // Get seller ID - handle both Supabase and FoodItem types
+  const sellerId = isSupabaseProduct && product.seller?.id 
+    ? product.seller.id 
+    : sellerName?.toLowerCase().replace(/\s+/g, '-');
+    
+  if (sellerId) {
+    // Navigate to seller profile page
+    navigate(`/seller/${sellerId}`);
+  }
+};
+
   // Render star rating
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -661,60 +675,33 @@ const ProductDetailNew: React.FC = () => {
                 </Button>
               </div>
 
-              {/* Seller Information */}
-              <div className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6">
-                <Avatar
-                  size="x-large"
-                  image={product.seller.image}
-                  className="flex-shrink-0"
-                >
-                  {product.seller.name.charAt(0)}
-                </Avatar>
-                <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
-                  <div className="flex items-center gap-2">
-                    <span className="text-body-bold font-body-bold text-default-font">
-                      {product.seller.name}
-                    </span>
-                    {product.seller.verified && (
-                      <FeatherVerified className="text-body font-body text-brand-700" />
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="flex items-center">
-                      <FeatherStar className="text-body font-body text-default-font" />
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        {product.seller.rating.toFixed(1)}
-                      </span>
-                    </div>
-                    <span className="text-body font-body text-subtext-color">
-                      ({product.seller.reviewCount} reviews)
-                    </span>
-                  </div>
-                  <span className="text-caption font-caption text-subtext-color">
-                    {product.seller.distance} • {product.seller.availability}
-                  </span>
-                </div>
-                <div className="flex flex-row sm:flex-col md:flex-row gap-2 mt-2 sm:mt-0">
-                  <IconButton
-                    variant="neutral-primary"
-                    icon={<FeatherMessageCircle />}
-                    onClick={handleContactSeller}
-                  />
-                  <IconButton
-                    variant="neutral-primary"
-                    icon={<FeatherMail />}
-                    onClick={() => window.location.href = `mailto:${product.seller.contact.email}`}
-                  />
-                  <IconButton
-                    variant="neutral-primary"
-                    icon={<FeatherPhone />}
-                    onClick={() => window.location.href = `tel:${product.seller.contact.phone.replace(/[^0-9]/g, '')}`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+             {/* Seller Info */}
+<div className="bg-neutral-50 rounded-lg p-4">
+  <div className="flex items-start gap-3">
+    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100">
+      <FeatherUser className="h-5 w-5 text-brand-600" />
+    </div>
+    <div className="flex-1">
+      <h4 className="text-heading-3 font-heading-3 text-default-font">
+        {sellerName}
+      </h4>
+      {sellerLocation && (
+        <div className="flex items-center gap-1 text-body font-body text-subtext-color">
+          <FeatherMapPin className="w-4 h-4" />
+          <span>{sellerLocation}</span>
         </div>
+      )}
+    </div>
+    <Button
+      variant="brand-secondary"
+      size="small"
+      icon={<FeatherMessageCircle />}
+      onClick={handleContactSeller}
+    >
+      Contact
+    </Button>
+  </div>
+</div>
 
         {/* Pickup Information with Map */}
         <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm mt-4">
