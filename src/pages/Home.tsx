@@ -49,6 +49,20 @@ function Home() {
         
        {/* Hero Section - FIXED mobile overlay issue */}
 <div className="flex min-h-[576px] w-full flex-col items-center justify-center gap-12 overflow-hidden px-4 pt-20 pb-24 max-w-full relative mobile:px-4 mobile:pt-24 mobile:pb-16 mobile:min-h-[500px]">
+  {/* Bolt.new Badge */}
+  <a 
+    href="https://bolt.new" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="absolute top-4 right-4 z-20 transition-transform hover:scale-105"
+  >
+    <img 
+      src="https://raw.githubusercontent.com/kickiniteasy/bolt-hackathon-badge/main/white-circle.svg" 
+      alt="Built with Bolt.new" 
+      className="w-12 h-12 md:w-16 md:h-16"
+    />
+  </a>
+  
   <div className="flex flex-col items-center justify-center gap-8 px-6 py-6 z-10">
     <Badge>Welcome to BuyFresh.Food!</Badge>
     <div className="flex w-full max-w-[768px] flex-col items-start gap-4 rounded-md bg-[#edfcefcc] px-6 py-6 shadow-sm mobile:px-4 mobile:py-4 mobile:max-w-[90%]">
