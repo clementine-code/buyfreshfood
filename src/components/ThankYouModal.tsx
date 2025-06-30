@@ -78,7 +78,7 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
               <p className="text-body font-body text-subtext-color">
                 {isFeatureContext 
                   ? `${featureTitle} functionality is coming soon to your area. You're already on our waitlist!` 
-                  : "You're already on the waitlist for <strong>buyfresh.food</strong> in your area."}
+                  : "You're already on the waitlist for buyfresh.food in your area."}
               </p>
             </div>
 
