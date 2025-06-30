@@ -111,7 +111,7 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
             {/* Additional Info */}
             <p className="text-caption font-caption text-subtext-color">
               {isFeatureContext 
-                ? `We'll notify you as soon as ${featureContext === 'checkout' ? 'ordering' : 'accounts'} becomes available in your area.` 
+                ? `We'll notify you as soon as ${state.featureContext === 'checkout' ? 'ordering' : 'accounts'} becomes available in your area.` 
                 : "We'll notify you as soon as we launch in your area. You'll be among the first to access fresh local food!"}
             </p>
           </div>
