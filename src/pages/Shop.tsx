@@ -879,6 +879,10 @@ function Shop() {
         className={`xl:hidden flex w-full flex-col bg-white min-h-screen overflow-y-auto relative mobile-shop-content ${isOfflineMode ? 'offline-mode' : ''} ${scrollDirection === 'down' ? 'filter-hidden' : 'filter-visible'}`}
         onScroll={handlePageScroll}
       >
+        {/* WORKING LAYOUT SOLUTION:
+ - Sort bar: basic transform animation (no sticky positioning)
+ - Products container: standard w-full px-4 flex-1 classes
+- Maintains scroll behavior while keeping sort bar visible */}
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
         <div className={`sort-filter-bar xl:hidden w-full bg-white border-b border-neutral-200 ${
   (showMobileFilters || showMobileMap) ? 'hidden' : ''
