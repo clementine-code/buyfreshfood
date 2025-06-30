@@ -92,7 +92,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye54aye.png"
             />
             <span className="text-heading-3 font-heading-3 text-default-font">
-              Fresh Local Food
+              BuyFresh.Food /*Keep logo name*/}
             </span>
           </div>
           <IconButton
