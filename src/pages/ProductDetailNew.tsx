@@ -1214,6 +1214,7 @@ const ProductDetailNew: React.FC = () => {
           </div>
         </div>
       </div>
+          </div>
     </DefaultPageLayout>
   );
 };
