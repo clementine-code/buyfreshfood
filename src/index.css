@@ -283,22 +283,22 @@ html, body {
 /* Snackbar animations */
 @keyframes slideInDown {
   from {
-    transform: translate(-50%, -120%);
+    transform: translateY(-120%);
     opacity: 0;
   }
   to {
-    transform: translate(-50%, 0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
 
 @keyframes slideOutUp {
   from {
-    transform: translate(-50%, 0);
+    transform: translateY(0);
     opacity: 1;
   }
   to {
-    transform: translate(-50%, -120%);
+    transform: translateY(-120%);
     opacity: 0;
   }
 }

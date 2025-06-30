@@ -115,7 +115,7 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({ children }) 
           {snackbars.map((snackbar, index) => (
             <div
               key={snackbar.id}
-              className={`transition-all duration-300 ease-in-out pointer-events-auto ${snackbar.exiting ? 'snackbar-exit' : ''}`}
+              className={`transition-all duration-300 ease-in-out pointer-events-auto ${snackbar.exiting ? 'snackbar-exit' : 'snackbar-enter'}`}
               style={{
                 zIndex: 1000 - index
               }}
