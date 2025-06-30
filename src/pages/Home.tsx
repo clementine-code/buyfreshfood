@@ -194,13 +194,7 @@ function Home() {
                 <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-center mobile:justify-center">
                   <img
                     className="h-5 w-5 flex-none object-cover"
-                    <Link to="/">
-              <img
-                className="h-10 flex-none object-contain"
-                src="/Buy-Fresh-Food-Logo.png"
-                alt="Buy Fresh. Food Logo"
-              />
-            </Link>
+                    src="/Buy-Fresh-Food-Logo.png"
                   />
                   <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
                     BuyFresh.Food
