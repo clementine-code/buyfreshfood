@@ -143,9 +143,9 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
               <>
                 <Link to="/">
                   <img
-                    className="h-6 flex-none object-cover cursor-pointer"
-                    src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye54aye.png"
-                    alt="Logo"
+                    className="h-10 flex-none object-contain cursor-pointer"
+                    src="/Buy-Fresh-Food-Logo-All.png"
+                    alt="Buy Fresh. Food Logo"
                   />
                 </Link>
                 <div className="flex items-center gap-2">
@@ -214,6 +214,15 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
             >
               <FeatherMenu className="w-5 h-5 text-default-font" />
             </button>
+
+            {/* Logo - Added to mobile navbar */}
+            <Link to="/" className="flex-shrink-0 mr-2">
+              <img
+                className="h-8 object-contain"
+                src="/Buy-Fresh-Food-Logo-All.png"
+                alt="Buy Fresh. Food Logo"
+              />
+            </Link>
 
             {/* Center Search */}
             <div className="flex grow shrink-0 basis-0 items-center justify-center gap-4">

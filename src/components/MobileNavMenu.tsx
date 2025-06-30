@@ -88,12 +88,10 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-neutral-200">
           <div className="flex items-center gap-3">
             <img
-              className="h-6 flex-none object-cover"
-              src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye54aye.png"
+              className="h-10 object-contain"
+              src="/Buy-Fresh-Food-Logo-All.png"
+              alt="Buy Fresh. Food Logo"
             />
-            <span className="text-heading-3 font-heading-3 text-default-font">
-              BuyFresh.Food
-            </span>
           </div>
           <IconButton
             variant="neutral-tertiary"

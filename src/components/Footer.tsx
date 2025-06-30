@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Link } from "react-router-dom";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherFacebook } from "@subframe/core";
 import { FeatherInstagram } from "@subframe/core";
@@ -17,14 +18,13 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
       <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6 mobile:flex-col mobile:flex-wrap mobile:gap-6">
         <div className="flex min-w-[320px] flex-col items-start gap-6 self-stretch mobile:items-center mobile:justify-start">
           <div className="flex w-full min-w-[320px] grow shrink-0 basis-0 items-start gap-4 mobile:items-start mobile:justify-center">
-            <img
-              className="h-5 w-5 flex-none object-cover"
-              src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4aye54aye.png"
-              alt="BuyFresh.Food Logo"
-            />
-            <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-              BuyFresh.Food
-            </span>
+            <Link to="/">
+              <img
+                className="h-10 flex-none object-contain"
+                src="/Buy-Fresh-Food-Logo-All.png"
+                alt="Buy Fresh. Food Logo"
+              />
+            </Link>
           </div>
           <div className="flex w-full items-center gap-2 mobile:items-center mobile:justify-center">
             <IconButton
