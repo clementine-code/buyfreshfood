@@ -5,7 +5,6 @@ import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { LocationProvider } from "./contexts/LocationContext";
 import { WaitlistProvider } from "./contexts/WaitlistContext";
 import { SnackbarProvider } from "./contexts/SnackbarContext";
-import PasswordProtection from "./components/PasswordProtection";
 import ScrollToTop from "./components/ScrollToTop";
 import WaitlistModal from "./components/WaitlistModal";
 import LocationCollectionModal from "./components/LocationCollectionModal";
@@ -78,18 +77,16 @@ function AppContent() {
 
 function App() {
   return (
-    <PasswordProtection>
-      <LocationProvider>
-        <WaitlistProvider>
-          <Router>
-            <SnackbarProvider>
-              <ScrollToTop />
-              <AppContent />
-            </SnackbarProvider>
-          </Router>
-        </WaitlistProvider>
-      </LocationProvider>
-    </PasswordProtection>
+    <LocationProvider>
+      <WaitlistProvider>
+        <Router>
+          <SnackbarProvider>
+            <ScrollToTop />
+            <AppContent />
+          </SnackbarProvider>
+        </Router>
+      </WaitlistProvider>
+    </LocationProvider>
   );
 }
 

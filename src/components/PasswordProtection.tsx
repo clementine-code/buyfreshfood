@@ -17,32 +17,27 @@ const PasswordProtection: React.FC<PasswordProtectionProps> = ({ children }) => 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Configuration - easily changeable
-  const STAGING_PASSWORD = "dominatefreshfoodmarket2025";
-  const SESSION_KEY = "fresh_food_staging_auth";
-  const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-
   // Check for existing session on mount
   useEffect(() => {
     const checkSession = () => {
       try {
-        const sessionData = localStorage.getItem(SESSION_KEY);
+        const sessionData = localStorage.getItem("fresh_food_staging_auth");
         if (sessionData) {
           const { timestamp, authenticated } = JSON.parse(sessionData);
           const now = Date.now();
           
           // Check if session is still valid (within 24 hours)
-          if (authenticated && (now - timestamp) < SESSION_DURATION) {
+          if (authenticated && (now - timestamp) < 24 * 60 * 60 * 1000) {
             setIsAuthenticated(true);
             return;
           } else {
             // Session expired, clear it
-            localStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem("fresh_food_staging_auth");
           }
         }
       } catch (error) {
         // Invalid session data, clear it
-        localStorage.removeItem(SESSION_KEY);
+        localStorage.removeItem("fresh_food_staging_auth");
       }
     };
 
@@ -57,13 +52,13 @@ const PasswordProtection: React.FC<PasswordProtectionProps> = ({ children }) => 
     // Simulate a brief loading state for better UX
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    if (password === STAGING_PASSWORD) {
+    if (password === "dominatefreshfoodmarket2025") {
       // Store session
       const sessionData = {
         authenticated: true,
         timestamp: Date.now()
       };
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+      localStorage.setItem("fresh_food_staging_auth", JSON.stringify(sessionData));
       setIsAuthenticated(true);
     } else {
       setError("Incorrect password. Please try again.");
