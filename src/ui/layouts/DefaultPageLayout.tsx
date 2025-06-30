@@ -14,6 +14,8 @@ import MobileNavMenu from "../../components/MobileNavMenu";
 import FoodSearchField from "../../components/FoodSearchField";
 import LocationCollectionModal from "../../components/LocationCollectionModal";
 import { type FoodSearchSuggestion } from "../../services/foodSearchService";
+import { useWaitlistContext } from "../../contexts/WaitlistContext";
+import { useLocationContext } from "../../contexts/LocationContext";
 
 interface DefaultPageLayoutRootProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -31,6 +33,10 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const [showMobileNav, setShowMobileNav] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
+    
+    // Waitlist integration
+    const { openSignInWaitlistFlow } = useWaitlistContext();
+    const { state: locationState } = useLocationContext();
 
     // Get cart item count from localStorage
     useEffect(() => {
@@ -111,6 +117,12 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
     const handleLocationButtonClick = () => {
       setIsLocationModalOpen(true);
     };
+    
+    // NEW: Handle sign in button click - trigger waitlist flow
+    const handleSignInClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      openSignInWaitlistFlow();
+    };
 
     return (
       <div
@@ -167,7 +179,11 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
             rightSlot={
               <>
                 <LocationButton className="flex-shrink-0" onClick={handleLocationButtonClick} />
-                <Button variant="brand-secondary" icon={<FeatherUser />}>
+                <Button 
+                  variant="brand-secondary" 
+                  icon={<FeatherUser />}
+                  onClick={handleSignInClick}
+                >
                   Sign In
                 </Button>
                 <div className="relative">

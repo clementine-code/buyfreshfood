@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FeatherX, FeatherHome, FeatherShoppingBag, FeatherStore, FeatherUser, FeatherShoppingCart } from "@subframe/core";
+import { FeatherX, FeatherHome, FeatherShoppingBag, FeatherStore, FeatherUser, FeatherShoppingCart, FeatherClock } from "@subframe/core";
 import { IconButton } from "@/ui/components/IconButton";
 import { Button } from "@/ui/components/Button";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
 
 interface MobileNavMenuProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [cartItemCount, setCartItemCount] = useState(0);
+  const { openSignInWaitlistFlow, openWaitlistFlow } = useWaitlistContext();
 
   // Get cart item count from localStorage
   useEffect(() => {
@@ -63,6 +65,18 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
       clearInterval(intervalId);
     };
   }, [isOpen]);
+  
+  // Handle join waitlist click
+  const handleJoinWaitlistClick = () => {
+    onClose();
+    openWaitlistFlow('geographic', undefined, { collectLocationInModal: true });
+  };
+  
+  // Handle sign in click
+  const handleSignInClick = () => {
+    onClose();
+    openSignInWaitlistFlow();
+  };
 
   if (!isOpen) return null;
 
@@ -91,6 +105,15 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
         {/* Navigation Items */}
         <div className="flex-1 p-6">
           <nav className="space-y-2">
+            {/* NEW: Join Waitlist - Prominent placement */}
+            <div 
+              className="flex items-center gap-4 p-4 rounded-lg bg-brand-50 border border-brand-100 text-brand-700 mb-4 cursor-pointer"
+              onClick={handleJoinWaitlistClick}
+            >
+              <FeatherClock className="w-5 h-5" />
+              <span className="text-body-bold font-body-bold">Join Waitlist</span>
+            </div>
+            
             <Link to="/" onClick={onClose}>
               <div className={`flex items-center gap-4 p-4 rounded-lg transition-colors ${
                 location.pathname === "/" 
@@ -149,14 +172,10 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               variant="brand-tertiary" 
               icon={<FeatherUser />}
               className="w-full justify-start"
-              onClick={() => {
-                onClose();
-                // Add your sign in logic here
-              }}
+              onClick={handleSignInClick}
             >
               Sign In
             </Button>
-            
           </div>
         </div>
 

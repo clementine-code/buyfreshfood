@@ -32,13 +32,16 @@ interface WaitlistState {
   
   // New: Options for modal behavior
   collectLocationInModal: boolean;
+  
+  // New: Feature access context
+  featureContext: 'direct' | 'checkout' | 'signin' | null;
 }
 
 interface WaitlistContextType {
   state: WaitlistState;
   
   // Main flow orchestrator - UPDATED with options parameter
-  openWaitlistFlow: (type: 'geographic' | 'early_access', locationData?: LocationData, options?: { collectLocationInModal?: boolean }) => Promise<void>;
+  openWaitlistFlow: (type: 'geographic' | 'early_access', locationData?: LocationData, options?: { collectLocationInModal?: boolean, featureContext?: 'direct' | 'checkout' | 'signin' }) => Promise<void>;
   
   // Modal controls
   closeAllModals: () => void;
@@ -56,6 +59,10 @@ interface WaitlistContextType {
   
   // NEW: Direct waitlist form opener
   reopenWaitlistForm: () => void;
+  
+  // NEW: Feature-specific waitlist flows
+  openCheckoutWaitlistFlow: () => Promise<void>;
+  openSignInWaitlistFlow: () => Promise<void>;
 }
 
 const WaitlistContext = createContext<WaitlistContextType | undefined>(undefined);
@@ -73,7 +80,8 @@ const initialState: WaitlistState = {
   submissionData: null,
   isUserWaitlisted: false,
   waitlistedEntry: null,
-  collectLocationInModal: false
+  collectLocationInModal: false,
+  featureContext: null
 };
 
 export function WaitlistProvider({ children }: { children: ReactNode }) {
@@ -96,8 +104,15 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Main flow orchestrator - UPDATED to handle options
-  const openWaitlistFlow = async (type: 'geographic' | 'early_access', locationData?: LocationData, options?: { collectLocationInModal?: boolean }) => {
+  // Main flow orchestrator - UPDATED to handle options and feature context
+  const openWaitlistFlow = async (
+    type: 'geographic' | 'early_access', 
+    locationData?: LocationData, 
+    options?: { 
+      collectLocationInModal?: boolean, 
+      featureContext?: 'direct' | 'checkout' | 'signin' 
+    }
+  ) => {
     console.log('🚀 Opening waitlist flow:', type, locationData, options);
 
     // If we have a waitlisted entry and it matches the current context, show thank you modal
@@ -108,6 +123,12 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
         true;
 
       if (isMatchingLocation) {
+        // Set feature context before showing thank you modal
+        setState(prev => ({
+          ...prev,
+          featureContext: options?.featureContext || 'direct'
+        }));
+        
         openThankYouModal(state.waitlistedEntry);
         return;
       }
@@ -117,7 +138,8 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ 
       ...prev, 
       modalType: type,
-      collectLocationInModal: options?.collectLocationInModal || false
+      collectLocationInModal: options?.collectLocationInModal || false,
+      featureContext: options?.featureContext || 'direct'
     }));
 
     // If we should collect location in modal OR no location data provided, go directly to waitlist modal
@@ -180,7 +202,8 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
       currentLocationData: null,
       queueNumber: null,
       submissionData: null,
-      collectLocationInModal: false
+      collectLocationInModal: false,
+      featureContext: null
     }));
   };
 
@@ -248,8 +271,55 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
       isSuccessView: false,
       modalType: 'geographic', // Default to geographic
       collectLocationInModal: true, // Always collect location when reopening
-      currentLocationData: null // Clear current location to allow new entry
+      currentLocationData: null, // Clear current location to allow new entry
+      featureContext: 'direct' // Reset to direct context
     }));
+  };
+
+  // NEW: Checkout-specific waitlist flow
+  const openCheckoutWaitlistFlow = async () => {
+    // Determine waitlist type based on location context
+    const { isNWA, city, state, zipCode, location } = state.currentLocationData || {};
+    const waitlistType = isNWA ? 'early_access' : 'geographic';
+    
+    // Open waitlist flow with checkout context
+    await openWaitlistFlow(
+      waitlistType, 
+      state.currentLocationData ? {
+        isNWA: isNWA || false,
+        city: city || '',
+        state: state || '',
+        zipCode: zipCode || '',
+        formattedAddress: location || ''
+      } : undefined,
+      { 
+        collectLocationInModal: !state.currentLocationData,
+        featureContext: 'checkout'
+      }
+    );
+  };
+
+  // NEW: Sign In-specific waitlist flow
+  const openSignInWaitlistFlow = async () => {
+    // Determine waitlist type based on location context
+    const { isNWA, city, state, zipCode, location } = state.currentLocationData || {};
+    const waitlistType = isNWA ? 'early_access' : 'geographic';
+    
+    // Open waitlist flow with sign in context
+    await openWaitlistFlow(
+      waitlistType, 
+      state.currentLocationData ? {
+        isNWA: isNWA || false,
+        city: city || '',
+        state: state || '',
+        zipCode: zipCode || '',
+        formattedAddress: location || ''
+      } : undefined,
+      { 
+        collectLocationInModal: !state.currentLocationData,
+        featureContext: 'signin'
+      }
+    );
   };
 
   const contextValue: WaitlistContextType = {
@@ -263,7 +333,9 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
     resetToForm,
     setWaitlistedEntry,
     clearWaitlistedEntry,
-    reopenWaitlistForm
+    reopenWaitlistForm,
+    openCheckoutWaitlistFlow,
+    openSignInWaitlistFlow
   };
 
   return (

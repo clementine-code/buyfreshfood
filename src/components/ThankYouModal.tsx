@@ -4,7 +4,8 @@ import React from "react";
 import { Button } from "@/ui/components/Button";
 import { IconButton } from "@/ui/components/IconButton";
 import { IconWithBackground } from "@/ui/components/IconWithBackground";
-import { FeatherX, FeatherCheck, FeatherMapPin } from "@subframe/core";
+import { FeatherX, FeatherCheck, FeatherMapPin, FeatherClock, FeatherShoppingCart, FeatherUser } from "@subframe/core";
+import { useWaitlistContext } from "../contexts/WaitlistContext";
 
 interface ThankYouModalProps {
   isOpen: boolean;
@@ -19,7 +20,14 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
   waitlistedLocation,
   onJoinDifferentLocation
 }) => {
+  const { state } = useWaitlistContext();
+  
   if (!isOpen) return null;
+
+  // Determine if this is a feature-specific context
+  const isFeatureContext = state.featureContext === 'checkout' || state.featureContext === 'signin';
+  const featureTitle = state.featureContext === 'checkout' ? 'Checkout' : 
+                       state.featureContext === 'signin' ? 'Sign In' : '';
 
   return (
     <>
@@ -38,7 +46,9 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-neutral-200">
             <h2 className="text-heading-2 font-heading-2 text-default-font">
-              You're Already on the Waitlist!
+              {isFeatureContext 
+                ? `${featureTitle} Coming Soon!` 
+                : "You're Already on the Waitlist!"}
             </h2>
             <IconButton
               variant="neutral-tertiary"
@@ -52,21 +62,36 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
             {/* Success Icon */}
             <div className="flex justify-center">
               <IconWithBackground 
-                variant="success" 
+                variant={isFeatureContext ? "warning" : "success"} 
                 size="x-large" 
-                icon={<FeatherCheck />}
+                icon={isFeatureContext ? <FeatherClock /> : <FeatherCheck />}
               />
             </div>
 
             {/* Message */}
             <div className="space-y-2">
               <h3 className="text-heading-2 font-heading-2 text-default-font">
-                Thank you for your interest!
+                {isFeatureContext 
+                  ? "We're working on it!" 
+                  : "Thank you for your interest!"}
               </h3>
               <p className="text-body font-body text-subtext-color">
-                You're already on the waitlist for <strong>buyfresh.food</strong> in your area.
+                {isFeatureContext 
+                  ? `${featureTitle} functionality is coming soon to your area. You're already on our waitlist!` 
+                  : "You're already on the waitlist for <strong>buyfresh.food</strong> in your area."}
               </p>
             </div>
+
+            {/* Feature-specific icon */}
+            {isFeatureContext && (
+              <div className="flex justify-center my-4">
+                {state.featureContext === 'checkout' ? (
+                  <FeatherShoppingCart className="w-12 h-12 text-brand-600" />
+                ) : (
+                  <FeatherUser className="w-12 h-12 text-brand-600" />
+                )}
+              </div>
+            )}
 
             {/* Location Display - FIXED: Better mobile sizing */}
             <div className="bg-success-50 rounded-lg p-4">
@@ -85,7 +110,9 @@ const ThankYouModal: React.FC<ThankYouModalProps> = ({
 
             {/* Additional Info */}
             <p className="text-caption font-caption text-subtext-color">
-              We'll notify you as soon as we launch in your area. You'll be among the first to access fresh local food!
+              {isFeatureContext 
+                ? `We'll notify you as soon as ${featureContext === 'checkout' ? 'ordering' : 'accounts'} becomes available in your area.` 
+                : "We'll notify you as soon as we launch in your area. You'll be among the first to access fresh local food!"}
             </p>
           </div>
 

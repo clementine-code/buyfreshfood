@@ -65,7 +65,7 @@ interface CartState {
 const Cart: React.FC = () => {
   const navigate = useNavigate();
   const { state: locationState } = useLocationContext();
-  const { openWaitlistFlow } = useWaitlistContext();
+  const { openCheckoutWaitlistFlow } = useWaitlistContext();
   
   // Cart state
   const [cartState, setCartState] = useState<CartState>({
@@ -357,8 +357,8 @@ const Cart: React.FC = () => {
     });
   };
 
-  // Handle checkout for a specific seller
-  const handleSellerCheckout = (sellerId: string) => {
+  // Handle checkout for a specific seller - UPDATED to use waitlist flow
+  const handleSellerCheckout = async (sellerId: string) => {
     const seller = cartState.sellers[sellerId];
     if (!seller) return;
     
@@ -367,26 +367,12 @@ const Cart: React.FC = () => {
       return;
     }
     
-    // For demo, show success modal
-    setSuccessMessage(`Your order from ${seller.name} has been placed! Pickup scheduled for ${seller.selectedPickupTime}.`);
-    setShowSuccessModal(true);
-    
-    // In a real app, this would process payment and create order
-    // For demo, we'll just clear this seller from cart after modal is closed
-    setTimeout(() => {
-      setCartState(prevState => {
-        const { [sellerId]: _, ...remainingSellers } = prevState.sellers;
-        return {
-          ...prevState,
-          sellers: remainingSellers
-        };
-      });
-      setShowSuccessModal(false);
-    }, 3000);
+    // Trigger waitlist flow for checkout
+    await openCheckoutWaitlistFlow();
   };
 
-  // Handle checkout for all sellers
-  const handleCheckoutAll = () => {
+  // Handle checkout for all sellers - UPDATED to use waitlist flow
+  const handleCheckoutAll = async () => {
     // Check if all sellers have pickup times selected
     const allHavePickupTimes = Object.values(cartState.sellers).every(
       seller => seller.selectedPickupTime !== null
@@ -397,19 +383,8 @@ const Cart: React.FC = () => {
       return;
     }
     
-    // For demo, show success modal
-    setSuccessMessage("All your orders have been placed! Check your email for pickup details.");
-    setShowSuccessModal(true);
-    
-    // In a real app, this would process payment and create orders
-    // For demo, we'll just clear the cart after modal is closed
-    setTimeout(() => {
-      setCartState(prevState => ({
-        sellers: {},
-        savedItems: prevState.savedItems // Keep saved items
-      }));
-      setShowSuccessModal(false);
-    }, 3000);
+    // Trigger waitlist flow for checkout
+    await openCheckoutWaitlistFlow();
   };
 
   // Handle navigation to seller profile
@@ -448,8 +423,8 @@ const Cart: React.FC = () => {
             {isCartEmpty && (
               <div className="flex w-full flex-col items-center justify-center gap-6 py-12 text-center">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100">
-  <FeatherShoppingBag className="text-heading-1 font-heading-1 text-neutral-400" />
-</div>
+                  <FeatherShoppingBag className="text-heading-1 font-heading-1 text-neutral-400" />
+                </div>
                 <div className="flex flex-col items-center gap-2">
                   <h2 className="text-heading-2 font-heading-2 text-default-font">Your cart is empty</h2>
                   <p className="text-body font-body text-subtext-color max-w-md">
