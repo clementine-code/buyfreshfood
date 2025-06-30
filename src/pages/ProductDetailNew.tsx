@@ -676,20 +676,25 @@ const ProductDetailNew: React.FC = () => {
              {/* Seller Info */}
 <div className="bg-neutral-50 rounded-lg p-4">
   <div className="flex items-start gap-3">
-    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100">
-      <FeatherUser className="h-5 w-5 text-brand-600" />
-    </div>
-    <div className="flex-1">
-      <h4 className="text-heading-3 font-heading-3 text-default-font">
-        {sellerName}
-      </h4>
-      {sellerLocation && (
+    {/* Clickable seller icon and info */}
+    <div 
+      className="flex items-start gap-3 flex-1 cursor-pointer hover:opacity-80 transition-opacity"
+      onClick={handleSellerClick}
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100">
+        <FeatherUser className="h-5 w-5 text-brand-600" />
+      </div>
+      <div className="flex-1">
+        <h4 className="text-heading-3 font-heading-3 text-default-font hover:text-brand-600 transition-colors">
+          {product.seller.name}
+        </h4>
         <div className="flex items-center gap-1 text-body font-body text-subtext-color">
           <FeatherMapPin className="w-4 h-4" />
-          <span>{sellerLocation}</span>
+          <span>{product.seller.location}</span>
         </div>
-      )}
+      </div>
     </div>
+    {/* Contact button stays separate */}
     <Button
       variant="brand-secondary"
       size="small"
