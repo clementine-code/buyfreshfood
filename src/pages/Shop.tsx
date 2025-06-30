@@ -886,7 +886,7 @@ function Shop() {
   transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
   transition: 'transform 0.3s ease-in-out',
   position: 'sticky',
-  top: '80px',
+  top: '60px',
   backgroundColor: 'white',
   zIndex: 60,
   borderBottom: '1px solid #e5e7eb'
