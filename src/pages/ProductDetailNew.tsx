@@ -25,7 +25,8 @@ import {
   FeatherInstagram,
   FeatherXTwitter,
   FeatherSlack,
-  FeatherHeart
+  FeatherHeart,
+  FeatherUser
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
@@ -503,7 +504,6 @@ const ProductDetailNew: React.FC = () => {
             <span className="text-body font-body text-subtext-color">Loading product details...</span>
           </div>
         </div>
-      </div>
       </DefaultPageLayout>
     );
   }
