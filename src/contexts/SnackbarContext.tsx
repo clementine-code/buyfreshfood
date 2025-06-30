@@ -58,19 +58,39 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({ children }) 
       timestamp: Date.now()
     };
     
-    setSnackbars(prev => [...prev, newSnackbar]);
+    // Replace existing snackbar of same type to avoid stacking too many
+    setSnackbars(prev => {
+      const filtered = prev.filter(sb => sb.type !== type);
+      return [...filtered, newSnackbar];
+    });
     
-    // Auto-dismiss after 5 seconds
+    // Auto-dismiss after 4 seconds (reduced from 5)
     const timerId = setTimeout(() => {
       dismissSnackbar(id);
-    }, 5000);
+    }, 4000);
     
     return id;
   }, []);
 
   // Dismiss snackbar
   const dismissSnackbar = useCallback((id: string) => {
-    setSnackbars(prev => prev.filter(snackbar => snackbar.id !== id));
+    setSnackbars(prev => {
+      const snackbar = prev.find(sb => sb.id === id);
+      if (snackbar) {
+        // Add exit animation class
+        const updatedSnackbars = prev.map(sb => 
+          sb.id === id ? { ...sb, exiting: true } : sb
+        );
+        
+        // Remove after animation completes
+        setTimeout(() => {
+          setSnackbars(current => current.filter(sb => sb.id !== id));
+        }, 300);
+        
+        return updatedSnackbars;
+      }
+      return prev.filter(sb => sb.id !== id);
+    });
   }, []);
 
   // Handle continue shopping
@@ -88,14 +108,13 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({ children }) 
     <SnackbarContext.Provider value={{ showSnackbar, dismissSnackbar }}>
       {children}
       
-      {/* Snackbar Container */}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 space-y-3 pointer-events-none">
+      {/* Snackbar Container - Fixed position at top center with z-index */}
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[1000] space-y-2 pointer-events-none">
         {snackbars.map((snackbar, index) => (
           <div
             key={snackbar.id}
             className="transition-all duration-300 ease-in-out pointer-events-auto"
             style={{
-              transform: `translateY(${index * 10}px)`,
               zIndex: 1000 - index
             }}
           >

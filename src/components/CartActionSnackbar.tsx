@@ -22,21 +22,21 @@ function CartActionSnackbar({
   onGoToCheckout 
 }: CartActionSnackbarProps) {
   return (
-    <div className="flex w-full sm:w-112 max-w-[95vw] items-start gap-4 rounded-md border border-solid border-neutral-border bg-white px-4 py-4 sm:px-6 sm:py-6 shadow-lg fixed left-1/2 top-4 -translate-x-1/2 transition-all duration-300 ease-in-out">
+    <div className="flex w-full sm:w-96 max-w-[95vw] items-start gap-3 rounded-md border border-solid border-neutral-border bg-white px-3 py-3 sm:px-4 sm:py-4 shadow-lg snackbar-enter">
       <img
-        className="h-16 w-16 flex-none rounded-md object-cover"
+        className="h-12 w-12 flex-none rounded-md object-cover"
         src={product.image}
         alt={product.name}
       />
-      <div className="flex grow shrink-0 basis-0 flex-col items-start gap-4">
+      <div className="flex grow shrink-0 basis-0 flex-col items-start gap-2">
         <div className="flex w-full flex-col items-start gap-1">
-          <div className="flex items-center gap-2">
-            <FeatherCheckCircle className="text-body font-body text-success-500" />
-            <span className="text-body-bold font-body-bold text-success-500">
+          <div className="flex items-center gap-1">
+            <FeatherCheckCircle className="w-4 h-4 text-success-500" />
+            <span className="text-caption-bold font-caption-bold text-success-500">
               Added to cart
             </span>
           </div>
-          <span className="text-body font-body text-default-font">
+          <span className="text-body font-body text-default-font truncate w-full">
             {product.name} {product.quantity && product.unit ? `(${product.quantity} ${product.unit})` : ''}
           </span>
         </div>
@@ -63,6 +63,8 @@ function CartActionSnackbar({
         icon={<FeatherX />}
         onClick={onDismiss}
         aria-label="Close notification"
+        size="small"
+        className="flex-shrink-0 -mt-1 -mr-1"
       />
     </div>
   );

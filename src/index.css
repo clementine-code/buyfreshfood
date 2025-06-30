@@ -283,7 +283,7 @@ html, body {
 /* Snackbar animations */
 @keyframes slideInDown {
   from {
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, -120%);
     opacity: 0;
   }
   to {
@@ -298,15 +298,15 @@ html, body {
     opacity: 1;
   }
   to {
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, -120%);
     opacity: 0;
   }
 }
 
 .snackbar-enter {
-  animation: slideInDown 0.3s forwards;
+  animation: slideInDown 0.25s forwards ease-out;
 }
 
 .snackbar-exit {
-  animation: slideOutUp 0.3s forwards;
+  animation: slideOutUp 0.25s forwards ease-in;
 }
