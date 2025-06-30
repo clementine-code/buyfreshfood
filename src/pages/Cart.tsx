@@ -437,7 +437,7 @@ const Cart: React.FC = () => {
           {/* Main Cart Section */}
           <div className="flex grow shrink-0 basis-0 flex-col items-start gap-8 w-full md:w-auto">
             {/* Cart Header */}
-            <div className="flex w-full items-center justify-between pt-0">
+            <div className="flex w-full items-center justify-between">
               <div className="flex flex-col items-start gap-1">
                 <span className="text-heading-2 font-heading-2 text-default-font">
                   Your Fresh Food Cart
