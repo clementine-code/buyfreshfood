@@ -113,8 +113,9 @@ class LocationService {
     const url = `${this.supabaseUrl}/functions/v1/${endpoint}`;
     
     try {
+      // Create abort controller for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
       const response = await fetch(url, {
         method: 'POST',
