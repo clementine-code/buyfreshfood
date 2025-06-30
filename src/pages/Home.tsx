@@ -54,10 +54,10 @@ function Home() {
     href="https://bolt.new" 
     target="_blank" 
     rel="noopener noreferrer" 
-    className="absolute top-4 right-4 z-20 transition-transform hover:scale-105"
+    className="absolute top-4 right-4 z-20 bolt-badge"
   >
     <img 
-      src="https://raw.githubusercontent.com/kickiniteasy/bolt-hackathon-badge/main/white-circle.svg" 
+      src="/white_circle_360x360.png" 
       alt="Built with Bolt.new" 
       className="w-12 h-12 md:w-16 md:h-16"
     />
