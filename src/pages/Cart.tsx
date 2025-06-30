@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { Badge } from "@/ui/components/Badge";
@@ -18,7 +18,8 @@ import {
   FeatherCheck,
   FeatherAlertCircle,
   FeatherMapPin,
-  FeatherClock
+  FeatherClock,
+  FeatherX
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
@@ -76,154 +77,120 @@ const Cart: React.FC = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Delete confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  // Ref for tracking cart changes
+  const cartUpdateRef = useRef<number>(0);
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('freshFoodCart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        setCartState(parsedCart);
-      } catch (error) {
-        console.error('Error parsing saved cart:', error);
-        // Initialize with default cart if parsing fails
-        setCartState({
-          sellers: {
-            'sarah-farm': {
-              id: 'sarah-farm',
-              name: "Sarah's Family Farm",
-              avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-              distance: "2.3 miles away",
-              pickupStatus: "Pickup available today",
-              selectedPickupTime: null,
-              pickupInstructions: "",
-              items: [
-                {
-                  id: 'carrots-1',
-                  name: 'Carrots',
-                  description: 'Harvested today',
-                  price: 3.99,
-                  unit: 'lb',
-                  quantity: 2,
-                  image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37"
-                },
-                {
-                  id: 'potatoes-1', 
-                  name: 'Potatoes',
-                  description: 'Collected this morning',
-                  price: 4.00,
-                  unit: 'lb',
-                  quantity: 1,
-                  image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
-                }
-              ]
-            },
-            'green-valley': {
-              id: 'green-valley',
-              name: 'Green Valley Organics',
-              avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-              distance: "3.1 miles away", 
-              pickupStatus: "Pickup available tomorrow",
-              selectedPickupTime: null,
-              pickupInstructions: "",
-              items: [
-                {
-                  id: 'cauliflower-1',
-                  name: 'Cauliflower',
-                  description: 'Peak season',
-                  price: 4.99,
-                  unit: 'bag',
-                  quantity: 3,
-                  image: "https://images.unsplash.com/photo-1566842600175-97dca489844f"
-                }
-              ]
-            }
-          },
-          savedItems: [
+    const loadCart = () => {
+      console.log('Loading cart from localStorage');
+      const savedCart = localStorage.getItem('freshFoodCart');
+      if (savedCart) {
+        try {
+          const parsedCart = JSON.parse(savedCart);
+          console.log('Successfully loaded cart:', parsedCart);
+          setCartState(parsedCart);
+        } catch (error) {
+          console.error('Error parsing saved cart:', error);
+          // Initialize with default cart if parsing fails
+          initializeDefaultCart();
+        }
+      } else {
+        console.log('No saved cart found, initializing default');
+        initializeDefaultCart();
+      }
+      setIsLoading(false);
+    };
+
+    loadCart();
+  }, []);
+
+  // Initialize default cart
+  const initializeDefaultCart = () => {
+    setCartState({
+      sellers: {
+        'sarah-farm': {
+          id: 'sarah-farm',
+          name: "Sarah's Family Farm",
+          avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
+          distance: "2.3 miles away",
+          pickupStatus: "Pickup available today",
+          selectedPickupTime: null,
+          pickupInstructions: "",
+          items: [
             {
-              id: 'apples-1',
-              name: 'Apples',
-              price: 5.50,
-              unit: 'bag',
-              image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716",
-              sellerId: 'orchard-farm'
+              id: 'carrots-1',
+              name: 'Carrots',
+              description: 'Harvested today',
+              price: 3.99,
+              unit: 'lb',
+              quantity: 2,
+              image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37"
+            },
+            {
+              id: 'potatoes-1', 
+              name: 'Potatoes',
+              description: 'Collected this morning',
+              price: 4.00,
+              unit: 'lb',
+              quantity: 1,
+              image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
             }
           ]
-        });
-      }
-    } else {
-      // Initialize with default cart if no saved cart exists
-      setCartState({
-        sellers: {
-          'sarah-farm': {
-            id: 'sarah-farm',
-            name: "Sarah's Family Farm",
-            avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-            distance: "2.3 miles away",
-            pickupStatus: "Pickup available today",
-            selectedPickupTime: null,
-            pickupInstructions: "",
-            items: [
-              {
-                id: 'carrots-1',
-                name: 'Carrots',
-                description: 'Harvested today',
-                price: 3.99,
-                unit: 'lb',
-                quantity: 2,
-                image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37"
-              },
-              {
-                id: 'potatoes-1', 
-                name: 'Potatoes',
-                description: 'Collected this morning',
-                price: 4.00,
-                unit: 'lb',
-                quantity: 1,
-                image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
-              }
-            ]
-          },
-          'green-valley': {
-            id: 'green-valley',
-            name: 'Green Valley Organics',
-            avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-            distance: "3.1 miles away", 
-            pickupStatus: "Pickup available tomorrow",
-            selectedPickupTime: null,
-            pickupInstructions: "",
-            items: [
-              {
-                id: 'cauliflower-1',
-                name: 'Cauliflower',
-                description: 'Peak season',
-                price: 4.99,
-                unit: 'bag',
-                quantity: 3,
-                image: "https://images.unsplash.com/photo-1566842600175-97dca489844f"
-              }
-            ]
-          }
         },
-        savedItems: [
-          {
-            id: 'apples-1',
-            name: 'Apples',
-            price: 5.50,
-            unit: 'bag',
-            image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716",
-            sellerId: 'orchard-farm'
-          }
-        ]
-      });
-    }
-    setIsLoading(false);
-  }, []);
+        'green-valley': {
+          id: 'green-valley',
+          name: 'Green Valley Organics',
+          avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
+          distance: "3.1 miles away", 
+          pickupStatus: "Pickup available tomorrow",
+          selectedPickupTime: null,
+          pickupInstructions: "",
+          items: [
+            {
+              id: 'cauliflower-1',
+              name: 'Cauliflower',
+              description: 'Peak season',
+              price: 4.99,
+              unit: 'bag',
+              quantity: 3,
+              image: "https://images.unsplash.com/photo-1566842600175-97dca489844f"
+            }
+          ]
+        }
+      },
+      savedItems: [
+        {
+          id: 'apples-1',
+          name: 'Apples',
+          price: 5.50,
+          unit: 'bag',
+          image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716",
+          sellerId: 'orchard-farm'
+        }
+      ]
+    });
+  };
 
   // Save cart to localStorage when it changes
   useEffect(() => {
     if (!isLoading) {
-      localStorage.setItem('freshFoodCart', JSON.stringify(cartState));
+      try {
+        console.log('Saving cart to localStorage:', cartState);
+        localStorage.setItem('freshFoodCart', JSON.stringify(cartState));
+        
+        // Increment update counter for tracking
+        cartUpdateRef.current += 1;
+        console.log(`Cart update #${cartUpdateRef.current} saved successfully`);
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error);
+      }
     }
   }, [cartState, isLoading]);
 
@@ -407,6 +374,36 @@ const Cart: React.FC = () => {
         savedItems: updatedSavedItems
       };
     });
+  };
+
+  // Delete saved item with confirmation
+  const openDeleteConfirmation = (index: number) => {
+    setItemToDelete(index);
+    setShowDeleteModal(true);
+  };
+
+  // Confirm deletion of saved item
+  const confirmDeleteSavedItem = () => {
+    if (itemToDelete === null) return;
+    
+    setDeleteLoading(true);
+    
+    // Simulate a short loading state for better UX
+    setTimeout(() => {
+      setCartState(prevState => {
+        const updatedSavedItems = [...prevState.savedItems];
+        updatedSavedItems.splice(itemToDelete, 1);
+        
+        return {
+          ...prevState,
+          savedItems: updatedSavedItems
+        };
+      });
+      
+      setDeleteLoading(false);
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    }, 500);
   };
 
   // Update pickup time
@@ -673,6 +670,7 @@ const Cart: React.FC = () => {
                                   icon={<FeatherMinus />}
                                   onClick={() => updateItemQuantity(seller.id, item.id, item.quantity - 1)}
                                   disabled={item.quantity <= 1}
+                                  aria-label={`Decrease quantity of ${item.name}`}
                                 />
                                 <span className="text-body-bold font-body-bold text-default-font w-6 text-center">
                                   {item.quantity}
@@ -682,6 +680,7 @@ const Cart: React.FC = () => {
                                   size="small"
                                   icon={<FeatherPlus />}
                                   onClick={() => updateItemQuantity(seller.id, item.id, item.quantity + 1)}
+                                  aria-label={`Increase quantity of ${item.name}`}
                                 />
                               </div>
                               
@@ -696,12 +695,14 @@ const Cart: React.FC = () => {
                                   icon={<FeatherTrash />}
                                   onClick={() => removeItem(seller.id, item.id)}
                                   title="Remove from cart"
+                                  aria-label={`Remove ${item.name} from cart`}
                                 />
                                 <IconButton
                                   variant="destructive-secondary"
                                   icon={<FeatherHeart />}
                                   onClick={() => saveForLater(seller.id, item.id)}
                                   title="Save for later"
+                                  aria-label={`Save ${item.name} for later`}
                                 />
                               </div>
                             </div>
@@ -817,7 +818,10 @@ const Cart: React.FC = () => {
                     Saved for Later ({cartState.savedItems.length})
                   </span>
                   {cartState.savedItems.map((item, index) => (
-                    <div key={item.id} className="flex w-full items-center gap-4 rounded-md border border-solid border-neutral-border bg-default-background px-4 py-4 shadow-sm">
+                    <div 
+                      key={item.id} 
+                      className="flex w-full items-center gap-4 rounded-md border border-solid border-neutral-border bg-default-background px-4 py-4 shadow-sm relative group"
+                    >
                       <img
                         className="h-16 w-16 flex-none rounded-md object-cover"
                         src={item.image}
@@ -831,13 +835,24 @@ const Cart: React.FC = () => {
                           ${item.price.toFixed(2)}/{item.unit}
                         </span>
                       </div>
-                      <Button 
-                        variant="neutral-secondary" 
-                        size="small"
-                        onClick={() => addSavedItemToCart(index)}
-                      >
-                        Add
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="neutral-secondary" 
+                          size="small"
+                          onClick={() => addSavedItemToCart(index)}
+                          aria-label={`Add ${item.name} to cart`}
+                        >
+                          Add
+                        </Button>
+                        <IconButton
+                          variant="neutral-tertiary"
+                          icon={<FeatherTrash />}
+                          onClick={() => openDeleteConfirmation(index)}
+                          className="transition-opacity hover:bg-error-50 hover:text-error-600"
+                          aria-label={`Delete ${item.name} from saved items`}
+                          title="Delete saved item"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -881,6 +896,55 @@ const Cart: React.FC = () => {
                 >
                   Continue Shopping
                 </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowDeleteModal(false);
+                setItemToDelete(null);
+              }
+            }}
+          >
+            <div 
+              className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error-100">
+                  <FeatherTrash className="h-8 w-8 text-error-600" />
+                </div>
+                <h2 className="text-heading-2 font-heading-2 text-default-font text-center">Delete Saved Item?</h2>
+                <p className="text-body font-body text-subtext-color text-center">
+                  Are you sure you want to remove this item from your saved items? This action cannot be undone.
+                </p>
+                <div className="flex w-full gap-4 mt-4">
+                  <Button 
+                    variant="neutral-secondary"
+                    className="flex-1"
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setItemToDelete(null);
+                    }}
+                    disabled={deleteLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="destructive-primary"
+                    className="flex-1"
+                    onClick={confirmDeleteSavedItem}
+                    loading={deleteLoading}
+                  >
+                    {deleteLoading ? 'Deleting...' : 'Delete'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
