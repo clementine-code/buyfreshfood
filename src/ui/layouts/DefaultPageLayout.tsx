@@ -118,7 +118,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
       setIsLocationModalOpen(true);
     };
     
-    // NEW: Handle sign in button click - trigger waitlist flow
+    // Handle sign in button click - trigger waitlist flow
     const handleSignInClick = (e: React.MouseEvent) => {
       e.preventDefault();
       openSignInWaitlistFlow();
