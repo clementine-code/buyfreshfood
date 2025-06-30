@@ -884,7 +884,7 @@ function Shop() {
   (showMobileFilters || showMobileMap) ? 'hidden' : ''
 }`} style={{
   transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
-  transition: 'transform 0.3s ease-in-out',
+  transition: 'transform 0.3s ease-in-out'
   position: 'sticky',
   top: '60px',
   backgroundColor: 'white',
@@ -892,7 +892,7 @@ function Shop() {
   borderBottom: '1px solid #e5e7eb'
 }}>
           {/* IMPORTANT: pt-0 -mt-2 prevents product overlap with sort bar - don't change! */}
-          <div className="flex w-full flex-col gap-3 px-4 py-4 pt-0" style={{ marginTop: '-8px' }}>
+          <div className="flex w-full flex-col gap-3 px-4 py-4 pt-0" style={{ marginTop: '-4px' }}>
 
             {/* Search Status and Controls */}
             <div className="flex w-full items-center justify-between">
