@@ -448,8 +448,8 @@ const Cart: React.FC = () => {
             {isCartEmpty && (
               <div className="flex w-full flex-col items-center justify-center gap-6 py-12 text-center">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100">
-                  <FeatherShoppingBag className="h-10 w-10 text-neutral-400" />
-                </div>
+  <FeatherShoppingBag className="text-heading-1 font-heading-1 text-neutral-400" />
+</div>
                 <div className="flex flex-col items-center gap-2">
                   <h2 className="text-heading-2 font-heading-2 text-default-font">Your cart is empty</h2>
                   <p className="text-body font-body text-subtext-color max-w-md">
@@ -825,7 +825,7 @@ const Cart: React.FC = () => {
                   Shop Local Food
                 </Button>
                 <p className="text-body font-body text-subtext-color text-center">
-                  Add items to your cart to continue shopping
+                  Add items to your cart to continue to checkout.
                 </p>
               </div>
             )}
