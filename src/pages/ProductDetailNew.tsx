@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { Button } from "@/ui/components/Button";
@@ -335,6 +335,7 @@ const ProductDetailNew: React.FC = () => {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showFarmStory, setShowFarmStory] = useState(false);
   const [showFarmPractices, setShowFarmPractices] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Load product data
   useEffect(() => {
@@ -361,39 +362,130 @@ const ProductDetailNew: React.FC = () => {
     setQuantity(prev => Math.max(1, prev - 1));
   };
 
+  // Navigate to seller profile
+  const handleSellerClick = () => {
+    if (product && product.seller.id) {
+      navigate(`/seller/${product.seller.id}`);
+    }
+  };
+
   // Handle add to cart
   const handleAddToCart = () => {
-    // In a real app, this would add the product to the cart
-    // For now, we'll open the waitlist flow
-    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
+    if (!product) return;
     
-    openWaitlistFlow(waitlistType, locationState.isSet ? {
-      isNWA: locationState.isNWA,
-      city: locationState.city || '',
-      state: locationState.state || '',
-      zipCode: locationState.zipCode || '',
-      formattedAddress: locationState.location || ''
-    } : undefined);
+    // Get existing cart from localStorage
+    let cart;
+    try {
+      const savedCart = localStorage.getItem('freshFoodCart');
+      cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+    } catch (error) {
+      console.error('Error parsing saved cart:', error);
+      cart = { sellers: {}, savedItems: [] };
+    }
+    
+    // Determine seller ID
+    const sellerId = product.seller.id;
+    
+    // Create cart item
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      description: product.description.substring(0, 50) + '...',
+      price: product.price,
+      unit: product.unit,
+      quantity: quantity,
+      image: product.images[0]
+    };
+    
+    // Check if seller exists in cart
+    if (cart.sellers[sellerId]) {
+      // Check if item already exists
+      const existingItemIndex = cart.sellers[sellerId].items.findIndex(item => item.id === cartItem.id);
+      
+      if (existingItemIndex >= 0) {
+        // Update quantity if item exists
+        cart.sellers[sellerId].items[existingItemIndex].quantity += quantity;
+      } else {
+        // Add new item to existing seller
+        cart.sellers[sellerId].items.push(cartItem);
+      }
+    } else {
+      // Add new seller with item
+      cart.sellers[sellerId] = {
+        id: sellerId,
+        name: product.seller.name,
+        avatar: product.seller.image,
+        distance: product.seller.distance,
+        pickupStatus: product.seller.availability.includes('Today') ? "Pickup available today" : "Pickup available tomorrow",
+        selectedPickupTime: null,
+        pickupInstructions: "",
+        items: [cartItem]
+      };
+    }
+    
+    // Save updated cart to localStorage
+    localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+    
+    // Show success modal
+    setShowSuccessModal(true);
+    
+    // Hide modal after 2 seconds
+    setTimeout(() => {
+      setShowSuccessModal(false);
+    }, 2000);
   };
 
   // Handle save for later
   const handleSaveForLater = () => {
-    // Similar to add to cart, but would save for later
-    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
+    if (!product) return;
     
-    openWaitlistFlow(waitlistType, locationState.isSet ? {
-      isNWA: locationState.isNWA,
-      city: locationState.city || '',
-      state: locationState.state || '',
-      zipCode: locationState.zipCode || '',
-      formattedAddress: locationState.location || ''
-    } : undefined);
+    // Get existing cart from localStorage
+    let cart;
+    try {
+      const savedCart = localStorage.getItem('freshFoodCart');
+      cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+    } catch (error) {
+      console.error('Error parsing saved cart:', error);
+      cart = { sellers: {}, savedItems: [] };
+    }
+    
+    // Check if item already exists in saved items
+    const existingItemIndex = cart.savedItems.findIndex(item => item.id === product.id);
+    
+    if (existingItemIndex === -1) {
+      // Add to saved items
+      const savedItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        unit: product.unit,
+        image: product.images[0],
+        sellerId: product.seller.id
+      };
+      
+      cart.savedItems.push(savedItem);
+      
+      // Save updated cart to localStorage
+      localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+      
+      // Show confirmation
+      alert(`Saved ${product.name} for later!`);
+    } else {
+      alert(`${product.name} is already in your saved items!`);
+    }
   };
 
   // Handle buy now
   const handleBuyNow = () => {
-    // Similar to add to cart, but would proceed to checkout
+    if (!product) return;
+    
+    // Add to cart first
     handleAddToCart();
+    
+    // Navigate to cart page
+    setTimeout(() => {
+      navigate('/cart');
+    }, 500);
   };
 
   // Handle share
@@ -411,17 +503,10 @@ const ProductDetailNew: React.FC = () => {
     }
   };
 
-  // Navigate to seller profile
-  const handleSellerClick = () => {
-    if (product && product.seller.id) {
-      navigate(`/seller/${product.seller.id}`);
-    }
-  };
-
   // Handle contact seller
   const handleContactSeller = () => {
     // In a real app, this would open a chat with the seller
-    // For now, we'll open the waitlist flow
+    // For now, we'll use the waitlist flow as a placeholder
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
     openWaitlistFlow(waitlistType, locationState.isSet ? {
@@ -1080,7 +1165,54 @@ const ProductDetailNew: React.FC = () => {
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleAddToCart();
+                        // Add related product to cart
+                        const cartItem = {
+                          id: relatedProduct.id,
+                          name: relatedProduct.name,
+                          description: 'Related product',
+                          price: relatedProduct.price,
+                          unit: relatedProduct.unit,
+                          quantity: 1,
+                          image: relatedProduct.image
+                        };
+                        
+                        // Get existing cart
+                        let cart;
+                        try {
+                          const savedCart = localStorage.getItem('freshFoodCart');
+                          cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+                        } catch (error) {
+                          console.error('Error parsing saved cart:', error);
+                          cart = { sellers: {}, savedItems: [] };
+                        }
+                        
+                        // Add to seller's items
+                        const sellerId = product.seller.id;
+                        if (cart.sellers[sellerId]) {
+                          const existingItemIndex = cart.sellers[sellerId].items.findIndex(item => item.id === cartItem.id);
+                          if (existingItemIndex >= 0) {
+                            cart.sellers[sellerId].items[existingItemIndex].quantity += 1;
+                          } else {
+                            cart.sellers[sellerId].items.push(cartItem);
+                          }
+                        } else {
+                          cart.sellers[sellerId] = {
+                            id: sellerId,
+                            name: product.seller.name,
+                            avatar: product.seller.image,
+                            distance: product.seller.distance,
+                            pickupStatus: product.seller.availability.includes('Today') ? "Pickup available today" : "Pickup available tomorrow",
+                            selectedPickupTime: null,
+                            pickupInstructions: "",
+                            items: [cartItem]
+                          };
+                        }
+                        
+                        // Save cart
+                        localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+                        
+                        // Show confirmation
+                        alert(`Added ${relatedProduct.name} to your cart!`);
                       }}
                     >
                       Add to Cart
@@ -1091,7 +1223,35 @@ const ProductDetailNew: React.FC = () => {
                       icon={<FeatherHeart />}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSaveForLater();
+                        // Save related product for later
+                        const savedItem = {
+                          id: relatedProduct.id,
+                          name: relatedProduct.name,
+                          price: relatedProduct.price,
+                          unit: relatedProduct.unit,
+                          image: relatedProduct.image,
+                          sellerId: product.seller.id
+                        };
+                        
+                        // Get existing cart
+                        let cart;
+                        try {
+                          const savedCart = localStorage.getItem('freshFoodCart');
+                          cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+                        } catch (error) {
+                          console.error('Error parsing saved cart:', error);
+                          cart = { sellers: {}, savedItems: [] };
+                        }
+                        
+                        // Check if already saved
+                        const existingItemIndex = cart.savedItems.findIndex(item => item.id === savedItem.id);
+                        if (existingItemIndex === -1) {
+                          cart.savedItems.push(savedItem);
+                          localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+                          alert(`Saved ${relatedProduct.name} for later!`);
+                        } else {
+                          alert(`${relatedProduct.name} is already in your saved items!`);
+                        }
                       }}
                     />
                   </div>
@@ -1167,6 +1327,38 @@ const ProductDetailNew: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success-100">
+                <FeatherShoppingCart className="h-8 w-8 text-success-600" />
+              </div>
+              <h2 className="text-heading-2 font-heading-2 text-default-font">Added to Cart!</h2>
+              <p className="text-body font-body text-default-font">
+                {product.name} has been added to your cart.
+              </p>
+              <div className="flex w-full gap-3 mt-2">
+                <Button 
+                  className="w-full"
+                  variant="neutral-secondary"
+                  onClick={() => setShowSuccessModal(false)}
+                >
+                  Continue Shopping
+                </Button>
+                <Button 
+                  className="w-full"
+                  onClick={() => navigate('/cart')}
+                >
+                  View Cart
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DefaultPageLayout>
   );
 };

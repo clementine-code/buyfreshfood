@@ -221,44 +221,120 @@ function Shop() {
     window.history.replaceState({}, '', '/shop');
   };
 
-  // Handle Add to Cart with waitlist logic
-  const handleAddToCart = async (product: any) => {
-    // Determine waitlist type based on location
-    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
-    
-    // Open waitlist flow with current location data
-    await openWaitlistFlow(waitlistType, locationState.isSet ? {
-      isNWA: locationState.isNWA,
-      city: locationState.city || '',
-      state: locationState.state || '',
-      zipCode: locationState.zipCode || '',
-      formattedAddress: locationState.location || ''
-    } : undefined);
+  // Navigate to seller profile page
+  const handleSellerClick = (sellerId: string) => {
+    navigate(`/seller/${sellerId}`);
   };
 
-  // Handle Save for Later with waitlist logic
-  const handleSaveForLater = async (product: any) => {
-    // Determine waitlist type based on location
-    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
+  // Handle Add to Cart
+  const handleAddToCart = (product: any) => {
+    // Get existing cart from localStorage
+    let cart;
+    try {
+      const savedCart = localStorage.getItem('freshFoodCart');
+      cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+    } catch (error) {
+      console.error('Error parsing saved cart:', error);
+      cart = { sellers: {}, savedItems: [] };
+    }
+
+    // Determine seller ID and name
+    const sellerId = product.seller?.id || 
+                    (product.seller?.name ? product.seller.name.toLowerCase().replace(/\s+/g, '-') : 'unknown-seller');
+    const sellerName = product.seller?.name || 'Unknown Seller';
     
-    // Open waitlist flow with current location data
-    await openWaitlistFlow(waitlistType, locationState.isSet ? {
-      isNWA: locationState.isNWA,
-      city: locationState.city || '',
-      state: locationState.state || '',
-      zipCode: locationState.zipCode || '',
-      formattedAddress: locationState.location || ''
-    } : undefined);
+    // Create cart item
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      description: product.description?.substring(0, 50) || 'Fresh local product',
+      price: typeof product.price === 'string' ? parseFloat(product.price.replace('$', '')) : product.price,
+      unit: product.unit,
+      quantity: 1,
+      image: product.image_url || product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800'
+    };
+    
+    // Check if seller exists in cart
+    if (cart.sellers[sellerId]) {
+      // Check if item already exists
+      const existingItemIndex = cart.sellers[sellerId].items.findIndex(item => item.id === cartItem.id);
+      
+      if (existingItemIndex >= 0) {
+        // Update quantity if item exists
+        cart.sellers[sellerId].items[existingItemIndex].quantity += 1;
+      } else {
+        // Add new item to existing seller
+        cart.sellers[sellerId].items.push(cartItem);
+      }
+    } else {
+      // Add new seller with item
+      cart.sellers[sellerId] = {
+        id: sellerId,
+        name: sellerName,
+        avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
+        distance: "2.3 miles away",
+        pickupStatus: "Pickup available today",
+        selectedPickupTime: null,
+        pickupInstructions: "",
+        items: [cartItem]
+      };
+    }
+    
+    // Save updated cart to localStorage
+    localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+    
+    // Show confirmation
+    alert(`Added ${product.name} to your cart!`);
+    
+    // Optional: Navigate to cart
+    // navigate('/cart');
+  };
+
+  // Handle Save for Later
+  const handleSaveForLater = (product: any) => {
+    // Get existing cart from localStorage
+    let cart;
+    try {
+      const savedCart = localStorage.getItem('freshFoodCart');
+      cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+    } catch (error) {
+      console.error('Error parsing saved cart:', error);
+      cart = { sellers: {}, savedItems: [] };
+    }
+    
+    // Determine seller ID
+    const sellerId = product.seller?.id || 
+                    (product.seller?.name ? product.seller.name.toLowerCase().replace(/\s+/g, '-') : 'unknown-seller');
+    
+    // Check if item already exists in saved items
+    const existingItemIndex = cart.savedItems.findIndex(item => item.id === product.id);
+    
+    if (existingItemIndex === -1) {
+      // Add to saved items
+      const savedItem = {
+        id: product.id,
+        name: product.name,
+        price: typeof product.price === 'string' ? parseFloat(product.price.replace('$', '')) : product.price,
+        unit: product.unit,
+        image: product.image_url || product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800',
+        sellerId: sellerId
+      };
+      
+      cart.savedItems.push(savedItem);
+      
+      // Save updated cart to localStorage
+      localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+      
+      // Show confirmation
+      alert(`Saved ${product.name} for later!`);
+    } else {
+      alert(`${product.name} is already in your saved items!`);
+    }
   };
 
   // Navigate to product detail page
   const handleProductClick = (productId: string) => {
     navigate(`/product/${productId}`);
-  };
-
-  // Navigate to seller profile page
-  const handleSellerClick = (sellerId: string) => {
-    navigate(`/seller/${sellerId}`);
   };
 
   // Check if any filters are applied

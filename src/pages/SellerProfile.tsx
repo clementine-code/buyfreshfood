@@ -312,31 +312,114 @@ const SellerProfile: React.FC = () => {
     loadSellerData();
   }, [id]);
 
-  const handleAddToCart = async (product: any) => {
-    // Determine waitlist type based on location
-    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
+  const handleAddToCart = (product: any) => {
+    // Extract price value from string (e.g., "$3.99/bunch" -> 3.99)
+    const priceString = product.price;
+    const priceMatch = priceString.match(/\$(\d+\.\d+)/);
+    const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
     
-    // Open waitlist flow with current location data
-    await openWaitlistFlow(waitlistType, locationState.isSet ? {
-      isNWA: locationState.isNWA,
-      city: locationState.city || '',
-      state: locationState.state || '',
-      zipCode: locationState.zipCode || '',
-      formattedAddress: locationState.location || ''
-    } : undefined);
+    // Extract unit from string (e.g., "$3.99/bunch" -> "bunch")
+    const unitMatch = priceString.match(/\/(\w+)$/);
+    const unit = unitMatch ? unitMatch[1] : "item";
+    
+    // Get existing cart from localStorage
+    let cart;
+    try {
+      const savedCart = localStorage.getItem('freshFoodCart');
+      cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+    } catch (error) {
+      console.error('Error parsing saved cart:', error);
+      cart = { sellers: {}, savedItems: [] };
+    }
+    
+    // Create cart item
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      description: product.isOrganic ? 'Organic product' : 'Fresh local product',
+      price: price,
+      unit: unit,
+      quantity: 1,
+      image: product.image
+    };
+    
+    // Check if seller exists in cart
+    if (cart.sellers[seller.id]) {
+      // Check if item already exists
+      const existingItemIndex = cart.sellers[seller.id].items.findIndex(item => item.id === cartItem.id);
+      
+      if (existingItemIndex >= 0) {
+        // Update quantity if item exists
+        cart.sellers[seller.id].items[existingItemIndex].quantity += 1;
+      } else {
+        // Add new item to existing seller
+        cart.sellers[seller.id].items.push(cartItem);
+      }
+    } else {
+      // Add new seller with item
+      cart.sellers[seller.id] = {
+        id: seller.id,
+        name: seller.name,
+        avatar: seller.profileImage,
+        distance: seller.distance,
+        pickupStatus: "Pickup available today",
+        selectedPickupTime: null,
+        pickupInstructions: "",
+        items: [cartItem]
+      };
+    }
+    
+    // Save updated cart to localStorage
+    localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+    
+    // Show confirmation
+    alert(`Added ${product.name} to your cart!`);
   };
 
-  const handleSaveForLater = async (product: any) => {
-    // Similar to add to cart, but would save for later
-    const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
+  const handleSaveForLater = (product: any) => {
+    // Extract price value from string (e.g., "$3.99/bunch" -> 3.99)
+    const priceString = product.price;
+    const priceMatch = priceString.match(/\$(\d+\.\d+)/);
+    const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
     
-    await openWaitlistFlow(waitlistType, locationState.isSet ? {
-      isNWA: locationState.isNWA,
-      city: locationState.city || '',
-      state: locationState.state || '',
-      zipCode: locationState.zipCode || '',
-      formattedAddress: locationState.location || ''
-    } : undefined);
+    // Extract unit from string (e.g., "$3.99/bunch" -> "bunch")
+    const unitMatch = priceString.match(/\/(\w+)$/);
+    const unit = unitMatch ? unitMatch[1] : "item";
+    
+    // Get existing cart from localStorage
+    let cart;
+    try {
+      const savedCart = localStorage.getItem('freshFoodCart');
+      cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
+    } catch (error) {
+      console.error('Error parsing saved cart:', error);
+      cart = { sellers: {}, savedItems: [] };
+    }
+    
+    // Check if item already exists in saved items
+    const existingItemIndex = cart.savedItems.findIndex(item => item.id === product.id);
+    
+    if (existingItemIndex === -1) {
+      // Add to saved items
+      const savedItem = {
+        id: product.id,
+        name: product.name,
+        price: price,
+        unit: unit,
+        image: product.image,
+        sellerId: seller.id
+      };
+      
+      cart.savedItems.push(savedItem);
+      
+      // Save updated cart to localStorage
+      localStorage.setItem('freshFoodCart', JSON.stringify(cart));
+      
+      // Show confirmation
+      alert(`Saved ${product.name} for later!`);
+    } else {
+      alert(`${product.name} is already in your saved items!`);
+    }
   };
 
   const handleProductClick = (productId: string) => {
@@ -363,6 +446,7 @@ const SellerProfile: React.FC = () => {
     }
   };
 
+  // Handle contact seller - keep waitlist functionality for now
   const handleContactSeller = async () => {
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
@@ -377,6 +461,7 @@ const SellerProfile: React.FC = () => {
     } : undefined);
   };
 
+  // Handle follow seller - keep waitlist functionality for now
   const handleFollowSeller = async () => {
     // Determine waitlist type based on location
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
