@@ -149,7 +149,7 @@ const DefaultPageLayoutRoot = React.forwardRef<HTMLDivElement, DefaultPageLayout
                     Cart
                   </Button>
                   {cartItemCount > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-brand-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                    <div className="absolute -top-1 -right-1 bg-neutral-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                       {cartItemCount > 9 ? '9+' : cartItemCount}
                     </div>
                   )}
