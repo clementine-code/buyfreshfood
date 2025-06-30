@@ -178,6 +178,11 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
         {/* Footer with Slogan */}
         <div className="p-6 border-t border-neutral-200">
           <div className="text-center">
+            <img
+              className="h-10 object-contain"
+              src="/Buy-Fresh-Food-Logo.png"
+              alt="Buy Fresh. Food Logo"
+            />
             <span className="text-body-bold font-body-bold text-brand-700">
               Where fresh means local.
             </span>
