@@ -25,15 +25,14 @@ import {
   FeatherInstagram,
   FeatherXTwitter,
   FeatherSlack,
-  FeatherHeart,
-  FeatherUser
+  FeatherHeart
 } from "@subframe/core";
 import { useWaitlistContext } from "../contexts/WaitlistContext";
 import { useLocationContext } from "../contexts/LocationContext";
-import { useSnackbar } from "../contexts/SnackbarContext";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useSnackbar } from "../contexts/SnackbarContext";
 
 // Fix for default markers in React Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -317,7 +316,7 @@ const ProductDetailNew: React.FC = () => {
       cart = { sellers: {}, savedItems: [] };
     }
     
-    // Create seller ID from name
+    // Determine seller ID
     const sellerId = product.seller.name.toLowerCase().replace(/\s+/g, '-');
     
     // Create cart item
@@ -350,7 +349,7 @@ const ProductDetailNew: React.FC = () => {
         name: product.seller.name,
         avatar: product.seller.image,
         distance: product.seller.distance,
-        pickupStatus: product.seller.availability.includes('Today') ? 'Pickup available today' : 'Pickup available tomorrow',
+        pickupStatus: "Pickup available today",
         selectedPickupTime: null,
         pickupInstructions: "",
         items: [cartItem]
@@ -387,7 +386,7 @@ const ProductDetailNew: React.FC = () => {
       cart = { sellers: {}, savedItems: [] };
     }
     
-    // Create seller ID from name
+    // Determine seller ID
     const sellerId = product.seller.name.toLowerCase().replace(/\s+/g, '-');
     
     // Check if item already exists in saved items
@@ -427,11 +426,8 @@ const ProductDetailNew: React.FC = () => {
 
   // Handle buy now
   const handleBuyNow = () => {
-    if (!product) return;
-    
     // Add to cart first
     handleAddToCart();
-    
     // Then navigate to cart
     navigate('/cart');
   };
@@ -453,10 +449,10 @@ const ProductDetailNew: React.FC = () => {
 
   // Handle contact seller
   const handleContactSeller = () => {
-    // Determine waitlist type based on location
+    // In a real app, this would open a chat with the seller
+    // For now, we'll open the waitlist flow
     const waitlistType = locationState.isNWA ? 'early_access' : 'geographic';
     
-    // Open waitlist flow with current location data
     openWaitlistFlow(waitlistType, locationState.isSet ? {
       isNWA: locationState.isNWA,
       city: locationState.city || '',
@@ -473,17 +469,13 @@ const ProductDetailNew: React.FC = () => {
     }
   };
 
+  // Navigate to seller profile
   const handleSellerClick = () => {
-  if (!product) return;
-  
-  // Create seller ID from seller name
-  const sellerId = product.seller.name.toLowerCase().replace(/\s+/g, '-');
-    
-  if (sellerId) {
-    // Navigate to seller profile page
-    navigate(`/seller/${sellerId}`);
-  }
-};
+    if (product) {
+      const sellerId = product.seller.name.toLowerCase().replace(/\s+/g, '-');
+      navigate(`/seller/${sellerId}`);
+    }
+  };
 
   // Render star rating
   const renderStars = (rating: number) => {
@@ -674,545 +666,466 @@ const ProductDetailNew: React.FC = () => {
                 </Button>
               </div>
 
-              {/* Seller Info */}
-              <div className="bg-neutral-50 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  {/* Clickable seller icon and info */}
-                  <div 
-                    className="flex items-start gap-3 flex-1 cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={handleSellerClick}
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100">
-                      <FeatherUser className="h-5 w-5 text-brand-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-heading-3 font-heading-3 text-default-font hover:text-brand-600 transition-colors">
-                        {product.seller.name}
-                      </h4>
-                      <div className="flex items-center gap-1 text-body font-body text-subtext-color">
-                        <FeatherMapPin className="w-4 h-4" />
-                        <span>{product.seller.location}</span>
-                      </div>
-                    </div>
+              {/* Seller Information - UPDATED FOR MOBILE RESPONSIVENESS */}
+              <div 
+                className="flex w-full flex-col sm:flex-row items-center sm:items-center gap-4 rounded-md border border-solid border-neutral-200 bg-default-background p-4 sm:p-6 cursor-pointer hover:bg-neutral-50 transition-colors"
+                onClick={handleSellerClick}
+              >
+                <Avatar
+                  size="x-large"
+                  image={product.seller.image}
+                  className="flex-shrink-0"
+                >
+                  {product.seller.name.charAt(0)}
+                </Avatar>
+                <div className="flex grow shrink-0 basis-0 flex-col items-center sm:items-start text-center sm:text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      {product.seller.name}
+                    </span>
+                    {product.seller.verified && (
+                      <FeatherVerified className="text-body font-body text-brand-700" />
+                    )}
                   </div>
-                  {/* Contact button stays separate */}
-                  <Button
-                    variant="brand-secondary"
-                    size="small"
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center">
+                      <FeatherStar className="text-body font-body text-default-font" />
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        {product.seller.rating.toFixed(1)}
+                      </span>
+                    </div>
+                    <span className="text-body font-body text-subtext-color">
+                      ({product.seller.reviewCount} reviews)
+                    </span>
+                  </div>
+                  <span className="text-caption font-caption text-subtext-color">
+                    {product.seller.distance} • {product.seller.availability}
+                  </span>
+                </div>
+                <div className="flex flex-row sm:flex-col md:flex-row gap-2 mt-2 sm:mt-0">
+                  <IconButton
+                    variant="neutral-primary"
                     icon={<FeatherMessageCircle />}
-                    onClick={handleContactSeller}
-                  >
-                    Contact
-                  </Button>
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContactSeller();
+                    }}
+                  />
+                  <IconButton
+                    variant="neutral-primary"
+                    icon={<FeatherMail />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = `mailto:${product.seller.contact.email}`;
+                    }}
+                  />
+                  <IconButton
+                    variant="neutral-primary"
+                    icon={<FeatherPhone />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = `tel:${product.seller.contact.phone.replace(/[^0-9]/g, '')}`;
+                    }}
+                  />
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Pickup Information with Map */}
-          <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm mt-4">
-            <Accordion
-              trigger={
-                <div className="flex w-full items-center justify-between px-4 sm:px-6 py-4 sm:py-6">
-                  <span className="text-heading-2 font-heading-2 text-default-font">
-                    Pickup Information
-                  </span>
-                  <Accordion.Chevron />
-                </div>
-              }
-              defaultOpen={true}
-            >
-              <div className="flex w-full flex-col md:flex-row border-t border-solid border-neutral-200">
-                {/* Pickup Details */}
-                <div className="flex w-full md:w-1/2 flex-col items-start gap-4 px-4 sm:px-6 py-4 sm:py-6">
-                  <div className="flex items-start gap-4">
-                    <FeatherTruck className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Pickup Details
-                      </span>
-                      <span className="text-body font-body text-default-font">
-                        {product.pickup.details}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <FeatherClock className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Hours of Operation
-                      </span>
-                      <span className="text-body font-body text-default-font whitespace-pre-line">
-                        {product.pickup.hours}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <FeatherMapPin className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Farm Location
-                      </span>
-                      <span className="text-body font-body text-default-font">
-                        {product.pickup.location}
-                      </span>
-                      <Button
-                        variant="neutral-primary"
-                        size="small"
-                        icon={<FeatherMapPin />}
-                        onClick={handleGetDirections}
-                        className="mt-1"
-                      >
-                        Directions
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <FeatherPhone className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
-                    <div className="flex flex-col items-start gap-1">
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        Contact
-                      </span>
-                      <span className="text-body font-body text-default-font">
-                        {product.seller.contact.phone} | {product.seller.contact.email}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <IconButton
-                          variant="neutral-primary"
-                          size="small"
-                          icon={<FeatherMessageCircle />}
-                          onClick={handleContactSeller}
-                        />
-                        <IconButton
-                          variant="neutral-primary"
-                          size="small"
-                          icon={<FeatherMail />}
-                          onClick={() => window.location.href = `mailto:${product.seller.contact.email}`}
-                        />
-                        <IconButton
-                          variant="neutral-primary"
-                          size="small"
-                          icon={<FeatherPhone />}
-                          onClick={() => window.location.href = `tel:${product.seller.contact.phone.replace(/[^0-9]/g, '')}`}
-                        />
-                      </div>
-                    </div>
+        {/* Pickup Information with Map */}
+        <div className="flex w-full flex-col items-start gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm mt-4">
+          <Accordion
+            trigger={
+              <div className="flex w-full items-center justify-between px-4 sm:px-6 py-4 sm:py-6">
+                <span className="text-heading-2 font-heading-2 text-default-font">
+                  Pickup Information
+                </span>
+                <Accordion.Chevron />
+              </div>
+            }
+            defaultOpen={true}
+          >
+            <div className="flex w-full flex-col md:flex-row border-t border-solid border-neutral-200">
+              {/* Pickup Details */}
+              <div className="flex w-full md:w-1/2 flex-col items-start gap-4 px-4 sm:px-6 py-4 sm:py-6">
+                <div className="flex items-start gap-4">
+                  <FeatherTruck className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      Pickup Details
+                    </span>
+                    <span className="text-body font-body text-default-font">
+                      {product.pickup.details}
+                    </span>
                   </div>
                 </div>
                 
-                {/* Map */}
-                <div className="w-full md:w-1/2 h-64 md:h-auto border-t md:border-t-0 md:border-l border-neutral-200">
-                  <div className="h-full w-full p-4">
-                    <div className="h-full w-full rounded-md overflow-hidden border border-neutral-200">
-                      <MapContainer 
-                        center={product.seller.coordinates} 
-                        zoom={13} 
-                        style={{ height: '100%', width: '100%' }}
-                        scrollWheelZoom={false}
-                      >
-                        <TileLayer
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        <Marker position={product.seller.coordinates}>
-                          <Popup>
-                            <div className="p-1">
-                              <strong>{product.seller.name}</strong><br />
-                              {product.seller.location}
-                            </div>
-                          </Popup>
-                        </Marker>
-                      </MapContainer>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Accordion>
-          </div>
-
-          {/* Product Reviews */}
-          <div className="flex w-full flex-col items-start justify-end gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm">
-            <Accordion
-              trigger={
-                <div className="flex w-full items-center gap-2 px-4 sm:px-6 py-4 sm:py-6">
-                  <div className="flex grow shrink-0 basis-0 items-center gap-4 flex-wrap">
-                    <span className="text-heading-2 font-heading-2 text-default-font">
-                      Product Reviews
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <div className="flex items-center">
-                        <FeatherStar className="text-body font-body text-default-font" />
-                        <span className="text-body-bold font-body-bold text-default-font">
-                          {product.rating.toFixed(1)}
-                        </span>
-                      </div>
-                      <span className="text-body font-body text-subtext-color">
-                        ({product.reviewCount} reviews)
-                      </span>
-                    </div>
-                  </div>
-                  <Accordion.Chevron />
-                </div>
-              }
-              defaultOpen={true}
-            >
-              <div className="flex w-full flex-col items-start gap-4 border-t border-solid border-neutral-200 px-4 sm:px-6 py-4 sm:py-6">
-                <div className="flex w-full flex-col md:flex-row items-start gap-8 md:gap-12">
-                  {/* Review Highlights */}
-                  <div className="flex w-full md:w-auto grow shrink-0 basis-0 flex-col items-start gap-4">
+                <div className="flex items-start gap-4">
+                  <FeatherClock className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
+                  <div className="flex flex-col items-start">
                     <span className="text-body-bold font-body-bold text-default-font">
-                      Review Highlights
+                      Hours of Operation
                     </span>
-                    <div className="flex flex-wrap items-start gap-2">
-                      {product.reviews.highlights.map((highlight, index) => (
-                        <Badge key={index} variant="success">"{highlight}"</Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Rating Distribution */}
-                  <div className="flex w-full md:w-auto grow shrink-0 basis-0 flex-col items-start gap-2">
-                    <div className="flex w-full items-center gap-2">
-                      <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
-                        5
-                      </span>
-                      <Progress value={product.reviews.ratings.five} />
-                      <span className="w-8 flex-none text-body font-body text-default-font">
-                        {product.reviews.ratings.five}%
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center gap-2">
-                      <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
-                        4
-                      </span>
-                      <Progress value={product.reviews.ratings.four} />
-                      <span className="w-8 flex-none text-body font-body text-default-font">
-                        {product.reviews.ratings.four}%
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center gap-2">
-                      <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
-                        3
-                      </span>
-                      <Progress value={product.reviews.ratings.three} />
-                      <span className="w-8 flex-none text-body font-body text-default-font">
-                        {product.reviews.ratings.three}%
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center gap-2">
-                      <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
-                        2
-                      </span>
-                      <Progress value={product.reviews.ratings.two} />
-                      <span className="w-8 flex-none text-body font-body text-default-font">
-                        {product.reviews.ratings.two}%
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center gap-2">
-                      <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
-                        1
-                      </span>
-                      <Progress value={product.reviews.ratings.one} />
-                      <span className="w-8 flex-none text-body font-body text-default-font">
-                        {product.reviews.ratings.one}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Rating Metrics */}
-                  <div className="flex flex-col items-start gap-4">
-                    <div className="flex w-full items-center gap-4">
-                      <span className="w-24 flex-none text-body font-body text-default-font">
-                        Freshness
-                      </span>
-                      <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
-                        {product.reviews.metrics.freshness.toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center gap-4">
-                      <span className="w-24 flex-none text-body font-body text-default-font">
-                        Taste
-                      </span>
-                      <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
-                        {product.reviews.metrics.taste.toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center gap-4">
-                      <span className="w-24 flex-none text-body font-body text-default-font">
-                        Value
-                      </span>
-                      <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
-                        {product.reviews.metrics.value.toFixed(1)}
-                      </span>
-                    </div>
+                    <span className="text-body font-body text-default-font whitespace-pre-line">
+                      {product.pickup.hours}
+                    </span>
                   </div>
                 </div>
-
-                {/* Review Items */}
-                <div className="flex w-full flex-col items-center gap-6 mt-2">
-                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {product.reviews.items.map((review, index) => (
-                      <div key={index} className="flex flex-col items-start gap-1">
-                        <div className="flex w-full items-center justify-between">
-                          <span className="text-body-bold font-body-bold text-default-font">
-                            {review.name}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="flex items-center">
-                            {renderStars(review.rating)}
-                          </div>
-                          <span className="text-caption font-caption text-subtext-color">
-                            {review.date}
-                          </span>
-                        </div>
-                        <span className="line-clamp-3 text-body font-body text-default-font">
-                          {review.comment}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    className="h-10 w-full max-w-md flex-none"
-                    variant="neutral-primary"
-                    size="large"
-                    onClick={() => setShowAllReviews(true)}
-                  >
-                    Read more reviews
-                  </Button>
-                </div>
-              </div>
-            </Accordion>
-          </div>
-
-          {/* Related Products */}
-          <div className="flex w-full flex-col items-start gap-4 mt-2">
-            <h2 className="text-heading-2 font-heading-2 text-default-font">
-              More from {product.seller.name}
-            </h2>
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {product.relatedProducts.map((relatedProduct) => (
-                <div 
-                  key={relatedProduct.id} 
-                  className="flex flex-col items-start gap-2 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => navigate(`/product/${relatedProduct.id}`)}
-                >
-                  <img
-                    className="h-48 w-full flex-none rounded-lg object-cover"
-                    src={relatedProduct.image}
-                    alt={relatedProduct.name}
-                  />
-                  <div className="flex w-full flex-col items-start gap-2">
+                
+                <div className="flex items-start gap-4">
+                  <FeatherMapPin className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
+                  <div className="flex flex-col items-start">
                     <span className="text-body-bold font-body-bold text-default-font">
-                      {relatedProduct.name}
+                      Farm Location
                     </span>
-                    <div className="flex w-full items-center justify-between">
-                      <span className="text-body-bold font-body-bold text-default-font">
-                        ${relatedProduct.price.toFixed(2)}/{relatedProduct.unit}
-                      </span>
-                    </div>
-                    <div className="flex w-full items-center gap-2">
-                      <Button
-                        className="h-8 flex-1"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          
-                          // Get existing cart from localStorage
-                          let cart;
-                          try {
-                            const savedCart = localStorage.getItem('freshFoodCart');
-                            cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
-                          } catch (error) {
-                            console.error('Error parsing saved cart:', error);
-                            cart = { sellers: {}, savedItems: [] };
-                          }
-                          
-                          // Create seller ID from name
-                          const sellerId = product.seller.name.toLowerCase().replace(/\s+/g, '-');
-                          
-                          // Create cart item
-                          const cartItem = {
-                            id: relatedProduct.id,
-                            name: relatedProduct.name,
-                            description: 'Related product',
-                            price: relatedProduct.price,
-                            unit: relatedProduct.unit,
-                            quantity: 1,
-                            image: relatedProduct.image
-                          };
-                          
-                          // Check if seller exists in cart
-                          if (cart.sellers[sellerId]) {
-                            // Check if item already exists
-                            const existingItemIndex = cart.sellers[sellerId].items.findIndex(item => item.id === cartItem.id);
-                            
-                            if (existingItemIndex >= 0) {
-                              // Update quantity if item exists
-                              cart.sellers[sellerId].items[existingItemIndex].quantity += 1;
-                            } else {
-                              // Add new item to existing seller
-                              cart.sellers[sellerId].items.push(cartItem);
-                            }
-                          } else {
-                            // Add new seller with item
-                            cart.sellers[sellerId] = {
-                              id: sellerId,
-                              name: product.seller.name,
-                              avatar: product.seller.image,
-                              distance: product.seller.distance,
-                              pickupStatus: product.seller.availability.includes('Today') ? 'Pickup available today' : 'Pickup available tomorrow',
-                              selectedPickupTime: null,
-                              pickupInstructions: "",
-                              items: [cartItem]
-                            };
-                          }
-                          
-                          // Save updated cart to localStorage
-                          localStorage.setItem('freshFoodCart', JSON.stringify(cart));
-                          
-                          // Dispatch custom event to notify other components
-                          window.dispatchEvent(new Event('cartUpdated'));
-                          
-                          // Show snackbar notification
-                          showSnackbar('cart', {
-                            id: relatedProduct.id,
-                            name: relatedProduct.name,
-                            quantity: 1,
-                            unit: relatedProduct.unit,
-                            image: relatedProduct.image
-                          });
-                        }}
-                      >
-                        Add to Cart
-                      </Button>
+                    <span className="text-body font-body text-default-font">
+                      {product.pickup.location}
+                    </span>
+                    <Button
+                      variant="neutral-primary"
+                      size="small"
+                      icon={<FeatherMapPin />}
+                      onClick={handleGetDirections}
+                      className="mt-1"
+                    >
+                      Directions
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <FeatherPhone className="text-heading-2 font-heading-2 text-default-font flex-shrink-0 mt-1" />
+                  <div className="flex flex-col items-start gap-1">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      Contact
+                    </span>
+                    <span className="text-body font-body text-default-font">
+                      {product.seller.contact.phone} | {product.seller.contact.email}
+                    </span>
+                    <div className="flex items-center gap-2">
                       <IconButton
-                        variant="destructive-secondary"
+                        variant="neutral-primary"
                         size="small"
-                        icon={<FeatherHeart />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          
-                          // Get existing cart from localStorage
-                          let cart;
-                          try {
-                            const savedCart = localStorage.getItem('freshFoodCart');
-                            cart = savedCart ? JSON.parse(savedCart) : { sellers: {}, savedItems: [] };
-                          } catch (error) {
-                            console.error('Error parsing saved cart:', error);
-                            cart = { sellers: {}, savedItems: [] };
-                          }
-                          
-                          // Create seller ID from name
-                          const sellerId = product.seller.name.toLowerCase().replace(/\s+/g, '-');
-                          
-                          // Check if item already exists in saved items
-                          const existingItemIndex = cart.savedItems.findIndex(item => item.id === relatedProduct.id);
-                          
-                          if (existingItemIndex === -1) {
-                            // Add to saved items
-                            const savedItem = {
-                              id: relatedProduct.id,
-                              name: relatedProduct.name,
-                              price: relatedProduct.price,
-                              unit: relatedProduct.unit,
-                              image: relatedProduct.image,
-                              sellerId: sellerId
-                            };
-                            
-                            cart.savedItems.push(savedItem);
-                            
-                            // Save updated cart to localStorage
-                            localStorage.setItem('freshFoodCart', JSON.stringify(cart));
-                            
-                            // Show snackbar notification
-                            showSnackbar('saved', {
-                              id: relatedProduct.id,
-                              name: relatedProduct.name,
-                              image: relatedProduct.image
-                            });
-                          } else {
-                            // Show snackbar for already saved item
-                            showSnackbar('saved', {
-                              id: relatedProduct.id,
-                              name: relatedProduct.name,
-                              image: relatedProduct.image
-                            });
-                          }
-                        }}
+                        icon={<FeatherMessageCircle />}
+                        onClick={handleContactSeller}
+                      />
+                      <IconButton
+                        variant="neutral-primary"
+                        size="small"
+                        icon={<FeatherMail />}
+                        onClick={() => window.location.href = `mailto:${product.seller.contact.email}`}
+                      />
+                      <IconButton
+                        variant="neutral-primary"
+                        size="small"
+                        icon={<FeatherPhone />}
+                        onClick={() => window.location.href = `tel:${product.seller.contact.phone.replace(/[^0-9]/g, '')}`}
                       />
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background py-8 mt-4">
-            <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6">
-              <div className="flex min-w-[280px] md:min-w-[320px] flex-col items-start gap-6 self-stretch">
-                <div className="flex w-full grow shrink-0 basis-0 items-start gap-4">
-                  <img
-                    className="h-5 w-5 flex-none object-cover"
-                    src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
-                    alt="Logo"
-                  />
-                  <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Subframe
-                  </span>
-                </div>
-                <div className="flex w-full items-center gap-2">
-                  <IconButton
-                    icon={<FeatherFacebook />}
-                    onClick={() => {}}
-                  />
-                  <IconButton
-                    icon={<FeatherInstagram />}
-                    onClick={() => {}}
-                  />
-                  <IconButton
-                    icon={<FeatherXTwitter />}
-                    onClick={() => {}}
-                  />
-                  <IconButton
-                    icon={<FeatherSlack />}
-                    onClick={() => {}}
-                  />
+              </div>
+              
+              {/* Map */}
+              <div className="w-full md:w-1/2 h-64 md:h-auto border-t md:border-t-0 md:border-l border-neutral-200">
+                <div className="h-full w-full p-4">
+                  <div className="h-full w-full rounded-md overflow-hidden border border-neutral-200">
+                    <MapContainer 
+                      center={product.seller.coordinates} 
+                      zoom={13} 
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={false}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <Marker position={product.seller.coordinates}>
+                        <Popup>
+                          <div className="p-1">
+                            <strong>{product.seller.name}</strong><br />
+                            {product.seller.location}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    </MapContainer>
+                  </div>
                 </div>
               </div>
-              <div className="flex grow shrink-0 basis-0 flex-wrap items-start gap-4 self-stretch">
-                <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                  <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Product
+            </div>
+          </Accordion>
+        </div>
+
+        {/* Product Reviews */}
+        <div className="flex w-full flex-col items-start justify-end gap-4 rounded-md border border-solid border-neutral-200 bg-default-background shadow-sm">
+          <Accordion
+            trigger={
+              <div className="flex w-full items-center gap-2 px-4 sm:px-6 py-4 sm:py-6">
+                <div className="flex grow shrink-0 basis-0 items-center gap-4 flex-wrap">
+                  <span className="text-heading-2 font-heading-2 text-default-font">
+                    Product Reviews
                   </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Features
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Integrations
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Pricing
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center">
+                      <FeatherStar className="text-body font-body text-default-font" />
+                      <span className="text-body-bold font-body-bold text-default-font">
+                        {product.rating.toFixed(1)}
+                      </span>
+                    </div>
+                    <span className="text-body font-body text-subtext-color">
+                      ({product.reviewCount} reviews)
+                    </span>
+                  </div>
                 </div>
-                <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
-                  <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
-                    Company
+                <Accordion.Chevron />
+              </div>
+            }
+            defaultOpen={true}
+          >
+            <div className="flex w-full flex-col items-start gap-4 border-t border-solid border-neutral-200 px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex w-full flex-col md:flex-row items-start gap-8 md:gap-12">
+                {/* Review Highlights */}
+                <div className="flex w-full md:w-auto grow shrink-0 basis-0 flex-col items-start gap-4">
+                  <span className="text-body-bold font-body-bold text-default-font">
+                    Review Highlights
                   </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    About us
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Blog
-                  </span>
-                  <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
-                    Careers
-                  </span>
+                  <div className="flex flex-wrap items-start gap-2">
+                    {product.reviews.highlights.map((highlight, index) => (
+                      <Badge key={index} variant="success">"{highlight}"</Badge>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Rating Distribution */}
+                <div className="flex w-full md:w-auto grow shrink-0 basis-0 flex-col items-start gap-2">
+                  <div className="flex w-full items-center gap-2">
+                    <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
+                      5
+                    </span>
+                    <Progress value={product.reviews.ratings.five} />
+                    <span className="w-8 flex-none text-body font-body text-default-font">
+                      {product.reviews.ratings.five}%
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center gap-2">
+                    <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
+                      4
+                    </span>
+                    <Progress value={product.reviews.ratings.four} />
+                    <span className="w-8 flex-none text-body font-body text-default-font">
+                      {product.reviews.ratings.four}%
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center gap-2">
+                    <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
+                      3
+                    </span>
+                    <Progress value={product.reviews.ratings.three} />
+                    <span className="w-8 flex-none text-body font-body text-default-font">
+                      {product.reviews.ratings.three}%
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center gap-2">
+                    <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
+                      2
+                    </span>
+                    <Progress value={product.reviews.ratings.two} />
+                    <span className="w-8 flex-none text-body font-body text-default-font">
+                      {product.reviews.ratings.two}%
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center gap-2">
+                    <span className="w-4 flex-none text-body-bold font-body-bold text-default-font">
+                      1
+                    </span>
+                    <Progress value={product.reviews.ratings.one} />
+                    <span className="w-8 flex-none text-body font-body text-default-font">
+                      {product.reviews.ratings.one}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rating Metrics */}
+                <div className="flex flex-col items-start gap-4">
+                  <div className="flex w-full items-center gap-4">
+                    <span className="w-24 flex-none text-body font-body text-default-font">
+                      Freshness
+                    </span>
+                    <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
+                      {product.reviews.metrics.freshness.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center gap-4">
+                    <span className="w-24 flex-none text-body font-body text-default-font">
+                      Taste
+                    </span>
+                    <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
+                      {product.reviews.metrics.taste.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center gap-4">
+                    <span className="w-24 flex-none text-body font-body text-default-font">
+                      Value
+                    </span>
+                    <span className="w-12 flex-none text-body-bold font-body-bold text-default-font">
+                      {product.reviews.metrics.value.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Review Items */}
+              <div className="flex w-full flex-col items-center gap-6 mt-2">
+                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {product.reviews.items.map((review, index) => (
+                    <div key={index} className="flex flex-col items-start gap-1">
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-body-bold font-body-bold text-default-font">
+                          {review.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="flex items-center">
+                          {renderStars(review.rating)}
+                        </div>
+                        <span className="text-caption font-caption text-subtext-color">
+                          {review.date}
+                        </span>
+                      </div>
+                      <span className="line-clamp-3 text-body font-body text-default-font">
+                        {review.comment}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  className="h-10 w-full max-w-md flex-none"
+                  variant="neutral-primary"
+                  size="large"
+                  onClick={() => setShowAllReviews(true)}
+                >
+                  Read more reviews
+                </Button>
+              </div>
+            </div>
+          </Accordion>
+        </div>
+
+        {/* Related Products */}
+        <div className="flex w-full flex-col items-start gap-4 mt-2">
+          <h2 className="text-heading-2 font-heading-2 text-default-font">
+            More from {product.seller.name}
+          </h2>
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {product.relatedProducts.map((relatedProduct) => (
+              <div 
+                key={relatedProduct.id} 
+                className="flex flex-col items-start gap-2 rounded-md border border-solid border-neutral-200 bg-default-background p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/product/${relatedProduct.id}`)}
+              >
+                <img
+                  className="h-48 w-full flex-none rounded-lg object-cover"
+                  src={relatedProduct.image}
+                  alt={relatedProduct.name}
+                />
+                <div className="flex w-full flex-col items-start gap-2">
+                  <span className="text-body-bold font-body-bold text-default-font">
+                    {relatedProduct.name}
+                  </span>
+                  <div className="flex w-full items-center justify-between">
+                    <span className="text-body-bold font-body-bold text-default-font">
+                      ${relatedProduct.price.toFixed(2)}/{relatedProduct.unit}
+                    </span>
+                  </div>
+                  <div className="flex w-full items-center gap-2">
+                    <Button
+                      className="h-8 flex-1"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart();
+                      }}
+                    >
+                      Add to Cart
+                    </Button>
+                    <IconButton
+                      variant="destructive-secondary"
+                      size="small"
+                      icon={<FeatherHeart />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSaveForLater();
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex w-full flex-col items-center justify-center gap-6 border-t border-solid border-neutral-100 bg-default-background py-8 mt-4">
+          <div className="flex w-full max-w-[1024px] flex-wrap items-start gap-6">
+            <div className="flex min-w-[280px] md:min-w-[320px] flex-col items-start gap-6 self-stretch">
+              <div className="flex w-full grow shrink-0 basis-0 items-start gap-4">
+                <img
+                  className="h-5 w-5 flex-none object-cover"
+                  src="https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/y2rsnhq3mex4auk54aye.png"
+                  alt="Logo"
+                />
+                <span className="grow shrink-0 basis-0 font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
+                  Subframe
+                </span>
+              </div>
+              <div className="flex w-full items-center gap-2">
+                <IconButton
+                  icon={<FeatherFacebook />}
+                  onClick={() => {}}
+                />
+                <IconButton
+                  icon={<FeatherInstagram />}
+                  onClick={() => {}}
+                />
+                <IconButton
+                  icon={<FeatherXTwitter />}
+                  onClick={() => {}}
+                />
+                <IconButton
+                  icon={<FeatherSlack />}
+                  onClick={() => {}}
+                />
+              </div>
+            </div>
+            <div className="flex grow shrink-0 basis-0 flex-wrap items-start gap-4 self-stretch">
+              <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
+                <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
+                  Product
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Features
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Integrations
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Pricing
+                </span>
+              </div>
+              <div className="flex min-w-[144px] grow shrink-0 basis-0 flex-col items-start gap-4">
+                <span className="w-full font-['Inter'] text-[14px] font-[500] leading-[20px] text-default-font -tracking-[0.01em]">
+                  Company
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  About us
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Blog
+                </span>
+                <span className="font-['Inter'] text-[14px] font-[400] leading-[20px] text-subtext-color -tracking-[0.01em]">
+                  Careers
+                </span>
               </div>
             </div>
           </div>
