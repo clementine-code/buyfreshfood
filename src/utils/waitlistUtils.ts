@@ -11,6 +11,7 @@ export interface WaitlistFormData {
   interests: string[];
   productInterests: string;
   waitlistType: 'geographic' | 'early_access';
+  honeypot?: string; // Honeypot field to catch bots
 }
 
 // Get real queue position from Supabase with fallback
@@ -41,21 +42,43 @@ export const submitWaitlist = async (formData: WaitlistFormData) => {
   try {
     console.log('📝 Submitting waitlist form:', formData);
 
+    // Check honeypot field - if it's filled, this is likely a bot
+    if (formData.honeypot && formData.honeypot.length > 0) {
+      console.log('🤖 Bot detected! Honeypot field was filled.');
+      // Return success to the bot but don't actually submit anything
+      return { 
+        success: true, 
+        queuePosition: Math.floor(Math.random() * 500) + 100,
+        data: {
+          id: `fake-${Date.now()}`,
+          email: formData.email,
+          location: formData.location,
+          city: formData.city,
+          state: formData.state,
+          waitlist_type: formData.waitlistType,
+          created_at: new Date().toISOString()
+        }
+      };
+    }
+
     // Create abort controller for timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+    // Remove honeypot field before sending to database
+    const { honeypot, ...cleanFormData } = formData;
+
     const { data, error } = await supabase
       .from('waitlist')
       .insert({
-        email: formData.email.toLowerCase().trim(),
-        location: formData.location,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zipCode || null,
-        interests: formData.interests,
-        product_interests: formData.productInterests,
-        waitlist_type: formData.waitlistType
+        email: cleanFormData.email.toLowerCase().trim(),
+        location: cleanFormData.location,
+        city: cleanFormData.city,
+        state: cleanFormData.state,
+        zip_code: cleanFormData.zipCode || null,
+        interests: cleanFormData.interests,
+        product_interests: cleanFormData.productInterests,
+        waitlist_type: cleanFormData.waitlistType
       })
       .select()
       .single()
@@ -68,7 +91,7 @@ export const submitWaitlist = async (formData: WaitlistFormData) => {
       throw error;
     }
 
-    const queuePosition = await getQueuePosition(formData.city, formData.waitlistType);
+    const queuePosition = await getQueuePosition(cleanFormData.city, cleanFormData.waitlistType);
     
     console.log('✅ Waitlist submission successful:', data);
     return { success: true, queuePosition, data };

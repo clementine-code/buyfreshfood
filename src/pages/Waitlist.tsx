@@ -18,6 +18,7 @@ function Waitlist() {
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [honeypot, setHoneypot] = useState(""); // Honeypot field state
 
   const handleLocationSelect = (location: LocationData) => {
     setSelectedLocation(location);
@@ -28,39 +29,40 @@ function Waitlist() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!email.trim() || !selectedLocation) return;
+    e.preventDefault();
+    if (!email.trim() || !selectedLocation) return;
 
-  setIsSubmitting(true);
-  
-  try {
-    const formData = {
-      email: email.trim(),
-      location: selectedLocation.formattedAddress || `${selectedLocation.city}, ${selectedLocation.state}`,
-      city: selectedLocation.city,
-      state: selectedLocation.state,
-      zipCode: selectedLocation.zipCode,
-      interests: [], // Empty array since this form doesn't collect interests
-      productInterests: '', // Empty since this form doesn't collect this
-      waitlistType: selectedLocation.isNWA ? 'early_access' : 'geographic'
-    };
-
-    const result = await submitWaitlist(formData);
+    setIsSubmitting(true);
     
-    if (result.success) {
-      setIsSubmitted(true);
-    } else {
-      console.error('Waitlist submission failed:', result.error);
-      // You might want to show an error message to the user
+    try {
+      const formData = {
+        email: email.trim(),
+        location: selectedLocation.formattedAddress || `${selectedLocation.city}, ${selectedLocation.state}`,
+        city: selectedLocation.city,
+        state: selectedLocation.state,
+        zipCode: selectedLocation.zipCode,
+        interests: [], // Empty array since this form doesn't collect interests
+        productInterests: '', // Empty since this form doesn't collect this
+        waitlistType: selectedLocation.isNWA ? 'early_access' : 'geographic',
+        honeypot: honeypot // Include honeypot field
+      };
+
+      const result = await submitWaitlist(formData);
+      
+      if (result.success) {
+        setIsSubmitted(true);
+      } else {
+        console.error('Waitlist submission failed:', result.error);
+        // You might want to show an error message to the user
+        alert('Failed to join waitlist. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting waitlist:', error);
       alert('Failed to join waitlist. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error('Error submitting waitlist:', error);
-    alert('Failed to join waitlist. Please try again.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   const isValidEmail = email.includes('@') && email.includes('.');
   const canSubmit = isValidEmail && selectedLocation && !isSubmitting;
@@ -228,6 +230,21 @@ function Waitlist() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                  />
+                </TextField>
+              </div>
+
+              {/* Honeypot field - hidden from real users, only bots will fill this */}
+              <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
+                <TextField
+                  label="Leave this field empty"
+                >
+                  <TextField.Input
+                    name="website"
+                    autoComplete="off"
+                    tabIndex={-1}
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
                   />
                 </TextField>
               </div>

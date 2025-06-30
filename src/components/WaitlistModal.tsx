@@ -46,6 +46,9 @@ const WaitlistModal: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
+  // Honeypot field state - invisible to users, only bots will fill this
+  const [honeypot, setHoneypot] = useState("");
+
   // Refs for suggestion handling - same as LocationCollectionModal
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -111,6 +114,9 @@ const WaitlistModal: React.FC = () => {
       setSuggestions([]);
       setShowSuggestions(false);
       setSelectedIndex(-1);
+      
+      // Reset honeypot field
+      setHoneypot("");
     }
   }, [state.isWaitlistModalOpen, state.isSuccessView, state.currentLocationData, state.collectLocationInModal, locationState]);
 
@@ -409,7 +415,8 @@ const WaitlistModal: React.FC = () => {
         zipCode: currentLocationData.zipCode,
         interests: selectedInterests,
         productInterests: productInterests.trim(),
-        waitlistType: state.modalType || 'geographic'
+        waitlistType: state.modalType || 'geographic',
+        honeypot: honeypot // Include honeypot field
       };
 
       const result = await submitWaitlist(formData);
@@ -797,6 +804,22 @@ const WaitlistModal: React.FC = () => {
                 className="mobile:text-sm"
               />
             </TextField>
+
+            {/* Honeypot field - hidden from real users, only bots will fill this */}
+            <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
+              <TextField
+                className="h-auto w-full flex-none"
+                label="Leave this field empty"
+              >
+                <TextField.Input
+                  name="website"
+                  autoComplete="off"
+                  tabIndex={-1}
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </TextField>
+            </div>
 
             {error && !error.includes('location') && (
               <div className="w-full p-3 bg-error-50 border border-error-200 rounded-md">
