@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { Breadcrumbs } from "@/ui/components/Breadcrumbs";
@@ -52,7 +52,7 @@ const sampleSellers = {
     id: 'sarah-family-farm',
     name: "Sarah's Family Farm",
     verified: true,
-    coverImage: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80",
+    coverImage: "https://images.unsplash.com/photo-1593935170461-de8f3cbe70de?w=800",
     profileImage: "https://res.cloudinary.com/subframe/image/upload/v1711417507/shared/fychrij7dzl8wgq2zjq9.avif",
     distance: "2.3 miles away",
     certifications: ["Certified Organic"],
@@ -782,13 +782,15 @@ const SellerProfile: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex grow shrink-0 basis-0 flex-col items-center justify-center rounded-md border border-neutral-200 bg-default-background shadow-sm h-96 md:w-2/3">
+            <div className="flex grow shrink-0 basis-0 flex-col items-center justify-center rounded-md border border-neutral-200 bg-default-background shadow-sm h-[300px] md:h-96 md:w-2/3 w-full">
               {seller.details.coordinates && (
                 <MapContainer 
                   center={seller.details.coordinates as [number, number]} 
                   zoom={13} 
-                  style={{ height: '100%', width: '100%', borderRadius: '0.375rem' }}
-                  scrollWheelZoom={false}
+                  style={{ height: '100%', width: '100%', minHeight: '300px', borderRadius: '0.375rem' }}
+                  scrollWheelZoom={true}
+                  touchZoom={true}
+                  dragging={true}
                 >
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -871,7 +873,7 @@ const SellerProfile: React.FC = () => {
         <div className="flex h-48 sm:h-64 md:h-80 w-full flex-none flex-col items-start relative rounded-lg overflow-hidden">
           <img
             className="h-full w-full flex-none object-cover"
-            src={seller.coverImage}
+            src="https://images.unsplash.com/photo-1593935170461-de8f3cbe70de?w=800"
             alt={`${seller.name} cover`}
           />
           <div className="flex w-full items-end gap-4 md:gap-6 p-4 md:px-8 md:py-6 absolute bottom-0 left-0 bg-gradient-to-t from-[#00000099] to-transparent">
@@ -1079,18 +1081,21 @@ const SellerProfile: React.FC = () => {
             <Tabs.Item 
               active={activeTab === 'Products'} 
               onClick={() => setActiveTab('Products')}
+              className="text-base px-5 py-2.5"
             >
               Products
             </Tabs.Item>
             <Tabs.Item 
               active={activeTab === 'Reviews'} 
               onClick={() => setActiveTab('Reviews')}
+              className="text-base px-5 py-2.5"
             >
               Reviews
             </Tabs.Item>
             <Tabs.Item 
               active={activeTab === 'Location'} 
               onClick={() => setActiveTab('Location')}
+              className="text-base px-5 py-2.5"
             >
               Location
             </Tabs.Item>
