@@ -68,72 +68,14 @@ const Cart: React.FC = () => {
   
   // Cart state
   const [cartState, setCartState] = useState<CartState>({
-    sellers: {
-      'sarah-farm': {
-        id: 'sarah-farm',
-        name: "Sarah's Family Farm",
-        avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-        distance: "2.3 miles away",
-        pickupStatus: "Pickup available today",
-        selectedPickupTime: null,
-        pickupInstructions: "",
-        items: [
-          {
-            id: 'carrots-1',
-            name: 'Carrots',
-            description: 'Harvested today',
-            price: 3.99,
-            unit: 'lb',
-            quantity: 2,
-            image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37"
-          },
-          {
-            id: 'potatoes-1', 
-            name: 'Potatoes',
-            description: 'Collected this morning',
-            price: 4.00,
-            unit: 'lb',
-            quantity: 1,
-            image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
-          }
-        ]
-      },
-      'green-valley': {
-        id: 'green-valley',
-        name: 'Green Valley Organics',
-        avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
-        distance: "3.1 miles away", 
-        pickupStatus: "Pickup available tomorrow",
-        selectedPickupTime: null,
-        pickupInstructions: "",
-        items: [
-          {
-            id: 'cauliflower-1',
-            name: 'Cauliflower',
-            description: 'Peak season',
-            price: 4.99,
-            unit: 'bag',
-            quantity: 3,
-            image: "https://images.unsplash.com/photo-1566842600175-97dca489844f"
-          }
-        ]
-      }
-    },
-    savedItems: [
-      {
-        id: 'apples-1',
-        name: 'Apples',
-        price: 5.50,
-        unit: 'bag',
-        image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716",
-        sellerId: 'orchard-farm'
-      }
-    ]
+    sellers: {},
+    savedItems: []
   });
 
   // Success modal state
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -144,14 +86,146 @@ const Cart: React.FC = () => {
         setCartState(parsedCart);
       } catch (error) {
         console.error('Error parsing saved cart:', error);
+        // Initialize with default cart if parsing fails
+        setCartState({
+          sellers: {
+            'sarah-farm': {
+              id: 'sarah-farm',
+              name: "Sarah's Family Farm",
+              avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
+              distance: "2.3 miles away",
+              pickupStatus: "Pickup available today",
+              selectedPickupTime: null,
+              pickupInstructions: "",
+              items: [
+                {
+                  id: 'carrots-1',
+                  name: 'Carrots',
+                  description: 'Harvested today',
+                  price: 3.99,
+                  unit: 'lb',
+                  quantity: 2,
+                  image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37"
+                },
+                {
+                  id: 'potatoes-1', 
+                  name: 'Potatoes',
+                  description: 'Collected this morning',
+                  price: 4.00,
+                  unit: 'lb',
+                  quantity: 1,
+                  image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
+                }
+              ]
+            },
+            'green-valley': {
+              id: 'green-valley',
+              name: 'Green Valley Organics',
+              avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
+              distance: "3.1 miles away", 
+              pickupStatus: "Pickup available tomorrow",
+              selectedPickupTime: null,
+              pickupInstructions: "",
+              items: [
+                {
+                  id: 'cauliflower-1',
+                  name: 'Cauliflower',
+                  description: 'Peak season',
+                  price: 4.99,
+                  unit: 'bag',
+                  quantity: 3,
+                  image: "https://images.unsplash.com/photo-1566842600175-97dca489844f"
+                }
+              ]
+            }
+          },
+          savedItems: [
+            {
+              id: 'apples-1',
+              name: 'Apples',
+              price: 5.50,
+              unit: 'bag',
+              image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716",
+              sellerId: 'orchard-farm'
+            }
+          ]
+        });
       }
+    } else {
+      // Initialize with default cart if no saved cart exists
+      setCartState({
+        sellers: {
+          'sarah-farm': {
+            id: 'sarah-farm',
+            name: "Sarah's Family Farm",
+            avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
+            distance: "2.3 miles away",
+            pickupStatus: "Pickup available today",
+            selectedPickupTime: null,
+            pickupInstructions: "",
+            items: [
+              {
+                id: 'carrots-1',
+                name: 'Carrots',
+                description: 'Harvested today',
+                price: 3.99,
+                unit: 'lb',
+                quantity: 2,
+                image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37"
+              },
+              {
+                id: 'potatoes-1', 
+                name: 'Potatoes',
+                description: 'Collected this morning',
+                price: 4.00,
+                unit: 'lb',
+                quantity: 1,
+                image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655"
+              }
+            ]
+          },
+          'green-valley': {
+            id: 'green-valley',
+            name: 'Green Valley Organics',
+            avatar: "https://images.unsplash.com/photo-1500076656116-558758c991c1",
+            distance: "3.1 miles away", 
+            pickupStatus: "Pickup available tomorrow",
+            selectedPickupTime: null,
+            pickupInstructions: "",
+            items: [
+              {
+                id: 'cauliflower-1',
+                name: 'Cauliflower',
+                description: 'Peak season',
+                price: 4.99,
+                unit: 'bag',
+                quantity: 3,
+                image: "https://images.unsplash.com/photo-1566842600175-97dca489844f"
+              }
+            ]
+          }
+        },
+        savedItems: [
+          {
+            id: 'apples-1',
+            name: 'Apples',
+            price: 5.50,
+            unit: 'bag',
+            image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716",
+            sellerId: 'orchard-farm'
+          }
+        ]
+      });
     }
+    setIsLoading(false);
   }, []);
 
   // Save cart to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('freshFoodCart', JSON.stringify(cartState));
-  }, [cartState]);
+    if (!isLoading) {
+      localStorage.setItem('freshFoodCart', JSON.stringify(cartState));
+    }
+  }, [cartState, isLoading]);
 
   // Calculate totals
   const calculateSellerTotal = (seller: Seller) => {
