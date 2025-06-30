@@ -176,20 +176,18 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
         </div>
 
         {/* Footer with Slogan */}
-        <div className="p-6 border-t border-neutral-200">
-          <img
-              className="h-10 object-contain"
-              src="/Buy-Fresh-Food-Logo.png"
-              alt="Buy Fresh. Food Logo"
-            />
-          <div className="text-center">
-            
-            <span className="text-body-bold font-body-bold text-brand-700">
-              Where fresh means local.
-            </span>
-          </div>
-        </div>
-      </div>
+<div className="p-6 border-t border-neutral-200">
+  <div className="flex items-center justify-center gap-4">
+    <img
+      className="h-10 object-contain"
+      src="/Buy-Fresh-Food-Logo.png"
+      alt="Buy Fresh. Food Logo"
+    />
+    <span className="text-body-bold font-body-bold text-brand-700">
+      Where fresh means local.
+    </span>
+  </div>
+</div>
       
       {/* Overlay - clicking closes menu */}
       <div 
