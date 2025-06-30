@@ -880,7 +880,7 @@ function Shop() {
         onScroll={handlePageScroll}
       >
         {/* Mobile/Tablet Page Controls - SMART SCROLL BEHAVIOR */}
-        <div className={`sort-filter-bar xl:hidden w-full ${
+        <div className={`sort-filter-bar xl:hidden w-full bg-white border-b border-neutral-200 ${
   (showMobileFilters || showMobileMap) ? 'hidden' : ''
 }`} style={{
   transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
