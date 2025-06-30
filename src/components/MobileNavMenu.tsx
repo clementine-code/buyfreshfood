@@ -86,6 +86,7 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
       <div className="w-80 h-full bg-white shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-200">
+           <div className="flex items-center gap-3">
             <span className="text-heading-3 font-heading-3 text-default-font">
               BuyFresh.Food
             </span>
@@ -176,12 +177,6 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
 
         {/* Footer with Slogan */}
         <div className="p-6 border-t border-neutral-200">
-          <div className="flex items-center gap-3">
-            <img
-              className="h-10 object-contain"
-              src="/Buy-Fresh-Food-Logo.png"
-              alt="Buy Fresh. Food Logo"
-            />
           <div className="text-center">
             <span className="text-body-bold font-body-bold text-brand-700">
               Where fresh means local.
