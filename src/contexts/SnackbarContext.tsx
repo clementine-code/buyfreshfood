@@ -18,6 +18,7 @@ interface SnackbarItem {
   type: 'cart' | 'saved';
   product: SnackbarProductData;
   timestamp: number;
+  exiting?: boolean;
 }
 
 // Context interface
@@ -109,32 +110,34 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({ children }) 
       {children}
       
       {/* Snackbar Container - Fixed position at top center with z-index */}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[1000] space-y-2 pointer-events-none">
-        {snackbars.map((snackbar, index) => (
-          <div
-            key={snackbar.id}
-            className="transition-all duration-300 ease-in-out pointer-events-auto"
-            style={{
-              zIndex: 1000 - index
-            }}
-          >
-            {snackbar.type === 'cart' ? (
-              <CartActionSnackbar
-                product={snackbar.product}
-                onDismiss={() => dismissSnackbar(snackbar.id)}
-                onContinueShopping={() => handleContinueShopping(snackbar.id)}
-                onGoToCheckout={() => handleGoToCheckout(snackbar.id)}
-              />
-            ) : (
-              <SaveForLaterActionSnackbar
-                product={snackbar.product}
-                onDismiss={() => dismissSnackbar(snackbar.id)}
-                onContinueShopping={() => handleContinueShopping(snackbar.id)}
-                onGoToCheckout={() => handleGoToCheckout(snackbar.id)}
-              />
-            )}
-          </div>
-        ))}
+      <div className="fixed top-4 left-0 right-0 z-[1000] flex justify-center pointer-events-none">
+        <div className="space-y-2 pointer-events-none">
+          {snackbars.map((snackbar, index) => (
+            <div
+              key={snackbar.id}
+              className={`transition-all duration-300 ease-in-out pointer-events-auto ${snackbar.exiting ? 'snackbar-exit' : ''}`}
+              style={{
+                zIndex: 1000 - index
+              }}
+            >
+              {snackbar.type === 'cart' ? (
+                <CartActionSnackbar
+                  product={snackbar.product}
+                  onDismiss={() => dismissSnackbar(snackbar.id)}
+                  onContinueShopping={() => handleContinueShopping(snackbar.id)}
+                  onGoToCheckout={() => handleGoToCheckout(snackbar.id)}
+                />
+              ) : (
+                <SaveForLaterActionSnackbar
+                  product={snackbar.product}
+                  onDismiss={() => dismissSnackbar(snackbar.id)}
+                  onContinueShopping={() => handleContinueShopping(snackbar.id)}
+                  onGoToCheckout={() => handleGoToCheckout(snackbar.id)}
+                />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </SnackbarContext.Provider>
   );

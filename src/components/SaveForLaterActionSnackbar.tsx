@@ -22,7 +22,7 @@ function SaveForLaterActionSnackbar({
   onGoToCheckout 
 }: SaveForLaterActionSnackbarProps) {
   return (
-    <div className="flex w-full sm:w-96 max-w-[95vw] items-start gap-3 rounded-md border border-solid border-neutral-border bg-white px-3 py-3 sm:px-4 sm:py-4 shadow-lg snackbar-enter">
+    <div className="flex w-full sm:w-96 max-w-[95vw] items-start gap-3 rounded-md border border-solid border-neutral-border bg-white px-3 py-3 sm:px-4 sm:py-4 shadow-lg snackbar-enter mx-auto">
       <img
         className="h-12 w-12 flex-none rounded-md object-cover"
         src={product.image}
