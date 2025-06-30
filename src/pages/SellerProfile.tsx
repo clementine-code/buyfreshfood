@@ -873,7 +873,7 @@ const SellerProfile: React.FC = () => {
         <div className="flex h-48 sm:h-64 md:h-80 w-full flex-none flex-col items-start relative rounded-lg overflow-hidden">
           <img
             className="h-full w-full flex-none object-cover"
-            src="https://images.unsplash.com/photo-1593935170461-de8f3cbe70de?w=800"
+            src="https://images.unsplash.com/photo-1586771107445-d3ca888129ff?w=800"
             alt={`${seller.name} cover`}
           />
           <div className="flex w-full items-end gap-4 md:gap-6 p-4 md:px-8 md:py-6 absolute bottom-0 left-0 bg-gradient-to-t from-[#00000099] to-transparent">
