@@ -92,6 +92,9 @@ const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
               src="/Buy-Fresh-Food-Logo.png"
               alt="Buy Fresh. Food Logo"
             />
+            <span className="text-heading-3 font-heading-3 text-default-font">
+              BuyFresh.Food
+            </span>
           </div>
           <IconButton
             variant="neutral-tertiary"
